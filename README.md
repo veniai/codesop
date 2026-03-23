@@ -1,4 +1,4 @@
-# AISOP — AI Coding Standard Operating Procedure
+# codesop — AI Coding Standard Operating Procedure
 
 A unified SOP for AI coding tools: Claude Code, OpenClaw, and Codex CLI.
 
@@ -17,14 +17,14 @@ A single skill file + universal instructions that work across all three major AI
 ## Quick Install
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/veniai/ai-sop/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/veniai/codesop/main/install.sh | bash
 ```
 
 Or clone manually:
 
 ```bash
-git clone https://github.com/veniai/ai-sop.git ~/AISOP
-cd ~/AISOP && bash install.sh
+git clone https://github.com/veniai/codesop.git ~/codesop
+cd ~/codesop && bash install.sh
 ```
 
 ## What gets installed
@@ -34,18 +34,18 @@ cd ~/AISOP && bash install.sh
 | `AGENTS.md` | `~/.claude/CLAUDE.md` | Claude Code |
 | `AGENTS.md` | `~/.codex/AGENTS.md` | Codex CLI |
 | `AGENTS.md` | `~/.config/opencode/AGENTS.md` | OpenCode |
-| `SKILL.md` | `~/.claude/skills/ai-sop/SKILL.md` | Claude Code |
-| `SKILL.md` | `~/.agents/skills/ai-sop/SKILL.md` | OpenClaw |
-| `SKILL.md` | `~/.codex/skills/ai-sop/SKILL.md` | Codex CLI |
+| `SKILL.md` | `~/.claude/skills/codesop/SKILL.md` | Claude Code |
+| `SKILL.md` | `~/.agents/skills/codesop/SKILL.md` | OpenClaw |
+| `SKILL.md` | `~/.codex/skills/codesop/SKILL.md` | Codex CLI |
 
 All via symlinks — edit once, sync everywhere.
 
 ## Usage
 
-Edit and commit from `~/AISOP`:
+Edit and commit from `~/codesop`:
 
 ```bash
-cd ~/AISOP
+cd ~/codesop
 vim SKILL.md           # or AGENTS.md
 git add . && git commit -m "update" && git push
 ```
@@ -53,7 +53,7 @@ git add . && git commit -m "update" && git push
 Other machines:
 
 ```bash
-cd ~/AISOP && git pull
+cd ~/codesop && git pull
 ```
 
 ## Scenarios Covered

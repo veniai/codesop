@@ -1,5 +1,5 @@
 ---
-name: ai-sop
+name: codesop
 version: 1.0.0
 description: |
   AI coding SOP — maps scenarios to workflows, initializes projects,
@@ -24,7 +24,7 @@ allowed-tools:
 
 # AI-SOP: Complete Workflow Guide
 
-Announce: "Using /ai-sop to map your scenario to the right workflow."
+Announce: "Using /codesop to map your scenario to the right workflow."
 
 ## 1. Scenario → Workflow Mapping
 
@@ -168,7 +168,7 @@ retro (gstack)                 ← Analyze commit history + work patterns
 
 ## 2. Sub-commands
 
-### 2.1 /ai-sop init [path]
+### 2.1 /codesop init [path]
 
 Initialize project configuration files.
 
@@ -181,7 +181,7 @@ Initialize project configuration files.
    - `<project>/PRD.md` (product template, if user needs and doesn't exist)
    - `<project>/README.md` (if doesn't exist)
 
-### 2.2 /ai-sop status
+### 2.2 /codesop status
 
 Show skill health dashboard.
 
@@ -190,7 +190,7 @@ Show skill health dashboard.
 3. Read usage stats (~/.gstack/analytics/)
 4. Output dashboard + recommendations
 
-### 2.3 /ai-sop update
+### 2.3 /codesop update
 
 Check and apply updates.
 
