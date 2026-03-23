@@ -1,28 +1,15 @@
 ---
 name: codesop
-version: 1.0.0
 description: |
-  AI coding SOP — maps scenarios to workflows, initializes projects,
-  checks skill health, checks for updates.
-  Use when: "what skill should I use", "help me start this", "init project",
-  "check status", "check for updates", "what workflow for bug/feature/refactor",
-  "I don't know what to do next".
-  Covers 15 scenarios: new features, bug fixes, small changes, refactoring,
-  PR review, code review feedback, production incidents, security audits,
-  design work, performance, weekly retro, and more.
-benefits-from: [office-hours, brainstorming]
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - WebSearch
-  - AskUserQuestion
+  Use when the user asks "what skill should I use", "help me start this",
+  "what workflow for bug/feature/refactor", "I don't know what to do next",
+  or wants to init a project, check skill status, or check for updates.
+  Covers new features, bug fixes, small changes, refactoring, PR review,
+  code review feedback, production incidents, security audits, design work,
+  performance, and weekly retro.
 ---
 
-# AI-SOP: Complete Workflow Guide
+# codesop: Complete Workflow Guide
 
 Announce: "Using /codesop to map your scenario to the right workflow."
 
