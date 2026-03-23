@@ -16,7 +16,7 @@ if [ -d "$REPO_DIR/.git" ]; then
   cd "$REPO_DIR" && git pull --quiet 2>/dev/null || echo "  (no remote yet, skipping pull)"
 else
   echo "[1/3] Cloning repo to $REPO_DIR..."
-  git clone https://github.com/YOUR_USERNAME/ai-sop.git "$REPO_DIR" --quiet
+  git clone https://github.com/veniai/ai-sop.git "$REPO_DIR" --quiet
 fi
 
 # 2. Create symlinks for AGENTS.md (universal instructions)
