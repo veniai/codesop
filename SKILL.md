@@ -157,16 +157,149 @@ retro (gstack)                 ← Analyze commit history + work patterns
 
 ### 2.1 /codesop init [path]
 
-Initialize project configuration files.
+Three-layer project initialization: mechanical setup → lightweight analysis → skill routing.
 
-1. Scan target directory: file structure, tech stack, existing config
-2. Output analysis summary
-3. Recommend 2-3 configuration options (including architecture choice), let user pick
-4. Ask: "Need PRD.md?"
-5. Generate based on user selection:
-   - `<project>/CLAUDE.md` or `<project>/AGENTS.md` (project config)
-   - `<project>/PRD.md` (product template, if user needs and doesn't exist)
-   - `<project>/README.md` (if doesn't exist)
+#### Layer 1: Mechanical (rule-driven, verifiable)
+
+**Phase 1: Environment Setup**
+
+Run `bash <codesop-root>/scripts/detect-environment.sh <target-dir>` to detect:
+- Installed tools: Claude Code, Codex, OpenCode/OpenClaw
+- Installed ecosystems: superpowers, gstack
+- Symlink validity: verify `AGENTS.md` and `SKILL.md` symlinks point to `~/codesop/` and are readable (`cat` each symlink to confirm content)
+
+Output format:
+```
+环境识别：
+  ✓ Claude Code: 已检测到
+  ✓ Codex: 已检测到
+  ⚠ superpowers: 未安装 → 建议命令: ...
+  ✓ gstack: 已安装
+  ✓ AGENTS.md symlink: 3/3 有效且可读
+  ✓ SKILL.md symlink: 3/3 有效且可读
+```
+
+If missing ecosystems: show install command per host tool, wait for user confirmation before executing.
+
+**Phase 2: Project Classification**
+
+Run the same detector script. Classify:
+- Language (Python / TypeScript/JavaScript / Go / Rust / Unknown)
+- Shape (Web App / Backend Service / CLI / Library / Monorepo / General)
+- Framework (Next.js / React / FastAPI / Django / None)
+- Maturity level:
+  - Empty directory: 0 source files
+  - New skeleton: < 10 source files, no git commits
+  - In development: has git commits, < 100 commits
+  - Established: > 100 commits
+
+Output format:
+```
+项目识别：
+  主语言：TypeScript/JavaScript
+  项目形态：Web App
+  框架：Next.js
+  成熟度：开发中 (47 commits)
+```
+
+**Phase 3: Scaffold Generation**
+
+Default generate (no user prompt):
+- `AGENTS.md` — filled with detected stack, commands, architecture rules
+- `CLAUDE.md` — lightweight wrapper: `@AGENTS.md`
+- `PRD.md` — product template with detected stack pre-filled
+
+Condition generate (only if doesn't exist):
+- `README.md` — filled with install/run/test commands
+
+If `AGENTS.md` already exists: keep it, output diff-like merge suggestions in terminal.
+
+All templates default to Chinese. Infer test/lint/typecheck/smoke commands from detected stack.
+
+#### Layer 2: Diagnosis (lightweight analysis, fixed template output)
+
+**Phase 4: Lightweight Status Analysis**
+
+AI reads the project and evaluates 6 dimensions. Each scored 0-10:
+
+| # | Check | Method | Output |
+|---|-------|--------|--------|
+| 1 | Git activity | `git log --oneline -20` | Recent commits summary + score |
+| 2 | Directory structure | `ls -R` + depth check | Structure score + suggestions |
+| 3 | Documentation | Check AGENTS/PRD/README/ARCHITECTURE | Missing list + score |
+| 4 | Test commands | Check package.json scripts / Makefile | Available/missing + score |
+| 5 | Architecture boundaries | Check domain/usecases/infra/app dirs | Clear/fuzzy/none + score |
+| 6 | TODO/FIXME scatter | `grep -rn TODO/FIXME` | Count + locations + score |
+
+Fixed output format:
+```
+## 现状分析
+
+| 检查项         | 状态    | 评分  | 说明                 |
+|----------------|---------|-------|----------------------|
+| git 活跃度     | 活跃    | 8/10  | 最近 7 天有 3 次提交  |
+| 目录结构       | 清晰    | 7/10  | src/ 分层合理         |
+| 文档存在性     | 不完整  | 4/10  | 缺 AGENTS.md, PRD.md |
+| 测试命令       | 有      | 6/10  | npm test 存在         |
+| 架构边界       | 模糊    | 3/10  | 无明确分层            |
+| TODO/FIXME     | 散落    | 5/10  | 12 处散落             |
+
+综合评分: 5.5/10
+```
+
+#### Layer 3: Decision (AI judgment, fixed output format)
+
+**Phase 5: Skill Routing**
+
+Combine Phase 2 (maturity) + Phase 4 (status) to recommend skills. Fixed 3-tier output:
+
+```
+## Skill 路由
+
+推荐: /office-hours
+原因: 架构边界模糊，需要先理清需求和方向
+
+备选: /plan-eng-review
+原因: 如果已有明确计划，直接做工程审查
+
+暂不建议: /subagent-driven-dev
+原因: 架构未定，直接实现会导致返工
+```
+
+Routing rules (not exhaustive, AI adapts):
+- Empty directory / idea stage → /office-hours
+- Has design but no implementation → /writing-plans
+- Has plan, ready to execute → /subagent-driven-dev
+- Has bugs → /investigate
+- Ready to ship → /review → /ship
+- Security concern → /cso
+- Performance issue → /benchmark
+
+**Phase 6: Write PROJECT_STATUS.md**
+
+Generate a separate `PROJECT_STATUS.md` in the project root. NOT written to `AGENTS.md`.
+
+```markdown
+# Project Status
+
+Last init: YYYY-MM-DD
+
+## Current Phase
+[Description from Phase 4 analysis]
+
+## Recommended Next Step
+/[skill-name] — [one-line reason]
+
+## Why
+- [Key finding 1 from Phase 4]
+- [Key finding 2 from Phase 4]
+
+## Do NOT Do Now
+/[skill-name] — [reason from Phase 5]
+```
+
+This file is read by future AI sessions to understand "what should I do next with this project."
+`AGENTS.md` stays clean — it only contains long-term rules.
 
 ### 2.2 /codesop status
 
