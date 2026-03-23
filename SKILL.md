@@ -166,10 +166,10 @@ Three-layer project initialization with parallel execution.
   Track A (bash):    Phase 1+2 → Phase 3
   Track B (sub-agent):          Phase 4
                      ↓ 合并 ↓
-  主 Agent:                      Phase 5 → Phase 6
+  主 Agent:                      Phase 5 → 输出总结
 ```
 
-**并行规则：Track A 和 Track B 同时启动，谁先完成谁等。全部完成后再做 Phase 5+6。**
+**并行规则：Track A 和 Track B 同时启动，谁先完成谁等。全部完成后再做 Phase 5。**
 
 #### Layer 1: Mechanical (rule-driven, verifiable)
 
@@ -264,7 +264,7 @@ sub-agent 任务提示词：
 
 #### Layer 3: Decision (AI judgment, fixed output format)
 
-**Phase 5: Skill 路由**
+**Phase 5: Skill 路由 + 项目状态总结**
 
 综合 Phase 2（成熟度）+ Phase 4（现状分析），推荐 skill。固定 3 档输出：
 
@@ -290,31 +290,18 @@ sub-agent 任务提示词：
 - 安全问题 → /cso
 - 性能问题 → /benchmark
 
-**Phase 6: 写入 PROJECT_STATUS.md**
+最后输出项目状态总结（终端输出，不生成文件）：
 
-在项目根目录生成 `PROJECT_STATUS.md`。不写入 `AGENTS.md`。
-
-```markdown
-# Project Status
-
-上次 init: YYYY-MM-DD
-
-## 当前阶段
-[Phase 4 分析得出的描述]
-
-## 推荐下一步
-/[skill名] — [一句话原因]
-
-## 原因
-- [Phase 4 关键发现 1]
-- [Phase 4 关键发现 2]
-
-## 暂不建议
-/[skill名] — [Phase 5 的原因]
 ```
+## 项目状态总结
 
-此文件供后续 AI 会话读取，了解"这个项目下一步该做什么"。
-`AGENTS.md` 保持干净，只放长期规则。
+当前阶段: [Phase 4 分析得出的描述]
+推荐下一步: /office-hours — [一句话原因]
+原因:
+  - [Phase 4 关键发现 1]
+  - [Phase 4 关键发现 2]
+暂不建议: /subagent-driven-dev — [Phase 5 的原因]
+```
 
 ### 2.2 /codesop status
 
