@@ -157,18 +157,31 @@ retro (gstack)                 ← Analyze commit history + work patterns
 
 ### 2.1 /codesop init [path]
 
-Three-layer project initialization: mechanical setup → lightweight analysis → skill routing.
+Three-layer project initialization with parallel execution.
+
+#### Execution Overview
+
+```
+并行启动:
+  Track A (bash):    Phase 1+2 → Phase 3
+  Track B (sub-agent):          Phase 4
+                     ↓ 合并 ↓
+  主 Agent:                      Phase 5 → Phase 6
+```
+
+**并行规则：Track A 和 Track B 同时启动，谁先完成谁等。全部完成后再做 Phase 5+6。**
 
 #### Layer 1: Mechanical (rule-driven, verifiable)
 
-**Phase 1: Environment Setup**
+**Phase 1+2: Environment Setup + Project Classification (Track A, bash)**
 
-Run `bash <codesop-root>/scripts/detect-environment.sh <target-dir>` to detect:
-- Installed tools: Claude Code, Codex, OpenCode/OpenClaw
-- Installed ecosystems: superpowers, gstack
-- Symlink validity: verify `AGENTS.md` and `SKILL.md` symlinks point to `~/codesop/` and are readable (`cat` each symlink to confirm content)
+启动方式：直接执行 bash 命令，不派 sub-agent。
 
-Output format:
+```bash
+bash ~/codesop/codesop init <target-dir>
+```
+
+Phase 1 输出：
 ```
 环境识别：
   ✓ Claude Code: 已检测到
@@ -179,21 +192,7 @@ Output format:
   ✓ SKILL.md symlink: 3/3 有效且可读
 ```
 
-If missing ecosystems: show install command per host tool, wait for user confirmation before executing.
-
-**Phase 2: Project Classification**
-
-Run the same detector script. Classify:
-- Language (Python / TypeScript/JavaScript / Go / Rust / Unknown)
-- Shape (Web App / Backend Service / CLI / Library / Monorepo / General)
-- Framework (Next.js / React / FastAPI / Django / None)
-- Maturity level:
-  - Empty directory: 0 source files
-  - New skeleton: < 10 source files, no git commits
-  - In development: has git commits, < 100 commits
-  - Established: > 100 commits
-
-Output format:
+Phase 2 输出：
 ```
 项目识别：
   主语言：TypeScript/JavaScript
@@ -202,56 +201,72 @@ Output format:
   成熟度：开发中 (47 commits)
 ```
 
-**Phase 3: Scaffold Generation**
+如果缺失插件：按宿主工具给出安装命令，等用户确认后再执行。
 
-Default generate (no user prompt):
-- `AGENTS.md` — filled with detected stack, commands, architecture rules
-- `CLAUDE.md` — lightweight wrapper: `@AGENTS.md`
-- `PRD.md` — product template with detected stack pre-filled
+**Phase 3: Scaffold Generation (Track A, bash)**
 
-Condition generate (only if doesn't exist):
-- `README.md` — filled with install/run/test commands
+Phase 1+2 完成后立即执行，不等 Phase 4。
 
-If `AGENTS.md` already exists: keep it, output diff-like merge suggestions in terminal.
+默认生成（不问用户）：
+- `AGENTS.md` — 填充技术栈、命令、架构规则
+- `CLAUDE.md` — 轻量包装：`@AGENTS.md`
+- `PRD.md` — 产品模板，技术栈预填
 
-All templates default to Chinese. Infer test/lint/typecheck/smoke commands from detected stack.
+条件生成（不存在时）：
+- `README.md` — 填充安装/运行/测试命令
 
-#### Layer 2: Diagnosis (lightweight analysis, fixed template output)
+`AGENTS.md` 已存在 → 保留，输出 diff 建议。
 
-**Phase 4: Lightweight Status Analysis**
+全部默认中文。根据检测到的技术栈推断 test/lint/typecheck/smoke 命令。
 
-AI reads the project and evaluates 6 dimensions. Each scored 0-10:
+#### Layer 2: Diagnosis (lightweight analysis, parallel sub-agent)
 
-| # | Check | Method | Output |
-|---|-------|--------|--------|
-| 1 | Git activity | `git log --oneline -20` | Recent commits summary + score |
-| 2 | Directory structure | `ls -R` + depth check | Structure score + suggestions |
-| 3 | Documentation | Check AGENTS/PRD/README/ARCHITECTURE | Missing list + score |
-| 4 | Test commands | Check package.json scripts / Makefile | Available/missing + score |
-| 5 | Architecture boundaries | Check domain/usecases/infra/app dirs | Clear/fuzzy/none + score |
-| 6 | TODO/FIXME scatter | `grep -rn TODO/FIXME` | Count + locations + score |
+**Phase 4: 轻量现状分析 (Track B, sub-agent)**
 
-Fixed output format:
+启动方式：在 Track A 启动的同时，派一个 sub-agent 执行。
+
+sub-agent 任务提示词：
 ```
+你是 codesop init 的现状分析助手。请分析项目 <target-dir>，完成以下 6 项检查，
+每项给评分 0-10，最后输出综合评分。
+
+检查项：
+1. git 活跃度 — 运行 git log --oneline -20，判断最近提交频率
+2. 目录结构 — 扫描目录，判断分层是否清晰
+3. 文档存在性 — 检查 AGENTS.md / CLAUDE.md / PRD.md / README.md / ARCHITECTURE.md
+4. 测试命令 — 检查 package.json scripts 或 Makefile 中的 test 命令
+5. 架构边界 — 检查是否有 domain / usecases / infra / app 目录
+6. TODO/FIXME 散落 — grep -rn "TODO\|FIXME" 统计数量和位置
+
+请严格按以下格式输出（中文）：
+
 ## 现状分析
 
 | 检查项         | 状态    | 评分  | 说明                 |
 |----------------|---------|-------|----------------------|
-| git 活跃度     | 活跃    | 8/10  | 最近 7 天有 3 次提交  |
-| 目录结构       | 清晰    | 7/10  | src/ 分层合理         |
-| 文档存在性     | 不完整  | 4/10  | 缺 AGENTS.md, PRD.md |
-| 测试命令       | 有      | 6/10  | npm test 存在         |
-| 架构边界       | 模糊    | 3/10  | 无明确分层            |
-| TODO/FIXME     | 散落    | 5/10  | 12 处散落             |
+| git 活跃度     |         |       |                      |
+| 目录结构       |         |       |                      |
+| 文档存在性     |         |       |                      |
+| 测试命令       |         |       |                      |
+| 架构边界       |         |       |                      |
+| TODO/FIXME     |         |       |                      |
 
-综合评分: 5.5/10
+综合评分: X/10
 ```
+
+#### 合并：等 Track A + Track B 都完成
+
+主 Agent 等两个 Track 都完成后，收集结果：
+- Track A 输出：环境识别 + 项目识别 + 已生成的文件
+- Track B 输出：现状分析表格 + 综合评分
+
+然后继续 Phase 5+6。
 
 #### Layer 3: Decision (AI judgment, fixed output format)
 
-**Phase 5: Skill Routing**
+**Phase 5: Skill 路由**
 
-Combine Phase 2 (maturity) + Phase 4 (status) to recommend skills. Fixed 3-tier output:
+综合 Phase 2（成熟度）+ Phase 4（现状分析），推荐 skill。固定 3 档输出：
 
 ```
 ## Skill 路由
@@ -266,40 +281,40 @@ Combine Phase 2 (maturity) + Phase 4 (status) to recommend skills. Fixed 3-tier 
 原因: 架构未定，直接实现会导致返工
 ```
 
-Routing rules (not exhaustive, AI adapts):
-- Empty directory / idea stage → /office-hours
-- Has design but no implementation → /writing-plans
-- Has plan, ready to execute → /subagent-driven-dev
-- Has bugs → /investigate
-- Ready to ship → /review → /ship
-- Security concern → /cso
-- Performance issue → /benchmark
+路由参考（AI 可灵活判断）：
+- 空目录 / 想法阶段 → /office-hours
+- 有设计但没实现 → /writing-plans
+- 有计划要执行 → /subagent-driven-dev
+- 代码有问题 → /investigate
+- 要发布 → /review → /ship
+- 安全问题 → /cso
+- 性能问题 → /benchmark
 
-**Phase 6: Write PROJECT_STATUS.md**
+**Phase 6: 写入 PROJECT_STATUS.md**
 
-Generate a separate `PROJECT_STATUS.md` in the project root. NOT written to `AGENTS.md`.
+在项目根目录生成 `PROJECT_STATUS.md`。不写入 `AGENTS.md`。
 
 ```markdown
 # Project Status
 
-Last init: YYYY-MM-DD
+上次 init: YYYY-MM-DD
 
-## Current Phase
-[Description from Phase 4 analysis]
+## 当前阶段
+[Phase 4 分析得出的描述]
 
-## Recommended Next Step
-/[skill-name] — [one-line reason]
+## 推荐下一步
+/[skill名] — [一句话原因]
 
-## Why
-- [Key finding 1 from Phase 4]
-- [Key finding 2 from Phase 4]
+## 原因
+- [Phase 4 关键发现 1]
+- [Phase 4 关键发现 2]
 
-## Do NOT Do Now
-/[skill-name] — [reason from Phase 5]
+## 暂不建议
+/[skill名] — [Phase 5 的原因]
 ```
 
-This file is read by future AI sessions to understand "what should I do next with this project."
-`AGENTS.md` stays clean — it only contains long-term rules.
+此文件供后续 AI 会话读取，了解"这个项目下一步该做什么"。
+`AGENTS.md` 保持干净，只放长期规则。
 
 ### 2.2 /codesop status
 
