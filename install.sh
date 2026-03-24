@@ -43,17 +43,20 @@ echo "[3/3] Setting up skill symlinks..."
 # Claude Code
 mkdir -p "$HOME/.claude/skills/codesop"
 ln -sfn "$REPO_DIR/SKILL.md" "$HOME/.claude/skills/codesop/SKILL.md"
-echo "  ✓ Claude Code: ~/.claude/skills/codesop/SKILL.md"
+ln -sfn "$REPO_DIR/agents" "$HOME/.claude/skills/codesop/agents"
+echo "  ✓ Claude Code: ~/.claude/skills/codesop/SKILL.md + agents/"
 
 # OpenClaw
 mkdir -p "$HOME/.agents/skills/codesop"
 ln -sfn "$REPO_DIR/SKILL.md" "$HOME/.agents/skills/codesop/SKILL.md"
-echo "  ✓ OpenClaw: ~/.agents/skills/codesop/SKILL.md"
+ln -sfn "$REPO_DIR/agents" "$HOME/.agents/skills/codesop/agents"
+echo "  ✓ OpenClaw: ~/.agents/skills/codesop/SKILL.md + agents/"
 
 # Codex
 mkdir -p "$HOME/.codex/skills/codesop"
 ln -sfn "$REPO_DIR/SKILL.md" "$HOME/.codex/skills/codesop/SKILL.md"
-echo "  ✓ Codex: ~/.codex/skills/codesop/SKILL.md"
+ln -sfn "$REPO_DIR/agents" "$HOME/.codex/skills/codesop/agents"
+echo "  ✓ Codex: ~/.codex/skills/codesop/SKILL.md + agents/"
 
 # CLI
 mkdir -p "$BIN_DIR"
@@ -63,9 +66,10 @@ echo "  ✓ CLI: ~/.local/bin/codesop"
 echo ""
 echo "=== Done! ==="
 echo ""
-echo "7 symlinks created. All three tools can now read:"
+echo "10 symlinks created. All three tools can now read:"
 echo "  - AGENTS.md (universal instructions)"
 echo "  - SKILL.md (complete SOP)"
+echo "  - agents/openai.yaml (Codex agent config)"
 echo "  - codesop (CLI entrypoint)"
 echo ""
 echo "To update: codesop update"

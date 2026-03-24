@@ -1,0 +1,6 @@
+interface:
+  display_name: "codesop"
+  short_description: "Use when the user asks what skill should I use, help me start this, what workflow for bug/feature/refactor, I don't know what to do next, or wants to init a project, check skill status, or check for updates. Covers new features, bug fixes, small changes, refactoring, PR review, code review feedback, production incidents, security audits, design work, performance, and weekly retro."
+  default_prompt: "Use codesop for this task."
+policy:
+  allow_implicit_invocation: true
