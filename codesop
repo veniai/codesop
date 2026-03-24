@@ -4,11 +4,18 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DETECTOR="$ROOT_DIR/scripts/detect-environment.sh"
+VERSION_FILE="$ROOT_DIR/VERSION"
+
+current_version() {
+  cat "$VERSION_FILE" 2>/dev/null || echo "unknown"
+}
 
 usage() {
   cat <<'EOF'
 Usage:
   codesop init [path]
+  codesop update
+  codesop version
 EOF
 }
 
@@ -621,12 +628,92 @@ run_init() {
   print_install_suggestions "$host" "$ecosystem_superpowers" "$ecosystem_gstack"
 }
 
+run_update() {
+  local repo_dir="$ROOT_DIR"
+  local old_ver
+
+  if [ ! -d "$repo_dir/.git" ]; then
+    printf '%s\n' "codesop 不是 git 仓库，无法更新" >&2
+    printf '%s\n' "请重新克隆：git clone https://github.com/veniai/codesop.git ~/codesop" >&2
+    exit 1
+  fi
+
+  old_ver="$(current_version)"
+  printf '%s\n' "当前版本：$old_ver"
+  printf '%s\n' "检查更新..."
+
+  cd "$repo_dir"
+
+  local local_hash remote_hash
+  local_hash="$(git rev-parse HEAD)"
+  remote_hash="$(git rev-parse @{u} 2>/dev/null || echo "")"
+
+  if [ -z "$remote_hash" ]; then
+    printf '%s\n' "未设置上游分支，尝试 fetch..."
+    git fetch origin 2>/dev/null || {
+      printf '%s\n' "fetch 失败，请检查网络" >&2
+      exit 1
+    }
+    remote_hash="$(git rev-parse origin/main 2>/dev/null || echo "")"
+  fi
+
+  if [ -z "$remote_hash" ]; then
+    printf '%s\n' "无法获取远程版本" >&2
+    exit 1
+  fi
+
+  if [ "$local_hash" = "$remote_hash" ]; then
+    printf '%s\n' "已是最新版本。"
+    return 0
+  fi
+
+  local ahead behind
+  ahead="$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")"
+  behind="$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")"
+
+  printf '%s\n' "发现 $ahead 个新提交。"
+
+  if [ "$behind" -gt 0 ]; then
+    printf '%s\n' "本地有 $behind 个未推送提交，更新前请先处理。"
+    printf '%s\n' "提示：运行 'git status' 查看本地修改。"
+    exit 1
+  fi
+
+  printf '%s\n' "正在更新..."
+  git pull --ff-only 2>/dev/null || {
+    printf '%s\n' "更新失败，可能存在冲突。" >&2
+    printf '%s\n' "请手动处理：cd $repo_dir && git pull" >&2
+    exit 1
+  }
+
+  local new_ver
+  new_ver="$(current_version)"
+  printf '%s\n' "更新完成：$old_ver → $new_ver"
+
+  local changes
+  changes="$(git log --oneline "$old_ver".."$new_ver" 2>/dev/null || git log --oneline -5)"
+  if [ -n "$changes" ]; then
+    printf '\n%s\n' "最近变更："
+    printf '%s\n' "$changes"
+  fi
+}
+
+run_version() {
+  printf '%s\n' "codesop $(current_version)"
+}
+
 subcommand="${1:-}"
 
 case "$subcommand" in
   init)
     shift || true
     run_init "${1:-.}"
+    ;;
+  update)
+    run_update
+    ;;
+  version|--version|-v)
+    run_version
     ;;
   ""|-h|--help|help)
     usage

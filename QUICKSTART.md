@@ -52,9 +52,11 @@ git add .
 git commit -m "改了什么"
 git push
 
-# 4. 其他电脑同步
-cd ~/codesop
-git pull
+# 4. 更新
+codesop update
+
+# 5. 查看版本
+codesop version
 ```
 
 ## 文件说明

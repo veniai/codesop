@@ -56,7 +56,12 @@ git add . && git commit -m "update" && git push
 
 **其他电脑同步：**
 ```bash
-cd ~/codesop && git pull
+codesop update
+```
+
+**查看版本：**
+```bash
+codesop version
 ```
 
 ## `/codesop init` 会做什么？
@@ -112,6 +117,8 @@ This skill orchestrates existing skills from:
 ~/codesop/
 ├── AGENTS.md      # 全局指引 / Universal instructions
 ├── SKILL.md       # 完整 SOP / Complete workflow guide
+├── codesop        # CLI 入口 / CLI entrypoint
+├── VERSION        # 版本号 / Version tracking
 ├── install.sh     # 一键安装 / One-click installer
 ├── README.md
 └── LICENSE
