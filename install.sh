@@ -6,6 +6,7 @@
 set -e
 
 REPO_DIR="$HOME/codesop"
+BIN_DIR="$HOME/.local/bin"
 
 echo "=== codesop installer ==="
 
@@ -36,7 +37,7 @@ mkdir -p "$HOME/.config/opencode"
 ln -sfn "$REPO_DIR/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
 echo "  ✓ OpenCode: ~/.config/opencode/AGENTS.md"
 
-# 3. Create symlinks for SKILL.md
+# 3. Create symlinks for SKILL.md and CLI
 echo "[3/3] Setting up skill symlinks..."
 
 # Claude Code
@@ -54,12 +55,18 @@ mkdir -p "$HOME/.codex/skills/codesop"
 ln -sfn "$REPO_DIR/SKILL.md" "$HOME/.codex/skills/codesop/SKILL.md"
 echo "  ✓ Codex: ~/.codex/skills/codesop/SKILL.md"
 
+# CLI
+mkdir -p "$BIN_DIR"
+ln -sfn "$REPO_DIR/codesop" "$BIN_DIR/codesop"
+echo "  ✓ CLI: ~/.local/bin/codesop"
+
 echo ""
 echo "=== Done! ==="
 echo ""
-echo "6 symlinks created. All three tools can now read:"
+echo "7 symlinks created. All three tools can now read:"
 echo "  - AGENTS.md (universal instructions)"
 echo "  - SKILL.md (complete SOP)"
+echo "  - codesop (CLI entrypoint)"
 echo ""
 echo "To update: cd ~/codesop && git pull"
 echo "To edit:   cd ~/codesop && vim SKILL.md"

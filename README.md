@@ -25,6 +25,12 @@ git clone https://github.com/veniai/codesop.git ~/codesop
 cd ~/codesop && bash install.sh
 ```
 
+Then make sure `~/.local/bin` is on your `PATH`, and run:
+
+```bash
+codesop init .
+```
+
 ## 安装了什么？/ What gets installed?
 
 | File | Target | Tool |
@@ -35,6 +41,7 @@ cd ~/codesop && bash install.sh
 | `SKILL.md` | `~/.claude/skills/codesop/SKILL.md` | Claude Code |
 | `SKILL.md` | `~/.agents/skills/codesop/SKILL.md` | OpenClaw |
 | `SKILL.md` | `~/.codex/skills/codesop/SKILL.md` | Codex CLI |
+| `codesop` | `~/.local/bin/codesop` | CLI |
 
 All via symlinks — edit once, sync everywhere.
 
@@ -51,6 +58,30 @@ git add . && git commit -m "update" && git push
 ```bash
 cd ~/codesop && git pull
 ```
+
+## `/codesop init` 会做什么？
+
+`/codesop init [path]` now follows a detection-first flow:
+
+- 扫描当前项目，判断主语言、项目形态、可识别框架
+- 默认中文生成项目级配置
+- 检测当前机器上的 Claude Code、Codex、OpenCode/OpenClaw
+- 检测 `superpowers` 和 `gstack` 是否已安装
+- 生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、独立 `PRD.md`
+- 如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议
+- 自动推断测试、lint、类型检查、smoke 命令并写入模板
+- 如果缺失，会按当前宿主工具给出安装命令，确认后由当前大模型继续执行
+- 如果已安装，会给出对应的更新命令或更新路径，确认后也由当前大模型继续执行
+
+The CLI output is organized into stable blocks:
+
+- 项目识别
+- 环境识别
+- 配置计划
+- 建议安装命令 / 更新建议
+- 下一步
+
+This keeps `init` simple: classify the project, inspect the local AI environment, then generate the right project-level guidance.
 
 ## 覆盖场景 / Scenarios Covered
 
