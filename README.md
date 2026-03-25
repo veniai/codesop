@@ -39,11 +39,13 @@ codesop init .
 | `AGENTS.md` | `~/.codex/AGENTS.md` | Codex CLI |
 | `AGENTS.md` | `~/.config/opencode/AGENTS.md` | OpenCode |
 | `SKILL.md` | `~/.claude/skills/codesop/SKILL.md` | Claude Code |
-| `SKILL.md` | `~/.agents/skills/codesop/SKILL.md` | OpenClaw |
-| `SKILL.md` | `~/.codex/skills/codesop/SKILL.md` | Codex CLI |
+| `SKILL.md` | `~/.agents/skills/codesop/SKILL.md` | Codex / OpenClaw |
+| `SKILL.md` | `~/.codex/skills/codesop/SKILL.md` | Codex compatibility symlink |
 | `codesop` | `~/.local/bin/codesop` | CLI |
 
 All via symlinks — edit once, sync everywhere.
+
+For Codex specifically, real skill discovery may depend on `~/.agents/skills/` at startup. The `~/.codex/skills/codesop` link is kept as a compatibility path, but `~/.agents/skills/codesop` should exist.
 
 ## 使用方法 / Usage
 
@@ -72,11 +74,16 @@ codesop version
 - 默认中文生成项目级配置
 - 检测当前机器上的 Claude Code、Codex、OpenCode/OpenClaw
 - 检测 `superpowers` 和 `gstack` 是否已安装
-- 生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、独立 `PRD.md`
+- 生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、活文档 `PRD.md`
 - 如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议
 - 自动推断测试、lint、类型检查、smoke 命令并写入模板
 - 如果缺失，会按当前宿主工具给出安装命令，确认后由当前大模型继续执行
 - 如果已安装，会给出对应的更新命令或更新路径，确认后也由当前大模型继续执行
+
+其中：
+
+- `AGENTS.md` 定义 AI 工作边界、交付约束和文档同步规则
+- `PRD.md` 同时承担产品规范和当前工作记录，默认包含长期目标、当前进度、最近决策、风险与工作日志
 
 The CLI output is organized into stable blocks:
 

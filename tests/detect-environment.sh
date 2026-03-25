@@ -87,31 +87,49 @@ make_project "$monorepo_dir" monorepo
 monorepo_output="$(run_detector "$monorepo_dir")"
 assert_contains "$monorepo_output" "project.shape=Monorepo"
 
-skill_output="$(sed -n '/^### 2\.1 \/codesop init \[path\]/,/^### 2\.2 /p' "$ROOT_DIR/SKILL.md")"
-assert_contains "$skill_output" "默认中文"
-assert_contains "$skill_output" "检测当前机器上的 Claude Code、Codex、OpenCode/OpenClaw"
-assert_contains "$skill_output" "先按当前宿主工具给安装命令和说明，等用户确认后，由当前大模型继续执行"
-assert_contains "$skill_output" "update suggestions when ecosystems are already installed"
-assert_contains "$skill_output" '<project>/AGENTS.md` as the full project instruction file'
-assert_contains "$skill_output" '<project>/CLAUDE.md` as a lightweight wrapper that imports `@AGENTS.md`'
-assert_contains "$skill_output" 'If `<project>/AGENTS.md` already exists, keep it and print a diff-like merge suggestion'
+skill_output="$(sed -n '/^### 8\.1 \/codesop init \[path\]/,/^### 8\.2 /p' "$ROOT_DIR/SKILL.md")"
+skill_header="$(sed -n '1,120p' "$ROOT_DIR/SKILL.md")"
+assert_contains "$skill_header" "skill-first operating system for AI-assisted coding work"
+assert_contains "$skill_header" "The skill is the orchestrator. The CLI is infrastructure."
+assert_contains "$skill_header" "Read project context in this order:"
+assert_contains "$skill_header" '1. `AGENTS.md`'
+assert_contains "$skill_header" '2. `PRD.md`'
+assert_contains "$skill_header" '3. `README.md` only if needed'
+assert_contains "$skill_header" 'The `/codesop` CLI is an optional but preferred mechanical context source.'
+assert_contains "$skill_header" 'Call `/codesop` when you need fresh project-state facts from the repo.'
+assert_contains "$skill_header" 'Do not call `/codesop` for abstract workflow questions that do not depend on repo state.'
+assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.'
+assert_contains "$skill_header" "## 工作台摘要"
+assert_contains "$skill_header" "**长期目标**:"
+assert_contains "$skill_header" "**当前阶段**:"
+assert_contains "$skill_header" "## Skill 建议"
+assert_contains "$skill_output" "Three-layer project initialization with parallel execution"
+assert_contains "$skill_output" "全部默认中文"
+assert_contains "$skill_output" "如果缺失插件：按宿主工具给出安装命令，等用户确认后再执行"
+assert_contains "$skill_output" '`AGENTS.md` — 填充技术栈、命令、架构规则'
+assert_contains "$skill_output" '`CLAUDE.md` — 轻量包装：`@AGENTS.md`'
+assert_contains "$skill_output" '`PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志'
+assert_contains "$skill_output" '`AGENTS.md` 已存在 → 保留，输出 diff 建议。'
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "默认中文"
 assert_contains "$readme_output" "superpowers"
 assert_contains "$readme_output" "gstack"
 assert_contains "$readme_output" "更新命令"
-assert_contains "$readme_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、独立 `PRD.md`'
+assert_contains "$readme_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、活文档 `PRD.md`'
 assert_contains "$readme_output" '如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议'
 assert_contains "$readme_output" "自动推断测试、lint、类型检查、smoke 命令并写入模板"
+assert_contains "$readme_output" '`AGENTS.md` 定义 AI 工作边界'
+assert_contains "$readme_output" '`PRD.md` 同时承担产品规范和当前工作记录'
 
 quickstart_output="$(sed -n '1,260p' "$ROOT_DIR/QUICKSTART.md")"
 assert_contains "$quickstart_output" "/codesop init"
 assert_contains "$quickstart_output" "默认中文"
 assert_contains "$quickstart_output" "确认后由当前大模型继续执行"
 assert_contains "$quickstart_output" "更新命令"
-assert_contains "$quickstart_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、独立 `PRD.md`'
+assert_contains "$quickstart_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、活文档 `PRD.md`'
 assert_contains "$quickstart_output" '如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议'
 assert_contains "$quickstart_output" "自动推断测试、lint、类型检查、smoke 命令并写入模板"
+assert_contains "$quickstart_output" '`PRD.md` 负责记录长期目标、当前进度、最近决策和工作日志'
 
 echo "PASS"

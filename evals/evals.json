@@ -1,0 +1,23 @@
+{
+  "skill_name": "codesop",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "继续这个项目，告诉我现在做到哪了。",
+      "expected_output": "Reads AGENTS.md first, then PRD.md, uses /codesop when fresh repo facts matter, and outputs a workbench summary plus skill recommendation.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我有点乱，先帮我整理当前状态和下一步。",
+      "expected_output": "Produces a workbench summary with long-term goal, current stage, progress, risks, recent decisions, next step, and workflow guidance.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "这个仓库下一步应该用什么 skill？",
+      "expected_output": "Uses AGENTS.md and PRD.md as primary context, calls /codesop when repo-state facts are needed, and recommends the best next downstream skill with reasons.",
+      "files": []
+    }
+  ]
+}

@@ -13,7 +13,9 @@ current_version() {
 usage() {
   cat <<'EOF'
 Usage:
+  codesop [path]
   codesop init [path]
+  codesop status [path]
   codesop update
   codesop version
 EOF
@@ -178,6 +180,13 @@ write_agents_template() {
   - 需求范围变化
   - 核心业务规则/用例变化
   - 验收标准、里程碑、版本计划变化
+  - 项目阶段变化
+  - 出现阻塞或阻塞解除
+  - 完成了一个有意义的实现步骤
+  - 关键技术/流程决策发生变化
+
+- 更新 PRD 的稳定区：产品核心规范、里程碑、验收标准、架构/实体/用例
+- 更新 PRD 的流动区：当前快照、当前进度、最近决策记录、风险与假设、工作日志
 
 - 可不更新文档的场景：
   - 纯重构且不改变行为
@@ -228,10 +237,60 @@ write_prd_template() {
 # Product: $project_name
 # Current Version: 1.0.0
 # Last Updated: $date_today
+# Status: active
 
 ---
 
-## 1. 版本历史 (Version History)
+## 0. 使用说明
+> 本文档同时承担两种职责：
+> 1. 产品主文档：描述当前有效的目标、范围、规则与架构。
+> 2. 工作记录：记录当前进度、最近决策、阻塞项与每步工作日志。
+>
+> 更新规则：
+> - 长期稳定信息：直接覆盖更新，保持“当前真实状态”
+> - 短期流动信息：追加记录，保留时间线
+> - 每次任务结束前，检查是否需要更新本文件
+
+## 1. 当前快照
+> 给人和 AI 在 30 秒内看懂“我们在做什么、做到哪了、下一步是什么”。
+
+- **当前阶段**: discovery | planning | implementation | testing | review | release | maintenance
+- **当前目标**: [一句话说明这阶段正在推进什么]
+- **长期目标**: [一句话说明项目最终要解决什么问题]
+- **当前里程碑**: [例如 v0.3 MVP / 支付闭环 / codesop v2]
+- **完成度**: [例如 60%]
+- **下一步**: [最明确的一步动作]
+- **负责人/执行主体**: Human | AI | Mixed
+- **最后更新原因**: [为什么这次更新 PRD]
+
+## 2. 当前进度
+> 只保留当前仍然相关的事项，已完成的重要事项移入工作日志。
+
+### 2.1 In Progress
+- [ ] [正在做的事 1]
+- [ ] [正在做的事 2]
+
+### 2.2 Next Up
+- [ ] [接下来最该做的事 1]
+- [ ] [接下来最该做的事 2]
+
+### 2.3 Blocked
+- [ ] [阻塞项]
+  - 原因: [为什么卡住]
+  - 解除条件: [满足什么即可继续]
+
+### 2.4 Done Recently
+- [x] [最近完成的重要事项 1]
+- [x] [最近完成的重要事项 2]
+
+## 3. 最近决策记录
+> 只保留最近 5-10 条仍然影响当前工作的决策。更早的可归档到版本历史。
+
+| Date | Decision | Why | Impact |
+|------|----------|-----|--------|
+| $date_today | [决定了什么] | [为什么这样定] | [影响哪些模块/流程] |
+
+## 4. 版本历史 (Version History)
 > 规则：新版本永远追加在最上方；记录“为什么改”和“改了什么”。
 
 ### **V1.0.0 - $date_today - (Initial Release)**
@@ -239,45 +298,52 @@ write_prd_template() {
 - **变更摘要**:
   - 项目初始化，创建 \`PRD.md\` v1.0.0。
 
----
-
-## 2. 产品核心规范 (Current Specification)
+## 5. 产品核心规范 (Current Specification)
 > 此区域始终反映产品“当前真实状态”，每次迭代直接更新。
 
-### 2.1 核心目标 (Mission)
+### 5.1 核心目标 (Mission)
 - [一句话描述产品愿景与目标价值]
 
-### 2.2 用户画像 (Persona)
+### 5.2 用户画像 (Persona)
 - **目标用户**: [描述用户角色]
 - **核心痛点**:
   - [痛点 1]
   - [痛点 2]
 
-### 2.3 核心功能 (Core Features)
+### 5.3 范围定义 (Scope)
+#### In Scope
+- [当前版本明确要做的内容]
+- [当前版本明确要做的内容]
+
+#### Out of Scope
+- [当前明确不做的内容]
+- [当前明确不做的内容]
+
+### 5.4 核心功能 (Core Features)
 - [功能点 1]
 - [功能点 2]
 - [功能点 3]
 
-### 2.4 版本规划 (Roadmap)
-- **V1.1.0**: [目标与范围]
-- **V1.2.0**: [目标与范围]
-- **V2.0.0**: [目标与范围]
+### 5.5 版本规划 (Roadmap)
+- **Now**: [当前版本目标]
+- **Next**: [下一阶段目标]
+- **Later**: [后续方向]
 
-### 2.5 领域实体 (Entities)
+### 5.6 领域实体 (Entities)
 > 描述业务数据模型，不绑定具体框架实现。
 
 - \`User\`: { id, email, name, createdAt }
 - \`Order\`: { id, userId, status, totalPrice, items[] }
 - \`[YourEntity]\`: { id, [字段...] }
 
-### 2.6 业务用例 (Use Cases)
+### 5.7 业务用例 (Use Cases)
 > 描述业务规则与流程，不写技术实现细节。
 
 - **UC1**: [当...时，系统应...]
 - **UC2**: [只有...才能...]
 - **UC3**: [如果...则...]
 
-### 2.7 ASCII UI 原型图 (ASCII Prototypes)（可选）
+### 5.8 ASCII UI 原型图 (ASCII Prototypes)（可选）
 \`\`\`text
 +------------------------------------------+
 | $project_name |
@@ -287,7 +353,7 @@ write_prd_template() {
 +------------------------------------------+
 \`\`\`
 
-### 2.8 架构设计蓝图 (Architecture Blueprint - ASCII)
+### 5.9 架构设计蓝图 (Architecture Blueprint - ASCII)
 
 - 技术栈: $tech_stack
 - 系统交互:
@@ -318,7 +384,7 @@ USER                    APPLICATION                 DOMAIN                    DA
 └── /presentation    # 表现层：页面、组件、状态管理
 \`\`\`
 
-### 2.9 技术实现规范 (Implementation Standards)
+### 5.10 技术实现规范 (Implementation Standards)
 
 > 仅保留“项目技术决策与质量标准”，不放 AI 代理行为规则。
 
@@ -346,14 +412,33 @@ USER                    APPLICATION                 DOMAIN                    DA
 - [ ] 文档同步更新（本 PRD、接口文档、发布说明）
 - [ ] 无阻塞上线的已知缺陷（或明确风险与补救计划）
 
-## 3. 可选扩展 (Optional Extensions)
+## 6. 当前风险与假设
+### 6.1 Risks
+- [风险 1]
+- [风险 2]
 
-### 3.1 依赖注入规范 (DI)（可选）
+### 6.2 Assumptions
+- [假设 1]
+- [假设 2]
+
+## 7. 工作日志
+> 这是流动区。每次关键动作后追加一条，按时间倒序。简短、事实化。
+
+### $date_today 10:00 - [标题]
+- **背景**: [为什么做这一步]
+- **动作**: [做了什么]
+- **结果**: [产出/变更]
+- **影响**: [影响了什么]
+- **后续**: [下一步是什么]
+
+## 8. 可选扩展 (Optional Extensions)
+
+### 8.1 依赖注入规范 (DI)（可选）
 
 - 依赖关系统一在组合根（Composition Root）装配
 - 模块间通过接口协作，降低耦合
 
-### 3.2 防腐层规范 (Anti-Corruption Layer)（可选）
+### 8.2 防腐层规范 (Anti-Corruption Layer)（可选）
 
 - 外部 DTO 与内部 Entity 分离
 - 通过 mapper/adapter 做模型转换
@@ -702,6 +787,84 @@ run_version() {
   printf '%s\n' "codesop $(current_version)"
 }
 
+run_status() {
+  local target_dir="${1:-.}"
+  local branch="unknown"
+  local untracked="0"
+  local uncommitted="0"
+  local last_commit="none"
+  local file_count="0"
+  local todo_count="0"
+  local fixme_count="0"
+
+  if git -C "$target_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    branch="$(git -C "$target_dir" branch --show-current 2>/dev/null || echo "unknown")"
+    local git_status
+    git_status="$(git -C "$target_dir" status --porcelain 2>/dev/null || true)"
+    untracked="$(printf '%s\n' "$git_status" | awk 'BEGIN{count=0} /^\?\? /{count++} END{print count}')"
+    uncommitted="$(printf '%s\n' "$git_status" | awk 'BEGIN{count=0} NF && $0 !~ /^\?\? /{count++} END{print count}')"
+    last_commit="$(git -C "$target_dir" log -1 --format="%ar" 2>/dev/null || echo "none")"
+  fi
+
+  file_count="$(find "$target_dir" -type f -not -path "$target_dir/.git/*" 2>/dev/null | wc -l | tr -d ' ')"
+  todo_count="$( (grep -r "TODO" --include="*.md" --include="*.sh" --include="*.js" --include="*.ts" "$target_dir" 2>/dev/null || true) | wc -l | tr -d ' ' )"
+  fixme_count="$( (grep -r "FIXME" --include="*.md" --include="*.sh" --include="*.js" --include="*.ts" "$target_dir" 2>/dev/null || true) | wc -l | tr -d ' ' )"
+
+  printf '%s\n' "## 项目状态（纯事实）"
+  printf '\n%s\n' "**版本信息**:"
+  printf '%s\n' "- codesop: $(current_version)"
+  printf '\n%s\n' "**Git 状态**:"
+  printf '%s\n' "- 分支: $branch"
+  printf '%s\n' "- 未跟踪: $untracked 文件"
+  printf '%s\n' "- 未提交: $uncommitted 文件"
+  printf '%s\n' "- 最近提交: $last_commit"
+  printf '\n%s\n' "**配置文件**:"
+  for config in CLAUDE.md AGENTS.md PRD.md PLAN.md; do
+    if [ -f "$target_dir/$config" ]; then
+      printf '%s\n' "- $config: ✓ 存在"
+    else
+      printf '%s\n' "- $config: ✗ 不存在"
+    fi
+  done
+  printf '\n%s\n' "**代码统计**:"
+  printf '%s\n' "- 文件数: $file_count"
+  printf '%s\n' "- TODO: $todo_count"
+  printf '%s\n' "- FIXME: $fixme_count"
+}
+
+run_diagnose() {
+  local target_dir="${1:-.}"
+  local signals=""
+  local diagnosis=""
+  local stage=""
+  local confidence=""
+  local branch=""
+  local uncommitted=""
+
+  source "$ROOT_DIR/scripts/collect-signals.sh"
+  source "$ROOT_DIR/scripts/diagnose.sh"
+  source "$ROOT_DIR/scripts/recommend.sh"
+
+  signals="$(collect_signals "$target_dir")"
+  diagnosis="$(diagnose_project "$signals")"
+  stage="$(printf '%s\n' "$diagnosis" | awk -F= '/^CURRENT_STAGE=/{print $2; exit}')"
+  confidence="$(printf '%s\n' "$diagnosis" | awk -F= '/^STAGE_CONFIDENCE=/{print $2; exit}')"
+  branch="$(printf '%s\n' "$signals" | awk -F= '/^GIT_BRANCH=/{print $2; exit}')"
+  uncommitted="$(printf '%s\n' "$signals" | awk -F= '/^GIT_UNCOMMITTED=/{print $2; exit}')"
+
+  printf '%s\n' "## 项目诊断"
+  printf '\n%s\n' "**当前阶段**: $stage"
+  printf '%s\n' "**置信度**: $confidence"
+  printf '\n%s\n' "**健康状态**:"
+  printf '%s\n' "- Git: $branch 分支，$uncommitted 个未提交文件"
+  if printf '%s\n' "$diagnosis" | grep -q '^HEALTH_ISSUES='; then
+    printf '%s\n' "- 问题: $(printf '%s\n' "$diagnosis" | awk -F= '/^HEALTH_ISSUES=/{print $2; exit}')"
+  fi
+  printf '\n'
+  recommend_skills "$diagnosis"
+  rm -rf "/tmp/codesop-git-$$"
+}
+
 subcommand="${1:-}"
 
 case "$subcommand" in
@@ -709,18 +872,29 @@ case "$subcommand" in
     shift || true
     run_init "${1:-.}"
     ;;
+  status)
+    shift || true
+    run_status "${1:-.}"
+    ;;
   update)
     run_update
     ;;
   version|--version|-v)
     run_version
     ;;
-  ""|-h|--help|help)
+  "" )
+    run_diagnose "."
+    ;;
+  -h|--help|help)
     usage
     ;;
   *)
-    printf '%s\n' "未知子命令：$subcommand" >&2
-    usage >&2
-    exit 1
+    if [ -d "$subcommand" ]; then
+      run_diagnose "$subcommand"
+    else
+      printf '%s\n' "未知子命令：$subcommand" >&2
+      usage >&2
+      exit 1
+    fi
     ;;
 esac
