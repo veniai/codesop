@@ -518,6 +518,52 @@ generate_templates() {
 ' "- CLAUDE.md：$claude_status"
   printf '%s
 ' "- PRD.md：$prd_status"
+
+  # 检测系统级别的配置文件
+  printf '
+%s
+' "系统级别配置："
+  
+  # 检测 ~/.claude/CLAUDE.md
+  local system_claude_status=""
+  if [ -L "$HOME/.claude/CLAUDE.md" ]; then
+    local claude_target=$(readlink "$HOME/.claude/CLAUDE.md")
+    if [ "$claude_target" = "$target_dir/CLAUDE.md" ]; then
+      system_claude_status="符号链接 → 当前项目（应改为独立文件）"
+    else
+      system_claude_status="符号链接 → $claude_target"
+    fi
+  elif [ -f "$HOME/.claude/CLAUDE.md" ]; then
+    # 检查是否包含 AI 编码契约
+    if grep -q "AI 编码契约" "$HOME/.claude/CLAUDE.md" 2>/dev/null; then
+      system_claude_status="已存在（独立文件，包含 AI 编码契约）"
+    else
+      system_claude_status="已存在（独立文件，但未包含 AI 编码契约）"
+    fi
+  else
+    system_claude_status="不存在（建议创建，包含 AI 编码契约）"
+  fi
+  printf '%s
+' "- ~/.claude/CLAUDE.md：$system_claude_status"
+
+  # 检测 ~/.claude/AGENTS.md
+  local system_agents_status=""
+  if [ -L "$HOME/.claude/AGENTS.md" ]; then
+    local agents_target=$(readlink "$HOME/.claude/AGENTS.md")
+    system_agents_status="符号链接 → $agents_target"
+  elif [ -f "$HOME/.claude/AGENTS.md" ]; then
+    system_agents_status="已存在（独立文件）"
+  else
+    system_agents_status="不存在"
+  fi
+  printf '%s
+' "- ~/.claude/AGENTS.md：$system_agents_status"
+
+  # 检测 ~/.config/opencode/CLAUDE.md（OpenCode）
+  if [ -f "$HOME/.config/opencode/CLAUDE.md" ]; then
+    printf '%s
+' "- ~/.config/opencode/CLAUDE.md：已存在"
+  fi
 }
 
 print_agents_merge_suggestions() {
@@ -623,49 +669,85 @@ find_first_existing_path() {
 
 git_update_check() {
   local repo_dir="$1"
+  local tool_name="${2:-tool}"
 
   if [ ! -d "$repo_dir/.git" ]; then
     printf '%s\n' "无法检查（非 git 安装）"
     return
   fi
 
-  # 先 fetch 获取远程最新状态
-  git -C "$repo_dir" fetch origin --quiet 2>/dev/null || true
+  # 先 fetch 获取远程最新状态（后台执行，不阻塞）
+  git -C "$repo_dir" fetch origin --quiet 2>/dev/null &
 
-  local branch upstream ahead behind
+  # 读取本地版本
+  local local_version="unknown"
+  if [ -f "$repo_dir/VERSION" ]; then
+    local_version=$(cat "$repo_dir/VERSION" 2>/dev/null | tr -d '[:space:]')
+  fi
+
+  # 读取远程版本（不等待 fetch 完成）
+  local remote_version="unknown"
+  local branch upstream
   branch="$(git -C "$repo_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
   upstream="$(git -C "$repo_dir" rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
 
-  if [ -z "$upstream" ]; then
-    printf '%s\n' "已安装（分支 $branch），但未配置上游，无法判断更新"
+  if [ -n "$upstream" ]; then
+    # 从远程分支获取 VERSION 文件（添加超时控制）
+    remote_version=$(timeout 5 git -C "$repo_dir" show "$upstream:VERSION" 2>/dev/null | tr -d '[:space:]' || echo "unknown")
+  fi
+
+  # 如果没有 VERSION 文件，尝试从 git tag 获取版本号
+  if [ "$local_version" = "unknown" ]; then
+    local_version=$(timeout 5 git -C "$repo_dir" describe --tags --always 2>/dev/null || echo "unknown")
+  fi
+  if [ "$remote_version" = "unknown" ]; then
+    remote_version=$(timeout 5 git -C "$repo_dir" describe --tags --always "$upstream" 2>/dev/null || echo "unknown")
+  fi
+
+  # 如果版本号相同，说明是最新
+  if [ "$local_version" = "$remote_version" ] && [ "$local_version" != "unknown" ]; then
+    printf '%s\n' "- $tool_name：$local_version（已是最新）"
     return
   fi
 
+  # 如果有版本差异，显示更新信息
+  if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
+    printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
+    
+    # 显示更新内容（最近的提交）
+    local update_count
+    update_count=$(git -C "$repo_dir" rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
+    
+    if [ "$update_count" != "0" ]; then
+      printf '%s\n' "  更新内容（最近 3 条）："
+      git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /'
+    fi
+    return
+  fi
+
+  # 兜底：使用原有的逻辑
+  local ahead behind
   read -r ahead behind <<EOF
 $(git -C "$repo_dir" rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0")
 EOF
 
   if [ "${ahead:-0}" = "0" ] && [ "${behind:-0}" = "0" ]; then
-    printf '%s
-' "已安装（分支 $branch），当前已是最新"
+    printf '%s\n' "- $tool_name：$local_version（已是最新）"
     return
   fi
 
   if [ "${behind:-0}" != "0" ] && [ "${ahead:-0}" = "0" ]; then
-    printf '%s
-' "发现 ${behind} 个待更新提交（基于本地远端引用）"
-    git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/  - /'
+    printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
+    git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /'
     return
   fi
 
   if [ "${ahead:-0}" != "0" ] && [ "${behind:-0}" = "0" ]; then
-    printf '%s
-' "本地领先上游 ${ahead} 个提交，暂不建议自动更新"
+    printf '%s\n' "- $tool_name：本地领先上游 ${ahead} 个提交，暂不建议自动更新"
     return
   fi
 
-  printf '%s
-' "本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
+  printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
 }
 
 print_dependency_update_checks() {
@@ -705,25 +787,18 @@ print_dependency_update_checks() {
 ' "更新检查："
 
   if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
-    printf '%s
-' "- superpowers：$(git_update_check "$superpowers_path" | paste -sd ' ' -)"
-    printf '%s
-' "  更新命令：$superpowers_update_cmd"
+    git_update_check "$superpowers_path" "superpowers"
+    printf '%s\n' "  更新命令：$superpowers_update_cmd"
   elif [ "$superpowers_state" = "installed" ]; then
-    printf '%s
-' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
-    printf '%s
-' "  更新命令：$superpowers_update_cmd"
+    printf '%s\n' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
+    printf '%s\n' "  更新命令：$superpowers_update_cmd"
   else
-    printf '%s
-' "- superpowers：未安装，跳过更新检查"
+    printf '%s\n' "- superpowers：未安装，跳过更新检查"
   fi
 
   if [ "$gstack_state" = "installed" ] && [ -n "$gstack_path" ]; then
-    printf '%s
-' "- gstack：$(git_update_check "$gstack_path" | paste -sd ' ' -)"
-    printf '%s
-' "  更新命令：$gstack_update_cmd"
+    git_update_check "$gstack_path" "gstack"
+    printf '%s\n' "  更新命令：$gstack_update_cmd"
   elif [ "$gstack_state" = "partial" ]; then
     printf '%s
 ' "- gstack：仅检测到残留安装，先修复宿主接入，再检查更新"
