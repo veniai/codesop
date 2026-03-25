@@ -2,7 +2,13 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE_PATH" ]; do
+  SOURCE_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
+  SOURCE_PATH="$(readlink "$SOURCE_PATH")"
+  [[ "$SOURCE_PATH" != /* ]] && SOURCE_PATH="$SOURCE_DIR/$SOURCE_PATH"
+done
+ROOT_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
 DETECTOR="$ROOT_DIR/scripts/detect-environment.sh"
 VERSION_FILE="$ROOT_DIR/VERSION"
 
@@ -16,6 +22,7 @@ Usage:
   codesop [path]
   codesop init [path]
   codesop status [path]
+  codesop setup [host]
   codesop update
   codesop version
 EOF
@@ -215,15 +222,19 @@ write_agents_template() {
 EOF
 }
 
-write_claude_template() {
-  local target_dir="$1"
-  local claude_file="$target_dir/CLAUDE.md"
-
-  cat >"$claude_file" <<'EOF'
+claude_wrapper_content() {
+  cat <<'EOF'
 @AGENTS.md
 
 AGENTS.md is the source of truth for project-level AI instructions in this repository.
 EOF
+}
+
+write_claude_template() {
+  local target_dir="$1"
+  local claude_file="$target_dir/CLAUDE.md"
+
+  claude_wrapper_content >"$claude_file"
 }
 
 write_prd_template() {
@@ -454,42 +465,59 @@ generate_templates() {
   local lint_cmd="$5"
   local type_cmd="$6"
   local smoke_cmd="$7"
-  local generated_files=""
-  local skipped_files=""
   local date_today
+  local agents_status=""
+  local claude_status=""
+  local prd_status=""
+  local claude_file="$target_dir/CLAUDE.md"
+  local prd_file="$target_dir/PRD.md"
+  local wrapper_expected
 
   date_today="$(date +%F)"
+  wrapper_expected="$(claude_wrapper_content)"
 
   if [ -f "$target_dir/AGENTS.md" ]; then
-    skipped_files="$(append_item "$skipped_files" "AGENTS.md")"
+    agents_status="已保留（当前版本已覆盖核心骨架）"
   else
     write_agents_template "$target_dir" "$project_name" "$tech_stack" "$test_cmd" "$lint_cmd" "$type_cmd" "$smoke_cmd"
-    generated_files="$(append_item "$generated_files" "AGENTS.md")"
+    agents_status="已生成"
   fi
 
-  if [ -f "$target_dir/CLAUDE.md" ]; then
-    skipped_files="$(append_item "$skipped_files" "CLAUDE.md")"
+  if [ -f "$claude_file" ]; then
+    if [ "$(cat "$claude_file")" = "$wrapper_expected" ]; then
+      claude_status="已保留（已是 @AGENTS.md 引用包装）"
+    else
+      cp "$claude_file" "$claude_file.codesop.bak"
+      write_claude_template "$target_dir"
+      claude_status="已规范化为 @AGENTS.md 引用（备份: CLAUDE.md.codesop.bak）"
+    fi
   else
     write_claude_template "$target_dir"
-    generated_files="$(append_item "$generated_files" "CLAUDE.md")"
+    claude_status="已生成（@AGENTS.md 引用包装）"
   fi
 
-  if [ -f "$target_dir/PRD.md" ]; then
-    skipped_files="$(append_item "$skipped_files" "PRD.md")"
+  if [ -f "$prd_file" ]; then
+    if grep -Fq "## 0. 使用说明" "$prd_file" && grep -Fq "## 1. 当前快照" "$prd_file"; then
+      prd_status="已保留（已是活文档格式）"
+    else
+      cp "$prd_file" "$prd_file.codesop.legacy.bak"
+      write_prd_template "$target_dir" "$project_name" "$date_today" "$tech_stack"
+      prd_status="已迁移为活文档格式（备份: PRD.md.codesop.legacy.bak）"
+    fi
   else
     write_prd_template "$target_dir" "$project_name" "$date_today" "$tech_stack"
-    generated_files="$(append_item "$generated_files" "PRD.md")"
+    prd_status="已生成（活文档格式）"
   fi
 
-  if [ -n "$generated_files" ]; then
-    printf '\n%s\n' "已生成文件："
-    printf '%s\n' "$generated_files" | sed 's/^/- /'
-  fi
-
-  if [ -n "$skipped_files" ]; then
-    printf '\n%s\n' "已保留现有文件："
-    printf '%s\n' "$skipped_files" | sed 's/^/- /'
-  fi
+  printf '
+%s
+' "文件状态："
+  printf '%s
+' "- AGENTS.md：$agents_status"
+  printf '%s
+' "- CLAUDE.md：$claude_status"
+  printf '%s
+' "- PRD.md：$prd_status"
 }
 
 print_agents_merge_suggestions() {
@@ -572,8 +600,136 @@ format_ecosystem_state() {
 
   if [ "$value" = "installed" ]; then
     echo "已安装"
+  elif [ "$value" = "partial" ]; then
+    echo "部分安装"
   else
     echo "未安装"
+  fi
+}
+
+find_first_existing_path() {
+  local candidate
+
+  for candidate in "$@"; do
+    if [ -e "$candidate" ]; then
+      printf '%s
+' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+git_update_check() {
+  local repo_dir="$1"
+
+  if [ ! -d "$repo_dir/.git" ]; then
+    printf '%s\n' "无法检查（非 git 安装）"
+    return
+  fi
+
+  # 先 fetch 获取远程最新状态
+  git -C "$repo_dir" fetch origin --quiet 2>/dev/null || true
+
+  local branch upstream ahead behind
+  branch="$(git -C "$repo_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+  upstream="$(git -C "$repo_dir" rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
+
+  if [ -z "$upstream" ]; then
+    printf '%s\n' "已安装（分支 $branch），但未配置上游，无法判断更新"
+    return
+  fi
+
+  read -r ahead behind <<EOF
+$(git -C "$repo_dir" rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0")
+EOF
+
+  if [ "${ahead:-0}" = "0" ] && [ "${behind:-0}" = "0" ]; then
+    printf '%s
+' "已安装（分支 $branch），当前已是最新"
+    return
+  fi
+
+  if [ "${behind:-0}" != "0" ] && [ "${ahead:-0}" = "0" ]; then
+    printf '%s
+' "发现 ${behind} 个待更新提交（基于本地远端引用）"
+    git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/  - /'
+    return
+  fi
+
+  if [ "${ahead:-0}" != "0" ] && [ "${behind:-0}" = "0" ]; then
+    printf '%s
+' "本地领先上游 ${ahead} 个提交，暂不建议自动更新"
+    return
+  fi
+
+  printf '%s
+' "本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
+}
+
+print_dependency_update_checks() {
+  local host="$1"
+  local superpowers_state="$2"
+  local gstack_state="$3"
+  local superpowers_path=""
+  local gstack_path=""
+  local superpowers_update_cmd=""
+  local gstack_update_cmd="/gstack-upgrade"
+
+  case "$host" in
+    claude)
+      superpowers_path="$(find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers")" || true
+      superpowers_update_cmd="/plugin update superpowers"
+      gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack")" || true
+      ;;
+    codex)
+      superpowers_path="$(find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
+      superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新"
+      gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
+      ;;
+    opencode)
+      superpowers_path="$(find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers")" || true
+      superpowers_update_cmd="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新"
+      gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
+      ;;
+    *)
+      superpowers_path="$(find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers")" || true
+      superpowers_update_cmd="按当前宿主的 superpowers 官方更新方式执行"
+      gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/gstack")" || true
+      ;;
+  esac
+
+  printf '
+%s
+' "更新检查："
+
+  if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
+    printf '%s
+' "- superpowers：$(git_update_check "$superpowers_path" | paste -sd ' ' -)"
+    printf '%s
+' "  更新命令：$superpowers_update_cmd"
+  elif [ "$superpowers_state" = "installed" ]; then
+    printf '%s
+' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
+    printf '%s
+' "  更新命令：$superpowers_update_cmd"
+  else
+    printf '%s
+' "- superpowers：未安装，跳过更新检查"
+  fi
+
+  if [ "$gstack_state" = "installed" ] && [ -n "$gstack_path" ]; then
+    printf '%s
+' "- gstack：$(git_update_check "$gstack_path" | paste -sd ' ' -)"
+    printf '%s
+' "  更新命令：$gstack_update_cmd"
+  elif [ "$gstack_state" = "partial" ]; then
+    printf '%s
+' "- gstack：仅检测到残留安装，先修复宿主接入，再检查更新"
+  else
+    printf '%s
+' "- gstack：未安装，跳过更新检查"
   fi
 }
 
@@ -585,60 +741,69 @@ print_install_suggestions() {
   local superpowers_update=""
   local gstack_install=""
   local gstack_update=""
+  local gstack_repair=""
 
   case "$host" in
     claude)
       superpowers_install="在 Claude Code 中执行：/plugin install superpowers@claude-plugins-official"
-      superpowers_update="已安装后可更新：/plugin update superpowers"
+      superpowers_update="/plugin update superpowers"
       gstack_install="git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup"
-      gstack_update="已安装后可更新：/gstack-upgrade"
+      gstack_update="/gstack-upgrade"
+      gstack_repair="检测到 gstack 残留，但 Claude Code 宿主接入不完整。建议执行：$gstack_install"
       ;;
     codex)
       superpowers_install="在 Codex 中执行：Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
-      superpowers_update="Codex 版建议按官方安装文档重新执行更新步骤"
+      superpowers_update="按 Codex 官方 superpowers 安装文档重新执行更新"
       gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host codex"
-      gstack_update="已安装后可更新：/gstack-upgrade"
+      gstack_update="/gstack-upgrade"
+      gstack_repair="检测到 gstack 仓库或命令，但 Codex 宿主接入不完整。建议重新执行：$gstack_install"
       ;;
     opencode)
       superpowers_install="在 OpenCode/OpenClaw 中执行：Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md"
-      superpowers_update="OpenCode 版建议按官方安装文档重新执行更新步骤"
+      superpowers_update="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新"
       gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host auto"
-      gstack_update="已安装后可更新：/gstack-upgrade"
+      gstack_update="/gstack-upgrade"
+      gstack_repair="检测到 gstack 仓库或命令，但 OpenCode/OpenClaw 宿主接入不完整。建议重新执行：$gstack_install"
       ;;
     *)
       superpowers_install="先安装 Claude Code、Codex 或 OpenCode/OpenClaw 之后再按对应宿主安装"
-      superpowers_update="安装完成后，按对应宿主的官方更新方式执行"
+      superpowers_update="按当前宿主的 superpowers 官方更新方式执行"
       gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host auto"
-      gstack_update="已安装后可更新：/gstack-upgrade"
+      gstack_update="/gstack-upgrade"
+      gstack_repair="检测到 gstack 仓库或命令，但未确认当前宿主已完成接入。建议执行：$gstack_install"
       ;;
   esac
 
-  if [ "$superpowers_state" = "installed" ] && [ "$gstack_state" = "installed" ]; then
-    printf '\n%s\n' "更新建议："
-    printf '%s\n' "- superpowers：$superpowers_update"
-    printf '%s\n' "- gstack：$gstack_update"
-    printf '\n%s\n' "下一步："
-    printf '%s\n' "- 如果你确认，我可以继续执行对应更新步骤。"
-    return
-  fi
+  print_dependency_update_checks "$host" "$superpowers_state" "$gstack_state"
 
-  printf '\n%s\n' "建议安装命令："
+  printf '
+%s
+' "安装/修复建议："
 
   if [ "$superpowers_state" = "missing" ]; then
-    printf '%s\n' "- superpowers：$superpowers_install"
+    printf '%s
+' "- superpowers：$superpowers_install"
   else
-    printf '%s\n' "- superpowers 已安装。更新方式：$superpowers_update"
+    printf '%s
+' "- superpowers：如需更新，执行：$superpowers_update"
   fi
 
   if [ "$gstack_state" = "missing" ]; then
-    printf '%s\n' "- gstack：$gstack_install"
+    printf '%s
+' "- gstack：$gstack_install"
+  elif [ "$gstack_state" = "partial" ]; then
+    printf '%s
+' "- gstack：$gstack_repair"
   else
-    printf '%s\n' "- gstack 已安装。更新方式：$gstack_update"
+    printf '%s
+' "- gstack：如需更新，执行：$gstack_update"
   fi
 
-  printf '%s\n' "这些依赖现在只做建议，确认后再安装。"
-  printf '\n%s\n' "下一步："
-  printf '%s\n' "- 如果你确认，我可以直接按上面的命令继续执行。"
+  printf '
+%s
+' "下一步："
+  printf '%s
+' "- 如需我继续执行安装、修复或更新，请明确指定依赖。"
 }
 
 run_init() {
@@ -749,6 +914,8 @@ run_update() {
 
   if [ "$local_hash" = "$remote_hash" ]; then
     printf '%s\n' "已是最新版本。"
+    printf '%s\n' "重新同步本机宿主集成..."
+    bash "$ROOT_DIR/setup" --host auto
     return 0
   fi
 
@@ -774,6 +941,8 @@ run_update() {
   local new_ver
   new_ver="$(current_version)"
   printf '%s\n' "更新完成：$old_ver → $new_ver"
+  printf '%s\n' "重新同步本机宿主集成..."
+  bash "$ROOT_DIR/setup" --host auto
 
   local changes
   changes="$(git log --oneline "$old_ver".."$new_ver" 2>/dev/null || git log --oneline -5)"
@@ -785,6 +954,11 @@ run_update() {
 
 run_version() {
   printf '%s\n' "codesop $(current_version)"
+}
+
+run_setup() {
+  local host="${1:-auto}"
+  bash "$ROOT_DIR/setup" --host "$host"
 }
 
 run_status() {
@@ -875,6 +1049,10 @@ case "$subcommand" in
   status)
     shift || true
     run_status "${1:-.}"
+    ;;
+  setup)
+    shift || true
+    run_setup "${1:-auto}"
     ;;
   update)
     run_update
