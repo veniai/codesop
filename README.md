@@ -38,14 +38,12 @@ codesop init .
 | `AGENTS.md` | `~/.claude/CLAUDE.md` | Claude Code |
 | `AGENTS.md` | `~/.codex/AGENTS.md` | Codex CLI |
 | `AGENTS.md` | `~/.config/opencode/AGENTS.md` | OpenCode |
-| `SKILL.md` | `~/.claude/skills/codesop/SKILL.md` | Claude Code |
-| `SKILL.md` | `~/.agents/skills/codesop/SKILL.md` | Codex / OpenClaw |
-| `SKILL.md` | `~/.codex/skills/codesop/SKILL.md` | Codex compatibility symlink |
+| `codesop setup --host claude` | `~/.claude/skills/codesop/` | Claude Code runtime |
+| `codesop setup --host codex` | `~/.agents/skills/codesop/` | Codex skill runtime |
+| `codesop setup --host opencode` | `~/.agents/skills/codesop/` | OpenCode / OpenClaw runtime |
 | `codesop` | `~/.local/bin/codesop` | CLI |
 
-All via symlinks — edit once, sync everywhere.
-
-For Codex specifically, real skill discovery may depend on `~/.agents/skills/` at startup. The `~/.codex/skills/codesop` link is kept as a compatibility path, but `~/.agents/skills/codesop` should exist.
+The installer is still a single entrypoint, but runtime layout is now host-aware. Claude Code, Codex, and OpenCode/OpenClaw do not all consume raw skill directories the same way, so `install.sh` delegates to `setup --host auto`.
 
 ## 使用方法 / Usage
 
@@ -54,6 +52,11 @@ For Codex specifically, real skill discovery may depend on `~/.agents/skills/` a
 cd ~/codesop
 vim SKILL.md
 git add . && git commit -m "update" && git push
+```
+
+**本地改完后重新同步宿主：**
+```bash
+codesop setup auto
 ```
 
 **其他电脑同步：**
@@ -94,6 +97,25 @@ The CLI output is organized into stable blocks:
 - 下一步
 
 This keeps `init` simple: classify the project, inspect the local AI environment, then generate the right project-level guidance.
+
+## Host-Aware Setup
+
+`codesop` keeps one source repo, but setup is host-aware:
+
+- Claude Code uses `~/.claude/skills/codesop`
+- OpenCode / OpenClaw use `~/.agents/skills/codesop`
+- Codex uses the shared `~/.agents/skills/codesop` skill directory
+
+For `codesop` specifically, duplicating the same skill under both `~/.agents/skills` and `~/.codex/skills` causes Codex to list it twice. The setup script now keeps only one discoverable Codex skill entry.
+
+Manual repair commands:
+
+```bash
+codesop setup auto
+codesop setup codex
+codesop setup claude
+codesop setup opencode
+```
 
 ## 覆盖场景 / Scenarios Covered
 

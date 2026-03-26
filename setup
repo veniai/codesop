@@ -1,0 +1,177 @@
+#!/bin/bash
+
+set -euo pipefail
+
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+HOST="auto"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./setup --host auto
+  ./setup --host claude
+  ./setup --host codex
+  ./setup --host opencode
+  ./setup --host openclaw
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      [ $# -lt 2 ] && echo "Missing value for --host" >&2 && exit 1
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*)
+      HOST="${1#--host=}"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "$HOST" in
+  auto|claude|codex|opencode|openclaw) ;;
+  *)
+    echo "Unknown host: $HOST" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
+
+copy_file() {
+  local src="$1"
+  local dst="$2"
+
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+}
+
+ensure_symlink() {
+  local src="$1"
+  local dst="$2"
+
+  mkdir -p "$(dirname "$dst")"
+  ln -sfn "$src" "$dst"
+}
+
+prepare_runtime_dir() {
+  local target_dir="$1"
+
+  if [ -L "$target_dir" ]; then
+    rm -f "$target_dir"
+  elif [ -e "$target_dir" ] && [ ! -d "$target_dir" ]; then
+    echo "setup failed: target exists and is not a directory: $target_dir" >&2
+    exit 1
+  fi
+
+  mkdir -p "$target_dir"
+}
+
+reset_runtime_path() {
+  local path="$1"
+
+  if [ -L "$path" ] || [ -f "$path" ]; then
+    rm -f "$path"
+  elif [ -d "$path" ]; then
+    rm -rf "$path"
+  fi
+}
+
+remove_dir_if_exists() {
+  local target_dir="$1"
+
+  if [ -L "$target_dir" ]; then
+    rm -f "$target_dir"
+  elif [ -d "$target_dir" ]; then
+    rm -rf "$target_dir"
+  fi
+}
+
+write_skill_runtime() {
+  local target_dir="$1"
+
+  prepare_runtime_dir "$target_dir"
+  reset_runtime_path "$target_dir/SKILL.md"
+  reset_runtime_path "$target_dir/skill.json"
+  reset_runtime_path "$target_dir/agents"
+  reset_runtime_path "$target_dir/codesop"
+  reset_runtime_path "$target_dir/VERSION"
+  reset_runtime_path "$target_dir/.codesop-source"
+  copy_file "$SOURCE_DIR/SKILL.md" "$target_dir/SKILL.md"
+  copy_file "$SOURCE_DIR/skill.json" "$target_dir/skill.json"
+  ensure_symlink "$SOURCE_DIR/agents" "$target_dir/agents"
+  ensure_symlink "$SOURCE_DIR/codesop" "$target_dir/codesop"
+  copy_file "$SOURCE_DIR/VERSION" "$target_dir/VERSION"
+  printf '%s\n' "$SOURCE_DIR" > "$target_dir/.codesop-source"
+}
+
+install_cli() {
+  ensure_symlink "$SOURCE_DIR/codesop" "$HOME/.local/bin/codesop"
+}
+
+install_claude() {
+  ensure_symlink "$SOURCE_DIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+  write_skill_runtime "$HOME/.claude/skills/codesop"
+  prepare_runtime_dir "$HOME/.claude/commands"
+  copy_file "$SOURCE_DIR/commands/codesop.md" "$HOME/.claude/commands/codesop.md"
+  copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
+  copy_file "$SOURCE_DIR/commands/codesop-status.md" "$HOME/.claude/commands/codesop-status.md"
+  copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
+  copy_file "$SOURCE_DIR/commands/codesop-setup.md" "$HOME/.claude/commands/codesop-setup.md"
+  echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"
+}
+
+install_opencode() {
+  ensure_symlink "$SOURCE_DIR/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
+  write_skill_runtime "$HOME/.agents/skills/codesop"
+  echo "  ✓ OpenCode/OpenClaw: ~/.config/opencode/AGENTS.md + ~/.agents/skills/codesop/"
+}
+
+install_codex() {
+  ensure_symlink "$SOURCE_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
+  write_skill_runtime "$HOME/.agents/skills/codesop"
+  remove_dir_if_exists "$HOME/.codex/skills/codesop"
+  echo "  ✓ Codex: ~/.codex/AGENTS.md + ~/.agents/skills/codesop/"
+}
+
+echo "=== codesop setup ==="
+echo "Source: $SOURCE_DIR"
+
+case "$HOST" in
+  auto)
+    echo "[1/2] Installing host integrations..."
+    install_claude
+    install_codex
+    install_opencode
+    ;;
+  claude)
+    echo "[1/2] Installing Claude Code integration..."
+    install_claude
+    ;;
+  codex)
+    echo "[1/2] Installing Codex integration..."
+    install_codex
+    ;;
+  opencode|openclaw)
+    echo "[1/2] Installing OpenCode/OpenClaw integration..."
+    install_opencode
+    ;;
+esac
+
+echo "[2/2] Linking CLI..."
+install_cli
+echo "  ✓ CLI: ~/.local/bin/codesop"
+
+echo
+echo "Done."
+echo "To resync hosts after editing codesop locally: codesop setup auto"

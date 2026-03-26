@@ -6,7 +6,7 @@
 cd ~/codesop && vim SKILL.md
 ```
 
-在这里改文件。改完提交。其他电脑拉一下。
+在这里改文件。改完提交。然后重新同步宿主运行时。
 
 ## `/codesop init`
 
@@ -57,6 +57,9 @@ git add .
 git commit -m "改了什么"
 git push
 
+# 3.5 本机重新同步宿主运行时
+codesop setup auto
+
 # 4. 更新
 codesop update
 
@@ -76,8 +79,8 @@ codesop version
 
 ## 它干了什么
 
-装完之后，Claude Code / OpenClaw / Codex CLI 都能读到你的 SOP。
-改一次文件，三个工具自动同步。
+装完之后，Claude Code / OpenClaw / Codex CLI 都会拿到各自兼容的 runtime。
+统一入口还是一次安装、一次更新；只是内部不再用一套裸 symlink 强行兼容三个宿主。
 
 ## 查看状态
 

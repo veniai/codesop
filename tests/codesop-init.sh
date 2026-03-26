@@ -137,6 +137,20 @@ assert_contains "$installed_output" "/plugin update superpowers"
 assert_contains "$installed_output" "/gstack-upgrade"
 assert_contains "$installed_output" "如果你确认，我可以继续执行对应更新步骤"
 
+partial_home="$tmpdir/home-partial"
+mkdir -p "$partial_home/.claude/plugins/superpowers" "$partial_home/gstack"
+mkdir -p "$partial_home/bin"
+cat >"$partial_home/bin/gstack" <<'EOF'
+#!/bin/bash
+exit 0
+EOF
+chmod +x "$partial_home/bin/gstack"
+
+partial_output="$(HOME="$partial_home" PATH="$partial_home/bin:$PATH" bash "$CLI" init "$project_dir")"
+assert_contains "$partial_output" "gstack：部分安装"
+assert_contains "$partial_output" "检测到 gstack 残留，但 Claude Code 宿主接入不完整"
+assert_contains "$partial_output" "./setup"
+
 existing_dir="$tmpdir/project-existing"
 mkdir -p "$existing_dir"
 cat >"$existing_dir/package.json" <<'EOF'

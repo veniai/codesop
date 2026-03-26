@@ -177,20 +177,36 @@ detect_superpowers_state() {
 }
 
 detect_gstack_state() {
-  if command -v gstack >/dev/null 2>&1; then
+  if detect_path_state \
+    "ecosystem.gstack" \
+    "$HOME/.claude/skills/gstack" \
+    "$HOME/.agents/skills/gstack" \
+    "$HOME/.config/opencode/skills/gstack" \
+    "$HOME/.codex/skills/gstack" \
+    "$TARGET_DIR/.claude/skills/gstack" \
+    "$TARGET_DIR/.agents/skills/gstack" \
+    "$TARGET_DIR/.config/opencode/skills/gstack" \
+    "$TARGET_DIR/.codex/skills/gstack" | grep -q 'installed$'; then
     echo "ecosystem.gstack=installed"
     return
   fi
 
-  detect_path_state \
+  if command -v gstack >/dev/null 2>&1; then
+    echo "ecosystem.gstack=partial"
+    return
+  fi
+
+  if detect_path_state \
     "ecosystem.gstack" \
     "$HOME/.gstack" \
-    "$HOME/.claude/skills/gstack" \
-    "$HOME/.codex/skills/gstack" \
-    "$HOME/.agents/skills/gstack" \
     "$HOME/gstack" \
-    "$TARGET_DIR/.claude/skills/gstack" \
-    "$TARGET_DIR/.agents/skills/gstack"
+    "$TARGET_DIR/.gstack" \
+    "$TARGET_DIR/gstack" | grep -q 'installed$'; then
+    echo "ecosystem.gstack=partial"
+    return
+  fi
+
+  echo "ecosystem.gstack=missing"
 }
 
 detect_project_language

@@ -1,0 +1,16 @@
+{
+  "name": "codesop",
+  "displayName": "codesop",
+  "version": "1.0.0",
+  "description": "Project workbench and workflow router for AI-assisted coding across Claude Code, Codex, and OpenCode/OpenClaw",
+  "author": "veniai",
+  "repository": "https://github.com/veniai/codesop",
+  "license": "MIT",
+  "commands": [
+    "init",
+    "status",
+    "update",
+    "version",
+    "setup"
+  ]
+}

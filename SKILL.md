@@ -1,6 +1,6 @@
 ---
 name: codesop
-description: Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet.
+description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop status`, `/codesop setup`, `/codesop update`, or `/codesop version`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
 ---
 
 # codesop: Project Workbench and Workflow Router
@@ -21,6 +21,27 @@ Use this skill to:
 - route into specialized downstream skills
 
 Do not use this skill as a replacement for specialist execution skills.
+
+## 1.1 CLI Command Bypass
+
+If the user is explicitly asking to run a mechanical `codesop` subcommand, do not switch into workbench-summary mode.
+
+Treat these as command execution requests first:
+
+- `/codesop init`
+- `/codesop status`
+- `/codesop setup`
+- `/codesop update`
+- `/codesop version`
+
+For these requests:
+
+- run the command
+- summarize the command output faithfully
+- keep interpretation minimal and local to the command result
+- do not output `## 工作台摘要`
+- do not output `## Skill 建议`
+- do not recommend downstream workflow skills unless the user separately asks what to do next
 
 ## 2. Read Order
 
@@ -113,6 +134,8 @@ Also trigger when the user explicitly mentions:
 - project status
 - next step
 - progress summary
+
+Do not use explicit `codesop` mention alone as a trigger if the message is clearly just a CLI subcommand execution request.
 
 ## 6. Workflow Mapping
 
@@ -274,59 +297,17 @@ When recommending, always include:
 
 ### 8.1 /codesop init [path]
 
-Three-layer project initialization with parallel execution.
+Initialize project scaffolding and environment guidance.
 
-#### Execution Overview
+This is a mechanical command, not a workbench-summary command.
 
-```text
-并行启动:
-  Track A (bash):    Phase 1+2 → Phase 3
-  Track B (sub-agent):          Phase 4
-                     ↓ 合并 ↓
-  主 Agent:                      Phase 5 → 输出总结
-```
-
-**并行规则：Track A 和 Track B 同时启动，谁先完成谁等。全部完成后再做 Phase 5。**
-
-#### Layer 1: Mechanical (rule-driven, verifiable)
-
-**Phase 1+2: Environment Setup + Project Classification (Track A, bash)**
-
-启动方式：直接执行 bash 命令，不派 sub-agent。
+Run:
 
 ```bash
 bash ~/codesop/codesop init <target-dir>
 ```
 
-Phase 1 输出：
-
-```text
-环境识别：
-  ✓ Claude Code: 已检测到
-  ✓ Codex: 已检测到
-  ⚠ superpowers: 未安装 → 建议命令: ...
-  ✓ gstack: 已安装
-  ✓ AGENTS.md symlink: 3/3 有效且可读
-  ✓ SKILL.md symlink: 3/3 有效且可读
-```
-
-Phase 2 输出：
-
-```text
-项目识别：
-  主语言：TypeScript/JavaScript
-  项目形态：Web App
-  框架：Next.js
-  成熟度：开发中 (47 commits)
-```
-
-如果缺失插件：按宿主工具给出安装命令，等用户确认后再执行。
-
-**Phase 3: Scaffold Generation (Track A, bash)**
-
-Phase 1+2 完成后立即执行，不等 Phase 4。
-
-默认生成（不问用户）：
+Expected command responsibilities:
 
 - `AGENTS.md` — 填充技术栈、命令、架构规则
 - `CLAUDE.md` — 轻量包装：`@AGENTS.md`
@@ -340,69 +321,13 @@ Phase 1+2 完成后立即执行，不等 Phase 4。
 
 全部默认中文。根据检测到的技术栈推断 test/lint/typecheck/smoke 命令。
 
-#### Layer 2: Diagnosis (lightweight analysis, parallel sub-agent)
+When reporting back after `init`:
 
-**Phase 4: 轻量现状分析 (Track B, sub-agent)**
-
-启动方式：在 Track A 启动的同时，派一个 sub-agent 执行。
-
-sub-agent 任务提示词：
-
-```text
-你是 codesop init 的现状分析助手。请分析项目 <target-dir>，完成以下 6 项检查，
-每项给评分 0-10，最后输出综合评分。
-
-检查项：
-1. git 活跃度 — 运行 git log --oneline -20，判断最近提交频率
-2. 目录结构 — 扫描目录，判断分层是否清晰
-3. 文档存在性 — 检查 AGENTS.md / CLAUDE.md / PRD.md / README.md / ARCHITECTURE.md
-4. 测试命令 — 检查 package.json scripts 或 Makefile 中的 test 命令
-5. 架构边界 — 检查是否有 domain / usecases / infra / app 目录
-6. TODO/FIXME 散落 — grep -rn "TODO\|FIXME" 统计数量和位置
-
-请严格按以下格式输出（中文）：
-
-## 现状分析
-
-| 检查项         | 状态    | 评分  | 说明                 |
-|----------------|---------|-------|----------------------|
-| git 活跃度     |         |       |                      |
-| 目录结构       |         |       |                      |
-| 文档存在性     |         |       |                      |
-| 测试命令       |         |       |                      |
-| 架构边界       |         |       |                      |
-| TODO/FIXME     |         |       |                      |
-
-综合评分: X/10
-```
-
-#### 合并：等 Track A + Track B 都完成
-
-主 Agent 等两个 Track 都完成后，收集结果：
-
-- Track A 输出：环境识别 + 项目识别 + 已生成的文件
-- Track B 输出：现状分析表格 + 综合评分
-
-然后继续 Phase 5。
-
-#### Layer 3: Decision (AI judgment, fixed output format)
-
-**Phase 5: Skill 路由 + 项目状态总结**
-
-综合 Phase 2 和 Phase 4，输出工作台摘要，并补一个 3 档 skill 路由：
-
-```text
-## Skill 路由
-
-推荐: /office-hours
-原因: 架构边界模糊，需要先理清需求和方向
-
-备选: /writing-plans
-原因: 如果已有明确需求，可直接进入计划阶段
-
-暂不建议: /subagent-driven-dev
-原因: 架构未定，直接实现会导致返工
-```
+- keep the response centered on the command output
+- say which files were generated or preserved
+- say whether ecosystem dependencies are installed, partially installed, or missing
+- do not add a separate project scorecard
+- do not add workbench routing unless the user explicitly asks for next-step advice
 
 ### 8.2 /codesop status
 

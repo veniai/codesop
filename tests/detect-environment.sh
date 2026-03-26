@@ -99,17 +99,20 @@ assert_contains "$skill_header" 'The `/codesop` CLI is an optional but preferred
 assert_contains "$skill_header" 'Call `/codesop` when you need fresh project-state facts from the repo.'
 assert_contains "$skill_header" 'Do not call `/codesop` for abstract workflow questions that do not depend on repo state.'
 assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.'
+assert_contains "$skill_header" "## 1.1 CLI Command Bypass"
+assert_contains "$skill_header" 'Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`'
 assert_contains "$skill_header" "## 工作台摘要"
 assert_contains "$skill_header" "**长期目标**:"
 assert_contains "$skill_header" "**当前阶段**:"
 assert_contains "$skill_header" "## Skill 建议"
-assert_contains "$skill_output" "Three-layer project initialization with parallel execution"
-assert_contains "$skill_output" "全部默认中文"
-assert_contains "$skill_output" "如果缺失插件：按宿主工具给出安装命令，等用户确认后再执行"
+assert_contains "$skill_output" "Initialize project scaffolding and environment guidance."
+assert_contains "$skill_output" "This is a mechanical command, not a workbench-summary command."
 assert_contains "$skill_output" '`AGENTS.md` — 填充技术栈、命令、架构规则'
 assert_contains "$skill_output" '`CLAUDE.md` — 轻量包装：`@AGENTS.md`'
 assert_contains "$skill_output" '`PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志'
 assert_contains "$skill_output" '`AGENTS.md` 已存在 → 保留，输出 diff 建议。'
+assert_contains "$skill_output" "do not add a separate project scorecard"
+assert_contains "$skill_output" "do not add workbench routing unless the user explicitly asks for next-step advice"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "默认中文"
