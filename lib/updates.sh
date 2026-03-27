@@ -77,6 +77,7 @@ extract_changelog_entries() {
 git_update_check() {
   local repo_dir="$1"
   local tool_name="${2:-tool}"
+  local update_cmd="${3:-}"
 
   if [ ! -d "$repo_dir/.git" ]; then
     printf '%s\n' "无法检查（非 git 安装）"
@@ -155,7 +156,11 @@ git_update_check() {
         git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
       fi
     fi
-    printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    if [ -n "$update_cmd" ]; then
+      printf '\n  更新命令：%s\n' "$update_cmd"
+    else
+      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    fi
     return
   fi
 
@@ -173,7 +178,11 @@ EOF
   if [ "${behind:-0}" != "0" ] && [ "${ahead:-0}" = "0" ]; then
     printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
     git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
-    printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    if [ -n "$update_cmd" ]; then
+      printf '\n  更新命令：%s\n' "$update_cmd"
+    else
+      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    fi
     return
   fi
 
@@ -183,7 +192,6 @@ EOF
   fi
 
   printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
-  printf '  更新命令：cd %s && git pull --rebase\n' "$repo_dir"
 }
 
 print_dependency_update_checks() {

@@ -288,7 +288,7 @@ _check_skills_all() {
       codex_label="Codex"
       [ "$codex_sp" = "$HOME/.agents/skills/superpowers" ] && codex_label="Codex (agents)"
       printf '  %-14s %s（%s）\n' "superpowers:" "$codex_ver" "$codex_label"
-      git_update_check "$codex_sp" "  更新"
+      git_update_check "$codex_sp" "superpowers ($codex_label)" "cd $codex_sp && git pull"
       sp_found=1
     fi
   done
@@ -311,7 +311,7 @@ _check_skills_all() {
       [ "$gs_path" = "$HOME/.codex/skills/gstack" ] && gs_label="Codex"
       printf '  %-14s %s（%s）\n' "gstack:" "$gs_ver" "$gs_label"
       if [ -d "$gs_path/.git" ]; then
-        git_update_check "$gs_path" "  更新"
+        git_update_check "$gs_path" "gstack ($gs_label)" "/gstack-upgrade"
       else
         _check_changelog "$gs_path" "$gs_ver" "/gstack-upgrade"
       fi
