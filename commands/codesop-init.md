@@ -98,5 +98,5 @@ Do NOT generate CLAUDE.md yourself. Claude Code's official `/init` handles this 
 ## After running:
 
 - report which files were generated or preserved
-- report environment detection and install/update suggestions
+- report skill dependency checks **verbatim** — preserve the full CLI output including version numbers AND update content (changelog excerpts). Do not summarize or truncate the update details.
 - do not add project scoring, workbench summary, or skill routing unless the user separately asks
