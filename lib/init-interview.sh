@@ -711,7 +711,7 @@ generate_project_files() {
         echo "@CLAUDE.md" > ./AGENTS.md
         echo "✓ 更新 AGENTS.md"
       else
-        echo "跳过 AGENTS.md 更新"
+        echo "跳过 AGENTS.md 更新（运行 /init 生成 CLAUDE.md 后，可将 AGENTS.md 改为 @CLAUDE.md）"
       fi
     else
       echo "✓ AGENTS.md 已是简单引用格式"
