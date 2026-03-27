@@ -270,14 +270,20 @@ check_skill_dependencies() {
 _check_skills_all() {
   local sp_found=0
 
-  # superpowers: Claude Code plugin cache
-  local cc_plugin
-  cc_plugin=$(find "$HOME/.claude/plugins/cache/superpowers-marketplace/superpowers" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
-  if [ -n "$cc_plugin" ] && [ "$cc_plugin" != "$HOME/.claude/plugins/cache/superpowers-marketplace/superpowers" ]; then
-    printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$cc_plugin")"
-    _check_changelog "$cc_plugin" "$(basename "$cc_plugin")" "/plugin update superpowers"
-    sp_found=1
-  fi
+  # superpowers: Claude Code plugin cache (check all marketplaces, skip orphaned)
+  local cc_plugin cc_marketplace
+  for cc_marketplace in "$HOME/.claude/plugins/cache/claude-plugins-official/superpowers" \
+                       "$HOME/.claude/plugins/cache/superpowers-marketplace/superpowers"; do
+    cc_plugin=$(find "$cc_marketplace" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
+    if [ -n "$cc_plugin" ] && [ "$cc_plugin" != "$cc_marketplace" ]; then
+      # Skip orphaned plugins
+      if [ -f "$cc_plugin/.orphaned_at" ]; then continue; fi
+      printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$cc_plugin")"
+      _check_changelog "$cc_plugin" "$(basename "$cc_plugin")" "/plugin update superpowers"
+      sp_found=1
+      break  # Only report the first non-orphaned plugin
+    fi
+  done
 
   # superpowers: Codex git repos
   for codex_sp in "$HOME/.codex/superpowers" "$HOME/.agents/skills/superpowers"; do
@@ -339,6 +345,14 @@ _check_changelog() {
   [ -z "$latest_ver" ] && return
 
   if [ "$current_ver" = "$latest_ver" ]; then
+    echo "  已是最新"
+    return
+  fi
+
+  # Compare versions: if current >= latest, it's up to date
+  local higher_ver
+  higher_ver=$(printf '%s\n%s\n' "$current_ver" "$latest_ver" | sort -V | tail -1)
+  if [ "$higher_ver" = "$current_ver" ]; then
     echo "  已是最新"
     return
   fi
