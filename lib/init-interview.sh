@@ -283,7 +283,7 @@ _check_skills_all() {
   for codex_sp in "$HOME/.codex/superpowers" "$HOME/.agents/skills/superpowers"; do
     if [ -d "$codex_sp/.git" ]; then
       local codex_ver codex_label
-      codex_ver=$(cat "$codex_sp/VERSION" 2>/dev/null | tr -d '[:space:]')
+      codex_ver=$(cat "$codex_sp/VERSION" 2>/dev/null | tr -d '[:space:]') || codex_ver=""
       [ -z "$codex_ver" ] && codex_ver=$(git -C "$codex_sp" describe --tags --always 2>/dev/null || echo "unknown")
       codex_label="Codex"
       [ "$codex_sp" = "$HOME/.agents/skills/superpowers" ] && codex_label="Codex (agents)"
@@ -305,7 +305,7 @@ _check_skills_all() {
       gs_found=1
       local gs_ver gs_label
       gs_ver="unknown"
-      [ -f "$gs_path/VERSION" ] && gs_ver=$(cat "$gs_path/VERSION" | tr -d '[:space:]')
+      [ -f "$gs_path/VERSION" ] && gs_ver=$(cat "$gs_path/VERSION" | tr -d '[:space:]') || true
       gs_label="Claude Code"
       [ "$gs_path" = "$HOME/.agents/skills/gstack" ] && gs_label="Codex (agents)"
       [ "$gs_path" = "$HOME/.codex/skills/gstack" ] && gs_label="Codex"

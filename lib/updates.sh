@@ -21,6 +21,59 @@ current_version() {
   cat "$VERSION_FILE" 2>/dev/null || echo "unknown"
 }
 
+# Extract CHANGELOG entries between two versions
+# Reads CHANGELOG.md from the repo and returns entries for versions > local_version
+# Arguments:
+#   $1 - repo_dir or directory containing CHANGELOG.md
+#   $2 - local_version (e.g. "5.0.5")
+# Returns: Changelog excerpt on stdout, empty if no changelog or no entries
+extract_changelog_entries() {
+  local target="$1"
+  local local_version="$2"
+  local changelog
+
+  # Accept either a directory (append CHANGELOG.md) or a direct file path
+  if [ -f "$target" ]; then
+    changelog="$target"
+  elif [ -f "$target/CHANGELOG.md" ]; then
+    changelog="$target/CHANGELOG.md"
+  else
+    return 0
+  fi
+
+  if [ "$local_version" = "unknown" ]; then
+    return
+  fi
+
+  # Find the line number of the current version heading
+  # Supports both "## [5.0.5]" and "## 5.0.5" and "## [5.0.5] - 2026-03-17" formats
+  # Also handles git describe output like "v4.3.1-2-ge4a2375" by extracting "4.3.1"
+  local clean_version
+  clean_version=$(echo "$local_version" | sed 's/^v//; s/-[0-9]*-g[0-9a-f]*$//')
+  local version_pattern
+  version_pattern=$(echo "$clean_version" | sed 's/\./\\./g')
+
+  local start_line
+  start_line=$(grep -n "^## \[$version_pattern\]\|^## $version_pattern " "$changelog" 2>/dev/null | head -1 | cut -d: -f1) || true
+
+  if [ -z "$start_line" ]; then
+    # Current version not found in CHANGELOG — all entries are newer
+    start_line=$(wc -l < "$changelog" | tr -d ' ')
+  fi
+
+  # Extract everything before the current version (i.e., newer entries)
+  # Changelogs list newest first, so entries above our version are newer
+  local entry
+  entry=$(head -n $((start_line - 1)) "$changelog" 2>/dev/null)
+
+  if [ -z "$entry" ]; then
+    return
+  fi
+
+  # Remove top-level title line (e.g. "# Changelog") and trim trailing empty lines
+  echo "$entry" | sed '1{/^# /d}' | sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'
+}
+
 git_update_check() {
   local repo_dir="$1"
   local tool_name="${2:-tool}"
@@ -29,6 +82,9 @@ git_update_check() {
     printf '%s\n' "无法检查（非 git 安装）"
     return
   fi
+
+  # Fetch latest from remote (quiet, non-blocking)
+  git -C "$repo_dir" fetch --quiet 2>/dev/null || true
 
   # 读取本地版本
   local local_version="unknown"
@@ -70,13 +126,34 @@ git_update_check() {
   if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
     printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
 
-    # 显示更新内容（最近的提交）
-    local update_count
-    update_count=$(git -C "$repo_dir" rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
+    # 优先从 CHANGELOG.md 提取更新内容
+    local changelog_excerpt
+    changelog_excerpt=$(extract_changelog_entries "$repo_dir" "$local_version")
 
-    if [ "$update_count" != "0" ]; then
-      printf '%s\n' "  更新内容（最近 3 条）："
-      git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+    # 如果本地 CHANGELOG 没有更新的条目，尝试从远程获取
+    if [ -z "$changelog_excerpt" ] && [ -n "$upstream" ]; then
+      local remote_changelog
+      remote_changelog=$(git -C "$repo_dir" show "$upstream:CHANGELOG.md" 2>/dev/null)
+      if [ -n "$remote_changelog" ]; then
+        local tmp_changelog
+        tmp_changelog=$(mktemp)
+        echo "$remote_changelog" > "$tmp_changelog"
+        changelog_excerpt=$(extract_changelog_entries "$tmp_changelog" "$local_version")
+        rm -f "$tmp_changelog"
+      fi
+    fi
+
+    if [ -n "$changelog_excerpt" ]; then
+      printf '%s\n' "  更新内容："
+      echo "$changelog_excerpt" | head -n 20 | sed 's/^/    /' | sed 's/    $//'
+    else
+      # Fallback: git log
+      local update_count
+      update_count=$(git -C "$repo_dir" rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
+      if [ "$update_count" != "0" ]; then
+        printf '%s\n' "  更新内容（最近 3 条）："
+        git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+      fi
     fi
     return
   fi
