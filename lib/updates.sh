@@ -155,6 +155,7 @@ git_update_check() {
         git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
       fi
     fi
+    printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
     return
   fi
 
@@ -172,6 +173,7 @@ EOF
   if [ "${behind:-0}" != "0" ] && [ "${ahead:-0}" = "0" ]; then
     printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
     git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+    printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
     return
   fi
 
@@ -181,6 +183,7 @@ EOF
   fi
 
   printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
+  printf '  更新命令：cd %s && git pull --rebase\n' "$repo_dir"
 }
 
 print_dependency_update_checks() {
