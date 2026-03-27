@@ -153,9 +153,10 @@ run_update() {
   printf '%s\n' "发现 $ahead 个新提交。"
 
   if [ "$behind" -gt 0 ]; then
-    printf '%s\n' "本地有 $behind 个未推送提交，更新前请先处理。"
-    printf '%s\n' "提示：运行 'git status' 查看本地修改。"
-    exit 1
+    printf '%s\n' "本地有 $behind 个未推送提交，跳过 git pull。"
+    printf '%s\n' "重新同步本机宿主集成..."
+    bash "$ROOT_DIR/setup" --host auto
+    return 0
   fi
 
   printf '%s\n' "正在更新..."
