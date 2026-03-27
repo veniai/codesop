@@ -83,8 +83,8 @@ git_update_check() {
     return
   fi
 
-  # Fetch latest from remote (quiet, non-blocking)
-  git -C "$repo_dir" fetch --quiet 2>/dev/null || true
+  # Fetch latest from remote (quiet, with timeout to avoid hanging)
+  timeout 10 git -C "$repo_dir" fetch --quiet 2>/dev/null || true
 
   # 读取本地版本
   local local_version="unknown"

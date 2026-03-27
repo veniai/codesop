@@ -127,7 +127,7 @@ run_update() {
 
   if [ -z "$remote_hash" ]; then
     printf '%s\n' "未设置上游分支，尝试 fetch..."
-    git fetch origin 2>/dev/null || {
+    timeout 10 git fetch origin 2>/dev/null || {
       printf '%s\n' "fetch 失败，请检查网络" >&2
       exit 1
     }
