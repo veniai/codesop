@@ -98,5 +98,16 @@ Do NOT generate CLAUDE.md yourself. Claude Code's official `/init` handles this 
 ## After running:
 
 - report which files were generated or preserved
-- for the skill dependency check section: paste the raw CLI output verbatim inside a code block. Do NOT summarize version numbers, changelog excerpts, or update commands. Include every line from "=== 技能依赖检查 ===" to the end of the CLI output.
+- if AGENTS.md is not a simple reference and CLAUDE.md exists, suggest replacing AGENTS.md content with `@CLAUDE.md`
+- for skill dependency checks: summarize each item as one line with version info and key changes (2-3 bullet points max). Preserve update commands exactly as-is.
+  Example format:
+  ```
+  - superpowers (Claude Code): 5.0.6 — 已是最新
+  - superpowers (Codex): v4.3.1 → v5.0.6 可用
+    - 修复 Brainstorm ESM 兼容、Windows PID 监控、stop-server.sh
+    更新命令：cd ~/.codex/superpowers && git pull
+  - gstack: 0.11.17.0 → 0.12.5.0 可用
+    - 修复 Codex 30分钟挂起、流式输出、reasoning effort 默认值
+    更新命令：/gstack-upgrade
+  ```
 - do not add project scoring, workbench summary, or skill routing unless the user separately asks
