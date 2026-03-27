@@ -268,7 +268,7 @@ check_skill_dependencies() {
 
 # Check all skill installations across Claude Code and Codex
 _check_skills_all() {
-  local sp_found=0
+  local sp_found=0 sp_cc_found=0 sp_codex_found=0
 
   # superpowers: Claude Code plugin cache (check all marketplaces)
   local cc_plugin cc_marketplace orphaned_plugins=""
@@ -282,7 +282,7 @@ _check_skills_all() {
       fi
       printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$cc_plugin")"
       _check_changelog "$cc_plugin" "$(basename "$cc_plugin")" "/plugin update superpowers"
-      sp_found=1
+      sp_found=1; sp_cc_found=1
     fi
   done
 
@@ -306,25 +306,49 @@ _check_skills_all() {
       [ "$codex_sp" = "$HOME/.agents/skills/superpowers" ] && codex_label="Codex (agents)"
       printf '  %-14s %s（%s）\n' "superpowers:" "$codex_ver" "$codex_label"
       git_update_check "$codex_sp" "superpowers ($codex_label)" "cd $codex_sp && git pull"
-      sp_found=1
+      sp_found=1; sp_codex_found=1
     fi
   done
 
   if [ $sp_found -eq 0 ]; then
     echo "⚠ superpowers 未安装"
-    echo "  安装命令：/plugin install superpowers"
+    echo "  Claude Code：/plugin install superpowers"
+    echo "  Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+  else
+    # Suggest missing per-host installations
+    local sp_missing=""
+    [ $sp_cc_found -eq 0 ] && sp_missing="$sp_missing Claude Code"
+    [ $sp_codex_found -eq 0 ] && sp_missing="$sp_missing Codex"
+    if [ -n "$sp_missing" ]; then
+      echo "  ⚠ superpowers 未安装于：$sp_missing"
+      [ $sp_cc_found -eq 0 ] && echo "    Claude Code：/plugin install superpowers"
+      [ $sp_codex_found -eq 0 ] && echo "    Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+    fi
   fi
 
-  # gstack: shared across tools
+  # gstack: check per-host installations
   local gs_found=0
-  for gs_path in "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/.codex/skills/gstack"; do
+  local gs_cc=0 gs_codex=0
+
+  # Claude Code gstack
+  if [ -d "$HOME/.claude/skills/gstack" ]; then
+    gs_cc=1; gs_found=1
+    local gs_ver="unknown"
+    [ -f "$HOME/.claude/skills/gstack/VERSION" ] && gs_ver=$(cat "$HOME/.claude/skills/gstack/VERSION" | tr -d '[:space:]') || true
+    printf '  %-14s %s（Claude Code）\n' "gstack:" "$gs_ver"
+    if [ -d "$HOME/.claude/skills/gstack/.git" ]; then
+      git_update_check "$HOME/.claude/skills/gstack" "gstack (Claude Code)" "/gstack-upgrade"
+    else
+      _check_changelog "$HOME/.claude/skills/gstack" "$gs_ver" "/gstack-upgrade"
+    fi
+  fi
+
+  # Codex gstack (check both paths)
+  for gs_path in "$HOME/.agents/skills/gstack" "$HOME/.codex/skills/gstack"; do
     if [ -d "$gs_path" ]; then
-      gs_found=1
-      local gs_ver gs_label
-      gs_ver="unknown"
+      gs_codex=1; gs_found=1
+      local gs_ver="unknown" gs_label="Codex (agents)"
       [ -f "$gs_path/VERSION" ] && gs_ver=$(cat "$gs_path/VERSION" | tr -d '[:space:]') || true
-      gs_label="Claude Code"
-      [ "$gs_path" = "$HOME/.agents/skills/gstack" ] && gs_label="Codex (agents)"
       [ "$gs_path" = "$HOME/.codex/skills/gstack" ] && gs_label="Codex"
       printf '  %-14s %s（%s）\n' "gstack:" "$gs_ver" "$gs_label"
       if [ -d "$gs_path/.git" ]; then
@@ -337,7 +361,18 @@ _check_skills_all() {
 
   if [ $gs_found -eq 0 ]; then
     echo "⚠ gstack 未安装"
-    echo "  安装：git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack"
+    echo "  Claude Code：git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack"
+    echo "  Codex：git clone https://github.com/garrytan/gstack.git ~/.agents/skills/gstack"
+  else
+    # Suggest missing per-host installations
+    local gs_missing=""
+    if [ $gs_cc -eq 0 ]; then gs_missing="$gs_missing Claude Code"; fi
+    if [ $gs_codex -eq 0 ]; then gs_missing="$gs_missing Codex"; fi
+    if [ -n "$gs_missing" ]; then
+      echo "  ⚠ gstack 未安装于：$gs_missing"
+      [ $gs_cc -eq 0 ] && echo "    Claude Code：git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack"
+      [ $gs_codex -eq 0 ] && echo "    Codex：git clone https://github.com/garrytan/gstack.git ~/.agents/skills/gstack"
+    fi
   fi
 }
 
@@ -736,7 +771,7 @@ generate_project_files() {
         echo "@CLAUDE.md" > ./AGENTS.md
         echo "✓ 更新 AGENTS.md"
       else
-        echo "跳过 AGENTS.md 更新（运行 /init 生成 CLAUDE.md 后，可将 AGENTS.md 改为 @CLAUDE.md）"
+        echo "AGENTS.md 已保留（建议：运行 /init 生成 CLAUDE.md 后，将 AGENTS.md 内容替换为 @CLAUDE.md）"
       fi
     else
       echo "✓ AGENTS.md 已是简单引用格式"

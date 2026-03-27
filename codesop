@@ -20,17 +20,18 @@ source "$ROOT_DIR/lib/detection.sh"
 source "$ROOT_DIR/lib/templates.sh"
 source "$ROOT_DIR/lib/updates.sh"
 source "$ROOT_DIR/lib/commands.sh"
+source "$ROOT_DIR/lib/init-interview.sh"
 
 # Main entry utilities
 usage() {
   cat <<'EOF'
 Usage:
-  codesop [path]              # Diagnose project and recommend next steps
-  codesop init [path]         # Initialize AGENTS.md, CLAUDE.md, PRD.md
-  codesop status [path]       # Show project health status
-  codesop setup [--host X]    # Configure host integration
-  codesop update              # Update codesop to latest version
-  codesop version             # Show current version
+  codesop [path]
+  codesop init [path]
+  codesop status [path]
+  codesop setup [--host X]
+  codesop update
+  codesop version
 
 Hosts: claude, codex, opencode, openclaw, auto
 EOF
@@ -42,7 +43,7 @@ subcommand="${1:-}"
 case "$subcommand" in
   init)
     shift || true
-    run_init "${1:-.}"
+    run_init_interview "${1:-.}"
     ;;
   status)
     shift || true

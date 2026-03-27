@@ -5,6 +5,12 @@ set -euo pipefail
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 HOST="auto"
 
+# Template paths - prefer templates/system/AGENTS.md if it exists
+SYSTEM_AGENTS_TEMPLATE="$SOURCE_DIR/templates/system/AGENTS.md"
+if [ ! -f "$SYSTEM_AGENTS_TEMPLATE" ]; then
+  SYSTEM_AGENTS_TEMPLATE="$SOURCE_DIR/AGENTS.md"
+fi
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -120,7 +126,7 @@ install_cli() {
 }
 
 install_claude() {
-  ensure_symlink "$SOURCE_DIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+  ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.claude/CLAUDE.md"
   write_skill_runtime "$HOME/.claude/skills/codesop"
   prepare_runtime_dir "$HOME/.claude/commands"
   copy_file "$SOURCE_DIR/commands/codesop.md" "$HOME/.claude/commands/codesop.md"
@@ -132,13 +138,13 @@ install_claude() {
 }
 
 install_opencode() {
-  ensure_symlink "$SOURCE_DIR/AGENTS.md" "$HOME/.config/opencode/AGENTS.md"
+  ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.config/opencode/AGENTS.md"
   write_skill_runtime "$HOME/.agents/skills/codesop"
   echo "  ✓ OpenCode/OpenClaw: ~/.config/opencode/AGENTS.md + ~/.agents/skills/codesop/"
 }
 
 install_codex() {
-  ensure_symlink "$SOURCE_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
+  ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.codex/AGENTS.md"
   write_skill_runtime "$HOME/.agents/skills/codesop"
   remove_dir_if_exists "$HOME/.codex/skills/codesop"
   echo "  ✓ Codex: ~/.codex/AGENTS.md + ~/.agents/skills/codesop/"
