@@ -270,20 +270,31 @@ check_skill_dependencies() {
 _check_skills_all() {
   local sp_found=0
 
-  # superpowers: Claude Code plugin cache (check all marketplaces, skip orphaned)
-  local cc_plugin cc_marketplace
+  # superpowers: Claude Code plugin cache (check all marketplaces)
+  local cc_plugin cc_marketplace orphaned_plugins=""
   for cc_marketplace in "$HOME/.claude/plugins/cache/claude-plugins-official/superpowers" \
                        "$HOME/.claude/plugins/cache/superpowers-marketplace/superpowers"; do
     cc_plugin=$(find "$cc_marketplace" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
     if [ -n "$cc_plugin" ] && [ "$cc_plugin" != "$cc_marketplace" ]; then
-      # Skip orphaned plugins
-      if [ -f "$cc_plugin/.orphaned_at" ]; then continue; fi
+      if [ -f "$cc_plugin/.orphaned_at" ]; then
+        orphaned_plugins="$orphaned_plugins $(basename "$cc_plugin")@$(basename "$cc_marketplace")"
+        continue
+      fi
       printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$cc_plugin")"
       _check_changelog "$cc_plugin" "$(basename "$cc_plugin")" "/plugin update superpowers"
       sp_found=1
-      break  # Only report the first non-orphaned plugin
     fi
   done
+
+  # Report orphaned plugins
+  if [ -n "$orphaned_plugins" ]; then
+    for op in $orphaned_plugins; do
+      local op_ver="${op%%@*}"
+      local op_market="${op##*@}"
+      printf '  %-14s %s（%s，已废弃）\n' "superpowers:" "$op_ver" "$op_market"
+    done
+    echo "  ⚠ 检测到废弃插件，建议清理：claude plugins list 查看，然后 /plugin remove superpowers@<marketplace>"
+  fi
 
   # superpowers: Codex git repos
   for codex_sp in "$HOME/.codex/superpowers" "$HOME/.agents/skills/superpowers"; do
