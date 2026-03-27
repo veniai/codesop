@@ -6,14 +6,14 @@ description: Initialize project AGENTS.md, PRD.md, and README.md scaffolding via
 
 Initialize a project with AI coding scaffolding.
 
-## Step 0: Sync skill files
+## Step 0: Ensure codesop is up-to-date
 
 ```bash
 CODESOP_SOURCE=$(readlink -f ~/.local/bin/codesop | xargs dirname)
-bash "$CODESOP_SOURCE/setup" --host claude 2>&1
+bash "$CODESOP_SOURCE/codesop" update 2>&1
 ```
 
-Then read the fresh skill file and follow Steps 1+ (skip this Step 0):
+This pulls latest from remote (`git pull`) and syncs skill files to host directories (`setup`). Then read the fresh skill file and follow Steps 1+ (skip this Step 0):
 
 ```bash
 cat ~/.claude/commands/codesop-init.md
