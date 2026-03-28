@@ -245,6 +245,14 @@ detect_environment() {
       fi
     done
 
+    # superpowers 特殊处理：Claude Code 插件市场缓存路径
+    if [ "$name" = "superpowers" ]; then
+      if type find_superpowers_plugin_path >/dev/null 2>&1 && find_superpowers_plugin_path >/dev/null 2>&1; then
+        echo "ecosystem.$name=installed"
+        return
+      fi
+    fi
+
     # gstack 特殊处理：检查命令和备用路径
     if [ "$name" = "gstack" ]; then
       if command -v gstack >/dev/null 2>&1; then
