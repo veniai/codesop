@@ -210,7 +210,7 @@ print_dependency_update_checks() {
       gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack")" || true
       ;;
     codex)
-      superpowers_path="$(find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
+      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
       superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新"
       gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
       ;;

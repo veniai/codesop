@@ -163,15 +163,10 @@ detect_path_state() {
 
 detect_superpowers_state() {
   # Check Claude Code plugin marketplace cache first
-  local marketplace_dir version_dir
-  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
-    [ -d "$marketplace_dir" ] || continue
-    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
-    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ] && [ ! -f "$version_dir/.orphaned_at" ]; then
-      echo "ecosystem.superpowers=installed"
-      return
-    fi
-  done
+  if type find_superpowers_plugin_path >/dev/null 2>&1 && find_superpowers_plugin_path >/dev/null 2>&1; then
+    echo "ecosystem.superpowers=installed"
+    return
+  fi
 
   detect_path_state \
     "ecosystem.superpowers" \
