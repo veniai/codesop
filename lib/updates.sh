@@ -205,22 +205,22 @@ print_dependency_update_checks() {
 
   case "$host" in
     claude)
-      superpowers_path="$(find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers")" || true
+      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers")" || true
       superpowers_update_cmd="/plugin update superpowers"
       gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack")" || true
       ;;
     codex)
-      superpowers_path="$(find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
+      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
       superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新"
       gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
       ;;
     opencode)
-      superpowers_path="$(find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers")" || true
+      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers")" || true
       superpowers_update_cmd="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新"
       gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
       ;;
     *)
-      superpowers_path="$(find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers")" || true
+      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers")" || true
       superpowers_update_cmd="按当前宿主的 superpowers 官方更新方式执行"
       gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/gstack")" || true
       ;;

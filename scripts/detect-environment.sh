@@ -162,6 +162,12 @@ detect_path_state() {
 }
 
 detect_superpowers_state() {
+  # Check Claude Code plugin marketplace cache first
+  if type find_superpowers_plugin_path >/dev/null 2>&1 && find_superpowers_plugin_path >/dev/null 2>&1; then
+    echo "ecosystem.superpowers=installed"
+    return
+  fi
+
   detect_path_state \
     "ecosystem.superpowers" \
     "$HOME/.codex/superpowers" \

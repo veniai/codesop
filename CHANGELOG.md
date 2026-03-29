@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2] - 2026-03-29
+
+### Fixed
+- Detect superpowers from Claude Code plugin marketplace cache path (`~/.claude/plugins/cache/<marketplace>/superpowers/<version>/`)
+- Add shared `find_superpowers_plugin_path()` to `lib/output.sh`, replacing inline duplicates
+- Consistent plugin cache fallback across all host cases (claude, codex, opencode) in `updates.sh`
+- `detect-environment.sh` reuses shared function instead of inline copy
+
 ## [1.0.1] - 2026-03-27
 
 ### Added
