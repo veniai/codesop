@@ -75,38 +75,6 @@ detect_installed_tools() {
   echo "${installed%" "}"
 }
 
-# Check if a specific tool is installed
-# Arguments:
-#   $1 - Tool name (claude, codex, opencode)
-# Returns: 0 if installed, 1 if not
-is_tool_installed() {
-  local tool="$1"
-
-  case "$tool" in
-    claude)
-      [ -d "$HOME/.claude" ]
-      return $?
-      ;;
-    codex)
-      [ -d "$HOME/.codex" ]
-      return $?
-      ;;
-    opencode)
-      [ -d "$HOME/.config/opencode" ]
-      return $?
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}
-
-# Get list of all supported tools
-# Returns: Space-separated list of all tool names
-get_supported_tools() {
-  echo "claude codex opencode"
-}
-
 # ============================================================================
 # System-Level Symlink Management
 # ============================================================================
@@ -459,21 +427,6 @@ is_living_prd() {
 
   # Living document features: has "当前快照" or "Current Snapshot" or "工作日志" sections
   grep -qi "当前快照\|current snapshot\|工作日志\|work log" "$file"
-}
-
-# Detect if CLAUDE.md has system-level references
-# System references: @~/.claude/CLAUDE.md, @~/.codex/AGENTS.md
-# Arguments:
-#   $1 - File path to check
-# Returns: 0 if has system reference, 1 otherwise
-has_system_reference() {
-  local file="$1"
-
-  if [ -z "$file" ] || [ ! -f "$file" ]; then
-    return 1
-  fi
-
-  grep -q "@~/.claude/CLAUDE.md\|@~/.codex/AGENTS.md" "$file"
 }
 
 # Ensure CLAUDE_CODE_NEW_INIT is set in ~/.claude/settings.json under env key

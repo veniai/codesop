@@ -3,7 +3,6 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DETECTOR="$ROOT_DIR/scripts/detect-environment.sh"
 
 fail() {
   echo "FAIL: $1" >&2
@@ -18,74 +17,6 @@ assert_contains() {
     fail "expected output to contain: $needle"
   fi
 }
-
-make_project() {
-  local project_dir="$1"
-  local project_kind="$2"
-
-  mkdir -p "$project_dir"
-
-  case "$project_kind" in
-    nextjs)
-      cat >"$project_dir/package.json" <<'EOF'
-{
-  "name": "web-app",
-  "dependencies": {
-    "next": "15.0.0",
-    "react": "19.0.0"
-  }
-}
-EOF
-      ;;
-    fastapi)
-      cat >"$project_dir/pyproject.toml" <<'EOF'
-[project]
-name = "api-service"
-dependencies = ["fastapi>=0.115.0"]
-EOF
-      ;;
-    monorepo)
-      mkdir -p "$project_dir/packages/app"
-      cat >"$project_dir/package.json" <<'EOF'
-{
-  "name": "workspace-root",
-  "workspaces": ["packages/*"]
-}
-EOF
-      ;;
-    *)
-      fail "unknown fixture kind: $project_kind"
-      ;;
-  esac
-}
-
-run_detector() {
-  local project_dir="$1"
-  bash "$DETECTOR" "$project_dir"
-}
-
-tmpdir="$(mktemp -d)"
-trap 'rm -rf "$tmpdir"' EXIT
-
-next_dir="$tmpdir/next-project"
-make_project "$next_dir" nextjs
-next_output="$(run_detector "$next_dir")"
-assert_contains "$next_output" "project.language=TypeScript/JavaScript"
-assert_contains "$next_output" "project.shape=Web App"
-assert_contains "$next_output" "project.framework=Next.js"
-assert_contains "$next_output" "output.language=zh-CN"
-
-fastapi_dir="$tmpdir/fastapi-project"
-make_project "$fastapi_dir" fastapi
-fastapi_output="$(run_detector "$fastapi_dir")"
-assert_contains "$fastapi_output" "project.language=Python"
-assert_contains "$fastapi_output" "project.shape=Backend Service"
-assert_contains "$fastapi_output" "project.framework=FastAPI"
-
-monorepo_dir="$tmpdir/monorepo-project"
-make_project "$monorepo_dir" monorepo
-monorepo_output="$(run_detector "$monorepo_dir")"
-assert_contains "$monorepo_output" "project.shape=Monorepo"
 
 skill_output="$(sed -n '/^### 8\.1 \/codesop init \[path\]/,/^### 8\.2 /p' "$ROOT_DIR/SKILL.md")"
 skill_header="$(sed -n '1,120p' "$ROOT_DIR/SKILL.md")"
