@@ -29,7 +29,6 @@ If the user is explicitly asking to run a mechanical `codesop` subcommand, do no
 Treat these as command execution requests first:
 
 - `/codesop init`
-- `/codesop setup`
 - `/codesop update`
 
 For these requests:
