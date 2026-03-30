@@ -31,15 +31,69 @@ CLI 诊断 + skill 路由，和 `init` 的协作模式一致。
 
 ### Skill 层
 
-`/codesop` skill 读取 CLI 输出，匹配场景，推荐行动。
+`/codesop` skill 读取 CLI 输出，匹配场景，推荐行动。遵循 Superpowers/gstack 分层规则：process 技能优先于 implementation 技能，有计划时 `subagent-driven-development` 为首选执行方式。
 
-三个场景：
+路由流程：
+
+```
+用户运行 /codesop
+        │
+        ▼
+  ┌─ 全新项目？─────────────────────────────────┐
+  │  AGENTS.md ✗ AND CLAUDE.md ✗                 │
+  │  → /codesop init                             │
+  └──────────────────────────────────────────────┘
+        │ 否
+        ▼
+  ┌─ 半成品项目？───────────────────────────────┐
+  │  有配置但缺关键项                              │
+  │  → 补缺失项（/init 生成 CLAUDE.md 等）       │
+  └──────────────────────────────────────────────┘
+        │ 否
+        ▼
+  ┌─ 活跃开发 ──────────────────────────────────┐
+  │                                               │
+  │  有 plan 文件？                                │
+  │  ├── 否 → brainstorming → writing-plans       │
+  │  │                                             │
+  │  ├── 是，未开始执行                            │
+  │  │   └── subagent-driven-development          │
+  │  │                                             │
+  │  ├── 是，正在执行中                            │
+  │  │   └── 继续当前工作                          │
+  │  │                                             │
+  │  └── 遇到问题（测试失败/bug）                  │
+  │      ├── 代码层问题 → systematic-debugging      │
+  │      └── 环境/集成问题 → investigate           │
+  │                                               │
+  │  准备好了？                                    │
+  │  └── ship                                     │
+  └──────────────────────────────────────────────┘
+        │
+        ▼
+  ┌─ 需要更深入思考？────────────────────────────┐
+  │                                               │
+  │  不确定做什么 / 方向不稳                      │
+  │  └── office-hours                             │
+  │                                               │
+  │  要全面 review 计划？                          │
+  │  └── autoplan                                 │
+  └──────────────────────────────────────────────┘
+```
+
+场景匹配表：
 
 | 场景 | 信号特征 | 推荐行动 |
 |------|---------|---------|
 | 全新项目 | 无 AGENTS.md 且无 CLAUDE.md | `/codesop init` |
-| 半成品 | 有配置但缺关键项（无 PRD、无测试、技能未安装） | 提示缺失项 + 对应命令 |
-| 活跃开发 | feature/fix/refactor 分支 + 未提交变更 | 推荐开发技能（brainstorm/write-plan/TDD） |
+| 半成品 | 有配置但缺关键项 | 补缺失项 + 对应命令 |
+| 未规划 | feature 分支 + 无 plan 文件 | `brainstorming` → `writing-plans` |
+| 有计划未执行 | feature 分支 + 有 plan 文件 | `subagent-driven-development` |
+| 正在开发 | feature 分支 + 有未提交变更 | 继续当前工作 |
+| 遇到 bug | 测试失败或 debug 意图 | `systematic-debugging` 或 `investigate` |
+| 方向不稳 | 用户表述不确定 | `office-hours` |
+| 全面 review | 有 plan 文件 + 用户要求 | `autoplan` |
+| 发布 | 代码已完成验证 | `ship` |
 
 输出 2-3 条建议，每条：推荐命令 + 一句话理由。
 
