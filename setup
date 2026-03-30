@@ -147,22 +147,35 @@ configure_hooks() {
   if ! command -v jq >/dev/null 2>&1; then
     echo "  ⚠ jq not found — hook auto-config skipped"
     echo "    Manual step: add to $settings:"
-    echo '    "hooks":{"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"cat ~/.claude/codesop-router.md"}]}]}'
+    echo '    "hooks":{"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]}'
     return 0
   fi
 
-  # Idempotency: check if hook already exists
+  # Validate existing settings.json is valid JSON
+  if ! jq '.' "$settings" >/dev/null 2>&1; then
+    echo "  ⚠ $settings contains invalid JSON — skipping hook config"
+    echo "    Fix the JSON manually, then re-run setup."
+    return 0
+  fi
+
+  # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME)
   local existing
-  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command == "cat ~/.claude/codesop-router.md")] | length' "$settings" 2>/dev/null || echo "0")
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" != "0" ]; then
     echo "  ✓ codesop-router hook already configured"
     return 0
   fi
 
   # Ensure hooks.SessionStart array exists, then append
-  jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat ~/.claude/codesop-router.md"}]}]' \
-    "$settings" > "$settings.tmp" && mv "$settings.tmp" "$settings"
-  echo "  ✓ SessionStart hook configured"
+  # Use $HOME instead of ~ for cross-shell compatibility
+  if jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]' \
+    "$settings" > "$settings.tmp"; then
+    mv "$settings.tmp" "$settings"
+    echo "  ✓ SessionStart hook configured"
+  else
+    rm -f "$settings.tmp"
+    echo "  ⚠ Failed to update $settings — hook not configured"
+  fi
 }
 
 check_discipline_deps() {

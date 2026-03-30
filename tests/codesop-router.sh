@@ -86,7 +86,7 @@ fi
 
 # Test 11: Idempotency
 echo "Test 11: Idempotency..."
-bash "$ROOT_DIR/setup" --host claude 2>&1 >/dev/null || true
+bash "$ROOT_DIR/setup" --host claude 2>&1 >/dev/null
 if command -v jq >/dev/null 2>&1; then
   hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command == "cat ~/.claude/codesop-router.md")] | length' "$HOME/.claude/settings.json" 2>/dev/null || echo "0")
   [ "$hook_count" -le 1 ] || fail "Hook duplicated after second setup run (idempotency broken)"
