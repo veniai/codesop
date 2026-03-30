@@ -2,15 +2,15 @@
 
 **AI 编码标准操作流程 / AI Coding Standard Operating Procedure**
 
-A skill-first operating system for AI-assisted coding work. The current core keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `setup`.
+A skill-first operating system for AI-assisted coding work. The current core keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
 
 ---
 
 ## 这是什么？ / What is this?
 
-**[中文]** 跨工具的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 3 个机械命令 `init / update / setup`。CLI 负责项目初始化、宿主同步和版本更新。
+**[中文]** 跨工具的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init / update`。CLI 负责项目初始化和版本更新。
 
-**[English]** A cross-tool AI coding workflow OS. The current core keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `setup`. The CLI handles project initialization, host sync, and updates.
+**[English]** A cross-tool AI coding workflow OS. The current core keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`. The CLI handles project initialization and updates.
 
 ## 安装 / Install
 
@@ -19,11 +19,7 @@ git clone https://github.com/veniai/codesop.git ~/codesop
 cd ~/codesop && bash install.sh
 ```
 
-Then make sure `~/.local/bin` is on your `PATH`, and run:
-
-```bash
-codesop setup --host auto
-```
+Then make sure `~/.local/bin` is on your `PATH`.
 
 ## 安装了什么？ / What gets installed?
 
@@ -46,11 +42,6 @@ codesop setup --host auto
 **进入工作台：**
 ```bash
 /codesop
-```
-
-**同步宿主（本地改完后）：**
-```bash
-codesop setup --host claude
 ```
 
 **更新 codesop：**
@@ -92,7 +83,7 @@ codesop update
 ## 产品边界 / Product Contract
 
 - 主流程只有一个：`/codesop`
-- 机械命令只有三个：`codesop init`、`codesop update`、`codesop setup`
+- 机械命令只有两个：`codesop init`、`codesop update`
 - `status` / `diagnose` 已从产品合同中移除
 - 本仓库正在做架构收口，与上面合同无关的能力不会优先扩展
 

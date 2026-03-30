@@ -62,7 +62,7 @@
 | 2026-03-30 | `codesop` 负责文档判定，`document-release` 负责文档执行 | 不重复造一个重文档 skill，同时保留本地判定权 | 后续应优先集成 `gstack:document-release` 作为执行器 |
 | 2026-03-30 | 保留 `install.sh`，删除 repo 内 `agents/` 运行时残留 | 安装入口有价值，但 `agents/openai.yaml` 没有实际消费方 | 安装说明保留，runtime 不再携带 `agents/` 目录 |
 | 2026-03-30 | `/codesop` 统一以 `SKILL.md` 为唯一真相源 | 双份正文会持续漂移，维护成本过高 | `setup` 改为从 `SKILL.md` 安装 `/codesop` 到 Claude Code 运行时 |
-| 2026-03-30 | 冻结产品合同为“1 套流程 + 3 个命令” | 先把边界收窄，避免继续在噪音上叠功能 | 后续要移除 `status/diagnose` 面向用户的入口和文档 |
+| 2026-03-30 | 冻结产品合同为”1 套流程 + 2 个命令” | 先把边界收窄，避免继续在噪音上叠功能 | `setup` 退回内部工具，不再作为用户命令暴露 |
 | 2026-03-30 | 清理全部历史 plans/specs | 已完成的规划文档变成噪音，阻碍“看着清爽” | 删除 docs/plans/ 和 docs/superpowers/ 下 16 个文件 |
 | 2026-03-30 | PR #3 先于 PR #4 合并 | 两者都改 lib/commands.sh，bug fix 先入 main | PR #4 rebase onto updated main |
 | 2026-03-30 | 删除 scripts/detect-environment.sh | 0 处生产代码引用，仅测试引用 | 测试改为只验证文档内容 |
@@ -114,7 +114,7 @@
 ### 5.3 范围定义
 #### In Scope
 - 一套主流程：`/codesop` 工作台摘要 + workflow 路由
-- 三个机械命令：`codesop init`、`codesop update`、`codesop setup`
+- 两个机械命令：`codesop init`、`codesop update`
 - Router card + SessionStart hook 的纪律注入
 - 项目初始化（AGENTS.md / PRD.md / README.md）
 - 宿主集成同步与版本更新
@@ -132,15 +132,13 @@
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`，并把 `AGENTS.md` 默认收敛为 `@CLAUDE.md`
 - **`codesop update`**: git pull + 自动重同步宿主集成
-- **`codesop setup`**: 安装 router card + 配置 hooks + 同步 commands
 
 ### 5.5 产品合同
 
-#### 对外只承诺这 4 个入口
+#### 对外只承诺这 3 个入口
 - `/codesop`
 - `codesop init`
 - `codesop update`
-- `codesop setup`
 
 #### 当前不再承诺稳定的入口
 - `codesop status`
@@ -162,7 +160,7 @@
 以下是收口后的目标结构，不等于当前实现已经完全到位：
 
 ```
-codesop                     # CLI 入口，只暴露 init / update / setup
+codesop                     # CLI 入口，只暴露 init / update
 setup                       # 宿主安装与同步
 ├── lib/
 │   ├── output.sh           # 格式化工具：render_tech_stack, infer_*_cmd
@@ -170,7 +168,7 @@ setup                       # 宿主安装与同步
 │   ├── templates.sh        # 模板生成：AGENTS.md 内容填充
 │   ├── init-interview.sh   # Init 流程：工具检测、symlink、偏好面试、项目文件、skill 检查
 │   ├── updates.sh          # 版本管理：CHANGELOG 解析、git 更新检查
-│   └── commands.sh         # 子命令：run_init_interview, run_update, run_setup
+│   └── commands.sh         # 子命令：run_init_interview, run_update
 ├── SKILL.md                # /codesop 唯一真相源
 ├── commands/               # 机械 slash command 文件
 │   ├── codesop-init.md     # /codesop-init
@@ -202,7 +200,6 @@ setup                       # 宿主安装与同步
 - `/codesop` workflow router
 - `codesop init`
 - `codesop update`
-- `codesop setup`
 - `setup`
 - `lib/output.sh`
 - `lib/detection.sh`
@@ -244,7 +241,7 @@ setup                       # 宿主安装与同步
 - 更新: `/plugin update superpowers` (CC), `/gstack-upgrade` (gstack), `git pull` (Codex)
 
 #### 验收标准
-- [ ] 产品合同文档统一为“1 套流程 + 3 个命令”
+- [ ] 产品合同文档统一为”1 套流程 + 2 个命令”
 - [ ] 所有保留测试通过
 - [ ] `bash setup --host claude` 幂等
 - [ ] PRD.md 反映当前真实状态（无占位符）
