@@ -14,6 +14,25 @@ IF A WORKFLOW STAGE HAS A MANDATORY SKILL, YOU MUST USE IT. This is not optional
 The rules below define what MUST happen at each stage. You cannot skip stages. You cannot substitute your judgment for the discipline.
 </EXTREMELY-IMPORTANT>
 
+## Task Alignment (MANDATORY)
+
+Before routing to any skill, output this block:
+
+```
+🎯 任务对齐
+- 理解: [用自己的话复述要做什么]
+- 阶段: [Pipeline Stage N: 名称]
+- 必用 Skill: [列出将调用的 skill]
+- 跳过及原因: [如跳过某阶段，说明为什么]
+```
+
+Trigger conditions:
+- User requests a new feature, bugfix, or refactoring
+- Moving from one pipeline stage to the next
+- User says "开始做" / "执行" / "修这个 bug"
+
+Fallback: If user points out "你跳过了 X", immediately re-output the alignment block and re-enter the pipeline.
+
 ## Instruction Priority
 
 1. **User's explicit instructions** (CLAUDE.md, AGENTS.md, direct requests) — highest priority
@@ -32,7 +51,7 @@ If CLAUDE.md says "skip TDD" and this skill says "TDD is mandatory", follow CLAU
 **Skill naming:**
 - Superpowers: `superpowers:brainstorming`, `superpowers:writing-plans`, etc.
 - gstack: `gstack-review`, `gstack-qa`, `gstack-ship`, etc.
-- codesop CLI commands: `codesop-init`, `codesop-status`, `codesop-setup`, `codesop-update`
+- codesop CLI commands: `codesop-init`, `codesop-setup`, `codesop-update`
 
 ---
 
@@ -185,7 +204,6 @@ When the user says something, route to the appropriate skill:
 | User Signal | Route To | Mandatory? |
 |-------------|----------|------------|
 | "初始化项目" | codesop-init | **YES** |
-| "项目状态" / "诊断" | codesop-status | No |
 | "配置 host" | codesop-setup | No |
 | "更新 codesop" | codesop-update | No |
 
@@ -218,7 +236,9 @@ digraph codesop_router {
     announce [label="Announce: 'Using [skill] for [purpose]'"];
     follow [label="Follow skill exactly"];
 
-    start -> is_init;
+    align [label="Output task alignment block" shape=box];
+    start -> align;
+    align -> is_init;
     is_init -> codesop_init [label="yes"];
     codesop_init -> follow;
 
@@ -322,7 +342,6 @@ When the user explicitly asks for mechanical codesop operations:
 | Command | Skill | What it does |
 |---------|-------|--------------|
 | `/codesop init` | codesop-init | Initialize AGENTS.md, PRD.md, README.md |
-| `/codesop status` | codesop-status | Show project diagnosis |
 | `/codesop setup` | codesop-setup | Refresh host integrations |
 | `/codesop update` | codesop-update | Update local installation |
 
@@ -338,5 +357,7 @@ If you're about to write code without brainstorming → STOP.
 If you're about to claim done without verification → STOP.
 If you're about to merge without review → STOP.
 If you're about to ship without QA (web) → STOP.
+If you're about to start work without outputting the task alignment block → STOP.
+If the user points out you skipped a skill → STOP, re-output alignment block, re-enter pipeline.
 
 The pipeline exists because undisciplined development wastes time. Follow it.

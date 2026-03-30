@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.1.0] - 2026-03-30
+
+### Added
+- Router card discipline layer: three-layer redundancy to fight AI context dilution
+- SessionStart hook injects router card into every Claude Code conversation
+- Task alignment mechanism: forced structured output before any new task
+- `install_router_card()`, `configure_hooks()`, `check_discipline_deps()` in setup
+- Skill discipline section in shared AGENTS.md template
+- Task alignment checkpoint in codesop.md Decision Flow and Iron Law
+- Consistency test suite (11 tests) for router card and setup integration
+- Design spec and implementation plan documentation
+
+### Fixed
+- Harden `configure_hooks()` against malformed JSON and stale temp files
+- Use `$HOME` instead of `~` in hook command for cross-shell compatibility
+- Idempotency test no longer masks setup crashes
+
 ## [1.0.2] - 2026-03-29
 
 ### Fixed
