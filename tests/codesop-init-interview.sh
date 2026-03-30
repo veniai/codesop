@@ -323,62 +323,7 @@ test_is_living_prd_missing() {
 }
 
 # ============================================================================
-# Test 16: is_tool_installed()
-# ============================================================================
-test_is_tool_installed() {
-  local tmpdir
-  tmpdir=$(mktemp -d)
-
-  # Test with claude installed
-  mkdir -p "$tmpdir/.claude"
-  if HOME="$tmpdir" is_tool_installed "claude"; then
-    pass "is_tool_installed claude - correctly detected"
-  else
-    fail "is_tool_installed claude - should detect installed claude"
-  fi
-
-  # Test with codex installed
-  mkdir -p "$tmpdir/.codex"
-  if HOME="$tmpdir" is_tool_installed "codex"; then
-    pass "is_tool_installed codex - correctly detected"
-  else
-    fail "is_tool_installed codex - should detect installed codex"
-  fi
-
-  # Test with opencode installed
-  mkdir -p "$tmpdir/.config/opencode"
-  if HOME="$tmpdir" is_tool_installed "opencode"; then
-    pass "is_tool_installed opencode - correctly detected"
-  else
-    fail "is_tool_installed opencode - should detect installed opencode"
-  fi
-
-  # Test with unknown tool
-  if HOME="$tmpdir" is_tool_installed "unknown"; then
-    fail "is_tool_installed unknown - should return 1 for unknown tool"
-  else
-    pass "is_tool_installed unknown - correctly rejected unknown tool"
-  fi
-
-  rm -rf "$tmpdir"
-}
-
-# ============================================================================
-# Test 17: get_supported_tools()
-# ============================================================================
-test_get_supported_tools() {
-  local tools
-  tools=$(get_supported_tools)
-
-  if [ "$tools" = "claude codex opencode" ]; then
-    pass "get_supported_tools - returned correct list: $tools"
-  else
-    fail "get_supported_tools - expected 'claude codex opencode', got: $tools"
-  fi
-}
-
-# ============================================================================
-# Test 18: ensure_symlink()
+# Test 16: ensure_symlink()
 # ============================================================================
 test_ensure_symlink() {
   local tmpdir
@@ -410,33 +355,7 @@ test_ensure_symlink() {
 }
 
 # ============================================================================
-# Test 19: has_system_reference()
-# ============================================================================
-test_has_system_reference() {
-  local tmpfile
-  tmpfile=$(mktemp)
-
-  # Test with system reference
-  echo "@~/.claude/CLAUDE.md" > "$tmpfile"
-  if has_system_reference "$tmpfile"; then
-    pass "has_system_reference - detected @~/.claude/CLAUDE.md"
-  else
-    fail "has_system_reference - should detect @~/.claude/CLAUDE.md"
-  fi
-
-  # Test without system reference
-  echo "# No system reference" > "$tmpfile"
-  if has_system_reference "$tmpfile"; then
-    fail "has_system_reference - should return 1 when no system reference"
-  else
-    pass "has_system_reference - correctly rejected file without system reference"
-  fi
-
-  rm -f "$tmpfile"
-}
-
-# ============================================================================
-# Test 20: generate_prd_template()
+# Test 17: generate_prd_template()
 # ============================================================================
 test_generate_prd_template() {
   local prd_content
@@ -549,10 +468,8 @@ run_tests() {
 
   # Tool and utility tests
   echo "--- Tool and utility tests ---"
-  test_is_tool_installed
-  test_get_supported_tools
   test_ensure_symlink
-  test_has_system_reference
+  test_check_user_preferences
   echo ""
 
   # Template generation tests

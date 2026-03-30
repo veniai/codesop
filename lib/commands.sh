@@ -2,7 +2,6 @@
 # commands.sh - Command implementations for codesop CLI
 #
 # This module provides all subcommand implementations for the codesop CLI:
-# - run_init(): Initialize a project with AGENTS.md, CLAUDE.md, PRD.md templates
 # - run_update(): Update codesop to the latest version via git pull
 # - run_version(): Display the current codesop version
 # - run_setup(): Run the setup script for host integration
@@ -29,81 +28,8 @@
 #   source /path/to/lib/commands.sh
 #
 #   # Then call command functions as needed
-#   run_init "/path/to/project"
 #   run_status "/path/to/project"
 #   run_version
-
-run_init() {
-  local target_dir="${1:-.}"
-  local output
-  local project_language=""
-  local project_shape=""
-  local project_framework=""
-  local tool_claude=""
-  local tool_codex=""
-  local tool_opencode=""
-  local ecosystem_superpowers=""
-  local ecosystem_gstack=""
-  local host=""
-  local project_name=""
-  local tech_stack=""
-  local test_cmd=""
-  local lint_cmd=""
-  local type_cmd=""
-  local smoke_cmd=""
-
-  if [ ! -d "$target_dir" ]; then
-    printf '%s\n' "目标目录不存在：$target_dir" >&2
-    exit 1
-  fi
-
-  output="$(detect_environment "$target_dir")"
-
-  while IFS='=' read -r key value; do
-    case "$key" in
-      project.language) project_language="$value" ;;
-      project.shape) project_shape="$value" ;;
-      project.framework) project_framework="$value" ;;
-      tool.claude) tool_claude="$value" ;;
-      tool.codex) tool_codex="$value" ;;
-      tool.opencode) tool_opencode="$value" ;;
-      ecosystem.superpowers) ecosystem_superpowers="$value" ;;
-      ecosystem.gstack) ecosystem_gstack="$value" ;;
-    esac
-  done <<<"$output"
-
-  host="$(pick_host "$tool_claude" "$tool_codex" "$tool_opencode")"
-  project_name="$(basename "$(cd "$target_dir" && pwd)")"
-  tech_stack="$(render_tech_stack "$project_language" "$project_framework")"
-  test_cmd="$(infer_test_cmd "$project_language" "$project_framework")"
-  lint_cmd="$(infer_lint_cmd "$project_language")"
-  type_cmd="$(infer_type_cmd "$project_language")"
-  smoke_cmd="$(infer_smoke_cmd "$project_language" "$project_framework")"
-
-  printf '%s\n' "项目识别："
-  printf '%s\n' "- 主语言：$project_language"
-  printf '%s\n' "- 项目形态：$project_shape"
-  printf '%s\n' "- 框架：$project_framework"
-  printf '\n%s\n' "环境识别："
-  printf '%s\n' "- Claude Code：$(format_tool_state "$tool_claude")"
-  printf '%s\n' "- Codex：$(format_tool_state "$tool_codex")"
-  printf '%s\n' "- OpenCode/OpenClaw：$(format_tool_state "$tool_opencode")"
-  printf '%s\n' "- superpowers：$(format_ecosystem_state "$ecosystem_superpowers")"
-  printf '%s\n' "- gstack：$(format_ecosystem_state "$ecosystem_gstack")"
-  printf '\n%s\n' "配置计划："
-  printf '%s\n' "- 默认生成语言：中文"
-  printf '%s\n' "- 建议生成：项目级 AGENTS.md 或 CLAUDE.md"
-  printf '%s\n' "- 实际生成：AGENTS.md、CLAUDE.md、PRD.md"
-  printf '%s\n' "- 项目名称：$project_name"
-  printf '%s\n' "- 建议技术栈：$tech_stack"
-  printf '%s\n' "- 建议测试命令：$test_cmd"
-  printf '%s\n' "- 建议校验命令：$lint_cmd / $type_cmd / $smoke_cmd"
-
-  generate_templates "$target_dir" "$project_name" "$tech_stack" "$test_cmd" "$lint_cmd" "$type_cmd" "$smoke_cmd"
-  print_agents_merge_suggestions "$target_dir"
-
-  print_install_suggestions "$host" "$ecosystem_superpowers" "$ecosystem_gstack"
-}
 
 run_update() {
   local repo_dir="$ROOT_DIR"
