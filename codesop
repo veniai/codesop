@@ -23,10 +23,7 @@ usage() {
   cat <<'EOF'
 Usage:
   codesop init [path]
-  codesop setup [--host X]
   codesop update
-
-Hosts: claude, codex, opencode, openclaw, auto
 EOF
 }
 
@@ -36,10 +33,6 @@ case "$subcommand" in
   init)
     shift || true
     run_init_interview "${1:-.}"
-    ;;
-  setup)
-    shift || true
-    run_setup "${1:-auto}"
     ;;
   update)
     run_update
