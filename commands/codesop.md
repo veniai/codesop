@@ -51,7 +51,7 @@ If CLAUDE.md says "skip TDD" and this skill says "TDD is mandatory", follow CLAU
 **Skill naming:**
 - Superpowers: `superpowers:brainstorming`, `superpowers:writing-plans`, etc.
 - gstack: `gstack-review`, `gstack-qa`, `gstack-ship`, etc.
-- codesop CLI commands: `codesop-init`, `codesop-status`, `codesop-setup`, `codesop-update`
+- codesop CLI commands: `codesop-init`, `codesop-setup`, `codesop-update`
 
 ---
 
@@ -204,7 +204,6 @@ When the user says something, route to the appropriate skill:
 | User Signal | Route To | Mandatory? |
 |-------------|----------|------------|
 | "初始化项目" | codesop-init | **YES** |
-| "项目状态" / "诊断" | codesop-status | No |
 | "配置 host" | codesop-setup | No |
 | "更新 codesop" | codesop-update | No |
 
@@ -343,7 +342,6 @@ When the user explicitly asks for mechanical codesop operations:
 | Command | Skill | What it does |
 |---------|-------|--------------|
 | `/codesop init` | codesop-init | Initialize AGENTS.md, PRD.md, README.md |
-| `/codesop status` | codesop-status | Show project diagnosis |
 | `/codesop setup` | codesop-setup | Refresh host integrations |
 | `/codesop update` | codesop-update | Update local installation |
 

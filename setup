@@ -199,7 +199,6 @@ install_claude() {
   prepare_runtime_dir "$HOME/.claude/commands"
   copy_file "$SOURCE_DIR/commands/codesop.md" "$HOME/.claude/commands/codesop.md"
   copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
-  copy_file "$SOURCE_DIR/commands/codesop-status.md" "$HOME/.claude/commands/codesop-status.md"
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
   copy_file "$SOURCE_DIR/commands/codesop-setup.md" "$HOME/.claude/commands/codesop-setup.md"
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"

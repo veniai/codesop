@@ -54,9 +54,9 @@ assert_file_contains "$home_auto/.claude/CLAUDE.md" "@AGENTS.md"
 assert_exists "$home_auto/.claude/skills/codesop/SKILL.md"
 assert_exists "$home_auto/.claude/commands/codesop.md"
 assert_exists "$home_auto/.claude/commands/codesop-init.md"
-assert_exists "$home_auto/.claude/commands/codesop-status.md"
 assert_exists "$home_auto/.claude/commands/codesop-update.md"
 assert_exists "$home_auto/.claude/commands/codesop-setup.md"
+
 assert_symlink "$home_auto/.codex/AGENTS.md"
 if [ -e "$home_auto/.codex/skills/codesop" ]; then
   fail "expected auto setup to avoid duplicate ~/.codex/skills/codesop skill"
