@@ -77,7 +77,7 @@ echo "  PASS"
 # Test 10: Settings.json has correct hook
 echo "Test 10: Settings hook configured..."
 if command -v jq >/dev/null 2>&1; then
-  hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router"))] | length' "$HOME/.claude/settings.json" 2>/dev/null || echo "0")
+  hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | type == "string" and test("codesop-router"))] | length' "$HOME/.claude/settings.json" 2>/dev/null || echo "0")
   [ "$hook_count" -ge 1 ] || fail "codesop-router hook not found in settings.json"
   echo "  PASS"
 else
@@ -88,7 +88,7 @@ fi
 echo "Test 11: Idempotency..."
 bash "$ROOT_DIR/setup" --host claude 2>&1 >/dev/null
 if command -v jq >/dev/null 2>&1; then
-  hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router"))] | length' "$HOME/.claude/settings.json" 2>/dev/null || echo "0")
+  hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | type == "string" and test("codesop-router"))] | length' "$HOME/.claude/settings.json" 2>/dev/null || echo "0")
   [ "$hook_count" -le 1 ] || fail "Hook duplicated after second setup run (idempotency broken)"
   echo "  PASS"
 else

@@ -123,10 +123,19 @@ run_update() {
 
   # 始终先 fetch 确保远程状态最新
   printf '%s\n' "正在 fetch 远程..."
-  timeout 10 git fetch origin 2>/dev/null || {
-    printf '%s\n' "fetch 失败，请检查网络" >&2
-    exit 1
-  }
+  local _remote
+  _remote="$(git rev-parse --abbrev-ref '@{u}' 2>/dev/null | sed 's|/.*||' || echo "origin")"
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 10 git fetch "$_remote" 2>/dev/null || {
+      printf '%s\n' "fetch 失败，请检查网络" >&2
+      exit 1
+    }
+  else
+    git fetch "$_remote" 2>/dev/null || {
+      printf '%s\n' "fetch 失败，请检查网络" >&2
+      exit 1
+    }
+  fi
 
   local local_hash remote_hash
   local_hash="$(git rev-parse HEAD)"
@@ -181,9 +190,10 @@ run_update() {
       exit 1
     }
     if git pull --ff-only 2>/dev/null; then
-      git stash pop 2>/dev/null || {
+      if ! git stash pop 2>/dev/null; then
         printf '%s\n' "更新成功但 stash pop 存在冲突，请手动解决：cd $repo_dir && git stash pop" >&2
-      }
+        exit 1
+      fi
     else
       git stash pop 2>/dev/null || true
       printf '%s\n' "更新失败，可能存在冲突。" >&2
