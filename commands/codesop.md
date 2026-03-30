@@ -1,363 +1,394 @@
 ---
-description: Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop.
+name: codesop
+description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop status`, `/codesop setup`, `/codesop update`, or `/codesop version`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
 ---
 
-<SUBAGENT-STOP>
-If you were dispatched as a subagent to execute a specific task, skip this skill.
-</SUBAGENT-STOP>
+# codesop: Project Workbench and Workflow Router
 
-<EXTREMELY-IMPORTANT>
-This skill is a **workflow router** that spans superpowers + gstack. It enforces development discipline across the entire project lifecycle.
+Announce: "Using codesop to restore project context and route the next workflow."
 
-IF A WORKFLOW STAGE HAS A MANDATORY SKILL, YOU MUST USE IT. This is not optional.
+## 1. System Position
 
-The rules below define what MUST happen at each stage. You cannot skip stages. You cannot substitute your judgment for the discipline.
-</EXTREMELY-IMPORTANT>
+`codesop` is a skill-first operating system for AI-assisted coding work.
 
-## Task Alignment (MANDATORY)
+The skill is the orchestrator. The CLI is infrastructure.
 
-Before routing to any skill, output this block:
+Use this skill to:
 
-```
-🎯 任务对齐
-- 理解: [用自己的话复述要做什么]
-- 阶段: [Pipeline Stage N: 名称]
-- 必用 Skill: [列出将调用的 skill]
-- 跳过及原因: [如跳过某阶段，说明为什么]
-```
+- restore project orientation
+- summarize current state
+- recommend the next workflow
+- route into specialized downstream skills
 
-Trigger conditions:
-- User requests a new feature, bugfix, or refactoring
-- Moving from one pipeline stage to the next
-- User says "开始做" / "执行" / "修这个 bug"
+Do not use this skill as a replacement for specialist execution skills.
 
-Fallback: If user points out "你跳过了 X", immediately re-output the alignment block and re-enter the pipeline.
+## 1.1 CLI Command Bypass
 
-## Instruction Priority
+If the user is explicitly asking to run a mechanical `codesop` subcommand, do not switch into workbench-summary mode.
 
-1. **User's explicit instructions** (CLAUDE.md, AGENTS.md, direct requests) — highest priority
-2. **This skill's mandatory workflow** — overrides default behavior
-3. **Individual skill instructions** — when invoked
-4. **Default system prompt** — lowest priority
+Treat these as command execution requests first:
 
-If CLAUDE.md says "skip TDD" and this skill says "TDD is mandatory", follow CLAUDE.md. The user is in control.
+- `/codesop init`
+- `/codesop status`
+- `/codesop setup`
+- `/codesop update`
+- `/codesop version`
 
----
+For these requests:
 
-## How to Access Skills
+- run the command
+- summarize the command output faithfully
+- keep interpretation minimal and local to the command result
+- do not output `## 工作台摘要`
+- do not output `## Skill 建议`
+- do not recommend downstream workflow skills unless the user separately asks what to do next
 
-**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded—follow it directly.
+## 2. Read Order
 
-**Skill naming:**
-- Superpowers: `superpowers:brainstorming`, `superpowers:writing-plans`, etc.
-- gstack: `gstack-review`, `gstack-qa`, `gstack-ship`, etc.
-- codesop CLI commands: `codesop-init`, `codesop-setup`, `codesop-update`
+Read project context in this order:
 
----
+1. `AGENTS.md` — **required** (defines boundaries, rules, verification, and delivery format)
+2. `PRD.md` — **required** (defines long-term goal, current progress, recent decisions, blockers, and next step)
+3. `README.md` — **optional** (only for install/run/API/env/operator-facing questions)
 
-# The Development Pipeline
+If `AGENTS.md` or `PRD.md` is missing, say so explicitly and continue with the best available context.
 
-This is the **mandatory workflow** for any development work. Each stage has required skills. You cannot skip stages.
+The `/codesop` CLI is an optional but preferred mechanical context source.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         DEVELOPMENT PIPELINE                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  1. EXPLORATION                                                              │
-│     "What should we build?"                                                  │
-│     ├─ Product direction unclear → gstack:office-hours                      │
-│     └─ Technical design needed → superpowers:brainstorming [MANDATORY]      │
-│                                                                              │
-│  2. PLANNING                                                                 │
-│     "How do we build it?"                                                    │
-│     ├─ Write plan → superpowers:writing-plans [MANDATORY]                   │
-│     └─ Review plan → gstack:autoplan [MANDATORY]                            │
-│                                                                              │
-│  3. EXECUTION                                                                │
-│     "Build it"                                                               │
-│     ├─ Isolate workspace → superpowers:using-git-worktrees [MANDATORY]      │
-│     ├─ Execute → superpowers:subagent-driven-development [MANDATORY]        │
-│     │            (executing-plans is FALLBACK only)                          │
-│     └─ During dev → superpowers:test-driven-development [MANDATORY]         │
-│                                                                              │
-│  4. DEBUGGING (when blocked)                                                 │
-│     "Something's broken"                                                     │
-│     ├─ Don't know where → gstack:investigate                                │
-│     └─ Know where, fear breaking → superpowers:systematic-debugging         │
-│                                                                              │
-│  5. VERIFICATION                                                             │
-│     "Did we build it right?"                                                 │
-│     ├─ Run commands → superpowers:verification-before-completion [MANDATORY]│
-│     └─ Web app → gstack:qa [MANDATORY for web]                              │
-│                                                                              │
-│  6. REVIEW                                                                   │
-│     "Is it safe to merge?"                                                   │
-│     ├─ Structural risks → gstack:review [MANDATORY]                         │
-│     ├─ Process → superpowers:requesting-code-review                         │
-│     └─ Controversial → gstack:codex + receiving-code-review                 │
-│                                                                              │
-│  7. RELEASE                                                                  │
-│     "Ship it"                                                                │
-│     ├─ Create PR → gstack:ship [MANDATORY]                                  │
-│     ├─ Merge + deploy → gstack:land-and-deploy                              │
-│     └─ Post-deploy → gstack:canary                                          │
-│                                                                              │
-│  8. CLEANUP                                                                  │
-│     "Sync everything"                                                        │
-│     ├─ Docs → gstack:document-release [MANDATORY]                           │
-│     └─ Weekly → gstack:retro                                                │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+Call `/codesop` when you need fresh project-state facts from the repo.
+
+Do not call `/codesop` for abstract workflow questions that do not depend on repo state.
+
+Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.
+
+## 3. Default Behavior
+
+When this skill triggers:
+
+1. Read `AGENTS.md`
+2. Read `PRD.md`
+3. Decide whether fresh repo facts are needed and call `/codesop` if they are
+4. Decide whether `README.md` is needed
+5. Produce a workbench summary
+6. Recommend the most relevant next skill or action
+
+Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
+
+When `/codesop` is used, treat it as a diagnosis/context layer:
+
+- use `/codesop` for stage guess, health status, config facts, and recommendation context
+- use `PRD.md` for long-term goal, current narrative, recent decisions, and next-step intent
+- explain any mismatch between `PRD.md` and fresh CLI facts
+
+## 4. Default Output
+
+Always prefer this shape when the user needs orientation:
+
+```md
+## 工作台摘要
+
+**长期目标**: ...
+**当前阶段**: ...
+**当前进度**: ...
+**阻塞/风险**: ...
+**最近决策**: ...
+**下一步**: ...
+
+## Skill 建议
+- 推荐: ...
+  - 原因: ...
+- 备选: ...
+  - 原因: ...
+- 暂不建议: ...
+  - 原因: ...
 ```
 
----
+If the user only wants a quick answer, compress it, but keep the same mental model.
 
-# Trigger Signal → Skill Routing
+## 5. Trigger Guidance
 
-When the user says something, route to the appropriate skill:
+Use this skill aggressively, not conservatively.
 
-## Stage 1: Exploration
+Trigger when the user:
 
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "不知道做什么" / "方向不明确" | gstack:office-hours | No |
-| "要做 X 功能" / "加个 Y" | superpowers:brainstorming | **YES** |
-| "重构 Z" / "改进 W" | superpowers:brainstorming | **YES** |
-| "修个 bug" (no exploration needed) | Skip to Stage 4 | — |
+- asks what to do next
+- asks what skill to use
+- says "continue"
+- returns to an existing project after a gap
+- wants a status or progress summary
+- looks confused or unstructured
+- wants to resume work
+- wants help deciding whether to plan, debug, implement, review, or ship
 
-## Stage 2: Planning
+Also trigger when the user explicitly mentions:
 
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "写计划" / "怎么做" | superpowers:writing-plans | **YES** |
-| "审一下计划" / "看看计划行不行" | gstack:autoplan | **YES** |
-| "CEO 视角审计划" | gstack:plan-ceo-review | No |
-| "设计视角审计划" | gstack:plan-design-review | No |
-| "工程视角审计划" | gstack:plan-eng-review | No |
+- `codesop`
+- `/codesop`
+- workflow
+- project status
+- next step
+- progress summary
 
-## Stage 3: Execution
+Do not use explicit `codesop` mention alone as a trigger if the message is clearly just a CLI subcommand execution request.
 
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "开始做" / "执行" | superpowers:subagent-driven-development | **YES** |
-| "多个独立问题" | superpowers:dispatching-parallel-agents | No |
-| "写代码" (direct) | superpowers:test-driven-development | **YES** |
+## 6. Workflow Mapping
 
-## Stage 4: Debugging
+Use the workbench summary to choose the downstream skill.
 
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "不知道 bug 住哪" / "排查一下" | gstack:investigate | No |
-| "知道问题但怕修错" | superpowers:systematic-debugging | **YES** |
-| "测试挂了" | superpowers:systematic-debugging | **YES** |
+### 6.1 New Feature / "I want to build X"
 
-## Stage 5: Verification
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "做完了" / "修好了" | superpowers:verification-before-completion | **YES** |
-| "跑一下看看" / "测一下" | gstack:qa | **YES** (web) |
-| "只看报告不改" | gstack:qa-only | No |
-| "性能问题" | gstack:benchmark | No |
-
-## Stage 6: Review
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "review 一下" / "合并前看看" | gstack:review | **YES** |
-| "外部意见" / "对抗测试" | gstack:codex | No |
-| "收到 review 反馈" | superpowers:receiving-code-review | **YES** |
-
-## Stage 7: Release
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "发布" / "ship" / "推 PR" | gstack:ship | **YES** |
-| "合并" / "部署" | gstack:land-and-deploy | **YES** |
-| "配置部署" | gstack:setup-deploy | No |
-| "部署后监控" | gstack:canary | **YES** |
-
-## Stage 8: Cleanup
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "更新文档" / "同步文档" | gstack:document-release | **YES** |
-| "周报" / "复盘" | gstack:retro | No |
-
-## Safety & Utilities
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "小心点" / "别搞坏" | gstack:careful | No |
-| "只改这个目录" | gstack:freeze | No |
-| "最大安全模式" | gstack:guard | No |
-| "解冻" | gstack:unfreeze | No |
-| "浏览器里看看" | gstack:browse | No |
-| "导入 cookie" | gstack:setup-browser-cookies | No |
-| "安全审计" | gstack:cso | No |
-| "设计系统" / "从零设计" | gstack:design-consultation | No |
-| "视觉审计" / "UI 问题" | gstack:design-review | No |
-
-## codesop Native Commands
-
-| User Signal | Route To | Mandatory? |
-|-------------|----------|------------|
-| "初始化项目" | codesop-init | **YES** |
-| "配置 host" | codesop-setup | No |
-| "更新 codesop" | codesop-update | No |
-
----
-
-# Decision Flow
-
-```dot
-digraph codesop_router {
-    rankdir=TB;
-    node [shape=box];
-
-    start [label="User message received" shape=doublecircle];
-
-    subgraph cluster_stage {
-        label="Detect Current Stage";
-
-        is_init [label="Initializing project?" shape=diamond];
-        is_explore [label="Exploring what to build?" shape=diamond];
-        is_plan [label="Planning implementation?" shape=diamond];
-        is_exec [label="Executing plan?" shape=diamond];
-        is_debug [label="Debugging issue?" shape=diamond];
-        is_verify [label="Claiming completion?" shape=diamond];
-        is_review [label="Pre-merge review?" shape=diamond];
-        is_ship [label="Ready to ship?" shape=diamond];
-        is_cleanup [label="Post-ship sync?" shape=diamond];
-    }
-
-    invoke [label="Invoke Skill tool"];
-    announce [label="Announce: 'Using [skill] for [purpose]'"];
-    follow [label="Follow skill exactly"];
-
-    align [label="Output task alignment block" shape=box];
-    start -> align;
-    align -> is_init;
-    is_init -> codesop_init [label="yes"];
-    codesop_init -> follow;
-
-    is_init -> is_explore [label="no"];
-    is_explore -> office_hours [label="product unclear"];
-    is_explore -> brainstorming [label="technical design"];
-    office_hours -> brainstorming;
-    brainstorming -> invoke;
-
-    is_explore -> is_plan [label="no"];
-    is_plan -> writing_plans [label="no plan yet"];
-    is_plan -> autoplan [label="plan exists"];
-    writing_plans -> autoplan;
-    autoplan -> invoke;
-
-    is_plan -> is_exec [label="no"];
-    is_exec -> worktrees [label="starting"];
-    worktrees -> subagent_driven;
-    subagent_driven -> invoke;
-
-    is_exec -> is_debug [label="blocked"];
-    is_debug -> investigate [label="don't know where"];
-    is_debug -> systematic_debugging [label="know where"];
-    investigate -> systematic_debugging;
-    systematic_debugging -> invoke;
-
-    is_debug -> is_verify [label="no"];
-    is_verify -> verification [label="always"];
-    verification -> qa [label="web app"];
-    qa -> invoke;
-
-    is_verify -> is_review [label="no"];
-    is_review -> review [label="always"];
-    review -> codex [label="controversial"];
-    review -> receiving_review [label="has feedback"];
-    codex -> invoke;
-
-    is_review -> is_ship [label="no"];
-    is_ship -> ship [label="always"];
-    ship -> land_deploy [label="need deploy"];
-    land_deploy -> canary;
-    canary -> invoke;
-
-    is_ship -> is_cleanup [label="no"];
-    is_cleanup -> document_release [label="always"];
-    document_release -> retro [label="weekly"];
-    retro -> invoke;
-
-    invoke -> announce;
-    announce -> follow;
-}
+```
+gstack:office-hours              ← Needs validation + design doc
+  ↓
+superpowers:brainstorming        ← Implementation design (MANDATORY)
+  ↓
+superpowers:writing-plans        ← Implementation plan (MANDATORY)
+  ↓
+gstack:autoplan                  ← CEO + Design + Eng auto review (MANDATORY)
+  ↓
+superpowers:using-git-worktrees  ← Isolated workspace (MANDATORY)
+  ↓
+superpowers:subagent-driven-development ← Implement with TDD + per-task review (MANDATORY)
+  ↓
+gstack:codex                     ← Adversarial review (optional)
+  ↓
+gstack:qa                        ← Browser testing (MANDATORY for web)
+  ↓
+gstack:review                    ← PR diff review (MANDATORY)
+  ↓
+gstack:ship                      ← Create PR (MANDATORY)
+  ↓
+gstack:land-and-deploy           ← Merge + production verify
+  ↓
+gstack:canary                    ← Post-deploy monitoring (MANDATORY after deploy)
+  ↓
+gstack:document-release          ← Doc sync (MANDATORY)
 ```
 
----
+### 6.2 Bug Fix / "XX is broken"
 
-# Red Flags
+```
+gstack:investigate               ← 4-phase root cause investigation
+  ↓
+gstack:freeze                    ← Restrict edit scope
+  ↓
+superpowers:systematic-debugging ← Root cause → hypothesis → verify → fix (MANDATORY)
+  ↓
+superpowers:test-driven-development ← Write failing test first (MANDATORY)
+  ↓
+superpowers:verification-before-completion ← Verification evidence (MANDATORY)
+  ↓
+gstack:unfreeze                  ← Remove edit restriction
+  ↓
+gstack:review                    ← PR review (if needed)
+  ↓
+gstack:ship                      ← Release (if needed)
+```
+
+### 6.3 Small Change / "Tweak XX"
+
+```
+superpowers:test-driven-development ← Write test, then change code (MANDATORY)
+  ↓
+superpowers:verification-before-completion ← Verification evidence (MANDATORY)
+  ↓
+gstack:review                    ← PR review (if multi-file)
+  ↓
+gstack:ship                      ← Release (if needed)
+```
+
+### 6.4 Refactoring / "Clean up XX"
+
+```
+superpowers:brainstorming        ← Design refactoring approach (MANDATORY)
+  ↓
+superpowers:writing-plans        ← Step-by-step plan (MANDATORY)
+  ↓
+superpowers:using-git-worktrees  ← Isolated workspace (MANDATORY)
+  ↓
+superpowers:subagent-driven-development ← Implement (TDD preserves behavior)
+  ↓
+superpowers:verification-before-completion ← All tests pass (MANDATORY)
+  ↓
+gstack:review                    ← PR review (MANDATORY)
+  ↓
+gstack:ship                      ← Release
+```
+
+### 6.5 Code Review Feedback
+
+```
+superpowers:receiving-code-review ← Evaluate feedback: verify > blind agree (MANDATORY)
+  ↓
+(if fix needed) superpowers:test-driven-development → modify → verification
+  ↓
+Reply in thread
+```
+
+### 6.6 Production Incident / "Production is down"
+
+```
+gstack:careful                   ← Safety mode
+  ↓
+gstack:investigate               ← Locate problem
+  ↓
+superpowers:systematic-debugging ← Root cause analysis (MANDATORY)
+  ↓
+Fix → gstack:canary              ← Post-fix monitoring
+```
+
+### 6.7 Security Audit / "Check security"
+
+```
+gstack:cso                       ← OWASP + STRIDE + attack surface
+  ↓
+(if issues found) superpowers:systematic-debugging → superpowers:test-driven-development fix → gstack:review
+```
+
+### 6.8 Performance / "Too slow"
+
+```
+gstack:benchmark                 ← Baseline test
+  ↓
+Locate bottleneck → optimize → gstack:benchmark verify
+```
+
+### 6.9 Design System / "Need DESIGN.md"
+
+```
+gstack:office-hours              ← Product context
+  ↓
+gstack:design-consultation       ← Create DESIGN.md + preview
+  ↓
+gstack:design-review             ← Visual audit (if existing site)
+```
+
+### 6.10 Visual Review / "UI looks wrong"
+
+```
+gstack:design-review             ← 80-dimension audit + fix + screenshots
+```
+
+### 6.11 Weekly Retro / "What did I ship"
+
+```
+gstack:retro                     ← Analyze commit history + work patterns
+```
+
+## 7. Routing Policy
+
+Use these routing defaults:
+
+- unclear feature request → `gstack:office-hours`
+- approved design needing implementation plan → `superpowers:writing-plans`
+- active implementation with existing plan → `superpowers:subagent-driven-development`
+- bug / broken behavior → `gstack:investigate` or `superpowers:systematic-debugging`
+- ready for release/review → `gstack:review`, `gstack:ship`
+
+When recommending, always include:
+
+- the best next skill
+- one backup option
+- one thing not to do yet
+
+## 8. Sub-commands
+
+### 8.1 /codesop init [path]
+
+Initialize project scaffolding and environment guidance.
+
+This is a mechanical command, not a workbench-summary command.
+
+Run:
+
+```bash
+bash ~/codesop/codesop init <target-dir>
+```
+
+Expected command responsibilities:
+
+- `AGENTS.md` — 填充技术栈、命令、架构规则
+- `CLAUDE.md` — 轻量包装：`@AGENTS.md`
+- `PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志
+
+条件生成（不存在时）：
+
+- `README.md` — 填充安装/运行/测试命令
+
+`AGENTS.md` 已存在 → 保留，输出 diff 建议。
+
+全部默认中文。根据检测到的技术栈推断 test/lint/typecheck/smoke 命令。
+
+When reporting back after `init`:
+
+- keep the response centered on the command output
+- say which files were generated or preserved
+- say whether ecosystem dependencies are installed, partially installed, or missing
+- do not add a separate project scorecard
+- do not add workbench routing unless the user explicitly asks for next-step advice
+
+### 8.2 /codesop status
+
+Show skill and project health facts without recommendations.
+
+1. Scan superpowers + gstack skill directories
+2. Check versions
+3. Read usage stats if available
+4. Output dashboard + facts only
+
+### 8.3 /codesop update
+
+Check and apply updates.
+
+1. Check gstack version → show diff
+2. Check superpowers version → show diff
+3. Check this file's version number
+4. Ask user if they want to update
+
+## 9. Conflict Resolution
+
+| Conflict | Rule |
+|----------|------|
+| `superpowers:brainstorming` vs `gstack:office-hours` | New feature direction unclear → office-hours; technical design → brainstorming |
+| `superpowers:requesting-code-review` vs `gstack:review` | Task-level quality check → requesting-code-review; PR-level structural risk → review |
+| `superpowers:systematic-debugging` vs `gstack:investigate` | Single file / known scope → systematic-debugging; system-level / unknown scope → investigate |
+| `superpowers:subagent-driven-development` vs `superpowers:executing-plans` | Independent tasks → subagent-driven (preferred); serial / no subagent support → executing-plans |
+| User says "just fix it" vs skill workflow | User instruction wins, but still obey verification and delivery rules from `AGENTS.md` |
+
+## 10. Red Flags
 
 These thoughts mean STOP—you're rationalizing:
 
 | Thought | Reality |
 |---------|---------|
-| "This is a simple feature, no need for brainstorming" | Brainstorming is **mandatory** before any creative work. |
-| "I'll just write the code directly" | TDD is **mandatory** during implementation. |
-| "Tests pass, we're done" | verification-before-completion requires **fresh evidence**, not memory. |
-| "The code looks fine, let's merge" | gstack:review is **mandatory** before merge. |
-| "I don't need QA for this" | Web apps **must** go through gstack:qa. |
-| "Docs can wait" | document-release is **mandatory** after ship. |
-| "This doesn't need a formal plan" | writing-plans + autoplan are **mandatory** for multi-step work. |
+| "This is a simple feature, no need for brainstorming" | `superpowers:brainstorming` is **mandatory** before any creative work. |
+| "I'll just write the code directly" | `superpowers:test-driven-development` is **mandatory** during implementation. |
+| "Tests pass, we're done" | `superpowers:verification-before-completion` requires **fresh evidence**, not memory. |
+| "The code looks fine, let's merge" | `gstack:review` is **mandatory** before merge. |
+| "I don't need QA for this" | Web apps **must** go through `gstack:qa`. |
+| "Docs can wait" | `gstack:document-release` is **mandatory** after ship. |
+| "This doesn't need a formal plan" | `superpowers:writing-plans` + `gstack:autoplan` are **mandatory** for multi-step work. |
 | "I remember what the skill says" | Skills evolve. Invoke the current version. |
-| "Let me just try this fix" | No root cause = no fix. Use systematic-debugging. |
+| "Let me just try this fix" | No root cause = no fix. Use `superpowers:systematic-debugging`. |
 | "The user just wants me to code" | Discipline exists to protect the user. Use the pipeline. |
 
----
+## 11. Fallback
 
-# Skill Priority Within Stages
+When no scenario matches:
 
-When multiple skills could apply at the same stage:
+1. Produce the workbench summary anyway
+2. Scan all skill descriptions if available
+3. Rank the top 3 workflow options
+4. Recommend the least-risk next step
+5. If still unclear, ask one focused question
 
-1. **Process skills first** (brainstorming, systematic-debugging) — determine HOW to approach
-2. **Implementation skills second** — guide execution
-3. **Verification skills third** — confirm correctness
+## 12. Iron Laws
 
----
-
-# Skill Types
-
-**Rigid** (TDD, verification, debugging): Follow exactly. Don't adapt away discipline.
-
-**Flexible** (brainstorming, design): Adapt principles to context.
-
-**Conditional** (qa vs qa-only, investigate vs systematic-debugging): Choose based on situation.
-
-The skill itself tells you which.
-
----
-
-# codesop CLI Commands
-
-When the user explicitly asks for mechanical codesop operations:
-
-| Command | Skill | What it does |
-|---------|-------|--------------|
-| `/codesop init` | codesop-init | Initialize AGENTS.md, PRD.md, README.md |
-| `/codesop setup` | codesop-setup | Refresh host integrations |
-| `/codesop update` | codesop-update | Update local installation |
-
-For these, invoke the corresponding skill. Do NOT re-implement CLI logic in conversation.
-
----
-
-# The Iron Law
-
-**No stage may be skipped. No mandatory skill may be bypassed.**
-
-If you're about to write code without brainstorming → STOP.
-If you're about to claim done without verification → STOP.
-If you're about to merge without review → STOP.
-If you're about to ship without QA (web) → STOP.
-If you're about to start work without outputting the task alignment block → STOP.
-If the user points out you skipped a skill → STOP, re-output alignment block, re-enter pipeline.
-
-The pipeline exists because undisciplined development wastes time. Follow it.
+| Iron Law | Source Skill |
+|----------|--------------|
+| No code without design approval | `superpowers:brainstorming` / `gstack:office-hours` |
+| No production code without failing test first | `superpowers:test-driven-development` |
+| No fix without root cause investigation | `superpowers:systematic-debugging` / `gstack:investigate` |
+| No completion claim without verification evidence | `superpowers:verification-before-completion` |
+| Load skill if 1% chance it applies | `superpowers:using-superpowers` |
+| User instruction > project rules > default behavior | Instruction priority |

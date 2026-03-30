@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.1] - 2026-03-30
+
+### Changed
+- `/codesop` skill rewritten as English workbench/workflow router (was Chinese task-alignment format)
+- Router skill now reads AGENTS.md + PRD.md for project orientation, recommends downstream skills
+- Added CLI command bypass: mechanical subcommands (`/codesop init`, etc.) skip workbench mode
+- Added 11 workflow scenarios with mandatory skill pipelines (new feature, bug fix, refactoring, etc.)
+
+### Fixed
+- `codesop update`: always fetch before comparing local/remote hashes (was fetch-on-demand)
+- `codesop update`: swap inverted ahead/behind calculations
+- `codesop update`: handle diverged branches (ahead + behind) with explicit message
+- `codesop update`: attempt stash + pull + pop when `git pull --ff-only` fails with dirty tree
+- Router consistency test updated to match new workbench format (was checking old task-alignment markers)
+- Hook query test uses regex match instead of exact path (`~` vs `$HOME` mismatch)
+
 ## [1.1.0] - 2026-03-30
 
 ### Added

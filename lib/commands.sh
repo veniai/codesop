@@ -121,16 +121,27 @@ run_update() {
 
   cd "$repo_dir"
 
+  # 始终先 fetch 确保远程状态最新
+  printf '%s\n' "正在 fetch 远程..."
+  local _remote
+  _remote="$(git rev-parse --abbrev-ref '@{u}' 2>/dev/null | sed 's|/.*||' || echo "origin")"
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 10 git fetch "$_remote" 2>/dev/null || {
+      printf '%s\n' "fetch 失败，请检查网络" >&2
+      exit 1
+    }
+  else
+    git fetch "$_remote" 2>/dev/null || {
+      printf '%s\n' "fetch 失败，请检查网络" >&2
+      exit 1
+    }
+  fi
+
   local local_hash remote_hash
   local_hash="$(git rev-parse HEAD)"
   remote_hash="$(git rev-parse @{u} 2>/dev/null || echo "")"
 
   if [ -z "$remote_hash" ]; then
-    printf '%s\n' "未设置上游分支，尝试 fetch..."
-    timeout 10 git fetch origin 2>/dev/null || {
-      printf '%s\n' "fetch 失败，请检查网络" >&2
-      exit 1
-    }
     remote_hash="$(git rev-parse origin/main 2>/dev/null || echo "")"
   fi
 
@@ -147,23 +158,48 @@ run_update() {
   fi
 
   local ahead behind
-  ahead="$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")"
-  behind="$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")"
+  ahead="$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")"
+  behind="$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")"
 
-  printf '%s\n' "发现 $ahead 个新提交。"
-
-  if [ "$behind" -gt 0 ]; then
-    printf '%s\n' "本地有 $behind 个未推送提交，跳过 git pull。"
+  if [ "$behind" -gt 0 ] && [ "$ahead" -gt 0 ]; then
+    printf '%s\n' "本地领先 $ahead 个提交，远程有 $behind 个新提交，存在分叉。"
+    printf '%s\n' "请手动处理：cd $repo_dir && git rebase 或 git merge"
     printf '%s\n' "重新同步本机宿主集成..."
     bash "$ROOT_DIR/setup" --host auto
     return 0
   fi
 
-  printf '%s\n' "正在更新..."
+  if [ "$ahead" -gt 0 ]; then
+    printf '%s\n' "本地领先上游 $ahead 个提交，远程无新提交。"
+    printf '%s\n' "重新同步本机宿主集成..."
+    bash "$ROOT_DIR/setup" --host auto
+    return 0
+  fi
+
+  printf '%s\n' "发现 $behind 个新提交，正在更新..."
   git pull --ff-only 2>/dev/null || {
-    printf '%s\n' "更新失败，可能存在冲突。" >&2
-    printf '%s\n' "请手动处理：cd $repo_dir && git pull" >&2
-    exit 1
+    # ff-only 失败时尝试 stash + pull + pop
+    if git diff --quiet && git diff --cached --quiet; then
+      printf '%s\n' "更新失败，可能存在冲突。" >&2
+      printf '%s\n' "请手动处理：cd $repo_dir && git pull" >&2
+      exit 1
+    fi
+    printf '%s\n' "存在未提交改动，尝试 stash 后更新..."
+    git stash push -m "codesop-update-$(date +%s)" 2>/dev/null || {
+      printf '%s\n' "stash 失败，请手动处理：cd $repo_dir && git pull" >&2
+      exit 1
+    }
+    if git pull --ff-only 2>/dev/null; then
+      if ! git stash pop 2>/dev/null; then
+        printf '%s\n' "更新成功但 stash pop 存在冲突，请手动解决：cd $repo_dir && git stash pop" >&2
+        exit 1
+      fi
+    else
+      git stash pop 2>/dev/null || true
+      printf '%s\n' "更新失败，可能存在冲突。" >&2
+      printf '%s\n' "请手动处理：cd $repo_dir && git pull" >&2
+      exit 1
+    fi
   }
 
   local new_ver
