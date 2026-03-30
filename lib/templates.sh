@@ -2,8 +2,7 @@
 # templates.sh - Template generation functions for codesop
 #
 # This module provides functions for generating project templates:
-# - AGENTS.md template with project-specific configuration
-# - CLAUDE.md wrapper template
+# - AGENTS.md wrapper template
 # - PRD.md template with full product documentation structure
 # - Template generation orchestration
 # - Merge suggestions for existing AGENTS.md files
@@ -27,112 +26,11 @@ contains_text() {
 
 write_agents_template() {
   local target_dir="$1"
-  local project_name="$2"
-  local tech_stack="$3"
-  local test_cmd="$4"
-  local lint_cmd="$5"
-  local type_cmd="$6"
-  local smoke_cmd="$7"
   local agents_file="$target_dir/AGENTS.md"
 
-  cat >"$agents_file" <<EOF
-# 项目级 AI 执行契约（Pragmatic Clean）
-
-## 0. 手动追加约束（预留）
-约束 1：
-约束 2：
-约束 3：
-
-## 1. 指令优先级
-1. 用户当前指令
-2. AGENTS.md
-3. 代码现有注释与历史风格
-
-若规则冲突，按以上顺序执行，并在最终交付说明中写明冲突与处理方式。
-
-## 2. 架构边界（Pragmatic Clean）
-- \`domain/\`：实体、规则、接口（不依赖框架）
-- \`usecases/\`：业务编排
-- \`infra/\`：数据库与外部系统实现
-- \`app/\`：路由、任务、配置、依赖注入、启动入口
-
-依赖方向：
-- \`domain\` 不导入 \`usecases/infra/app\`
-- \`usecases\` 依赖 \`domain\`
-- \`infra\` 实现 \`domain\` 接口
-- \`app\` 负责装配
-
-## 3. 工作流（Superpowers）
-1. 使用 Superpowers 技能框架管理开发流程。
-2. 计划文件统一存放在 \`docs/plans/\`。
-3. 参考文档：\`superpowers使用方法.md\`。
-4. 和 UI 相关的规划使用 ASCII 字符进行描述和展示。
-
-## 4. 编码约束（轻量）
-- 只改当前任务相关文件
-- 单文件建议 <= 250 行，>300 行需拆分或说明
-- 禁止硬编码密钥/Token
-- 跨层调用通过依赖注入
-
-## 5. 自动文档同步规则（强制）
-每次任务结束前，AI 必须检查是否需要更新 \`README.md\` 与 \`PRD.md\`：
-
-- 必须更新 README 的场景：
-  - 启动/安装/配置/运行命令变化
-  - 对外 API、环境变量、目录结构、使用方式变化
-
-- 必须更新 PRD 的场景：
-  - 需求范围变化
-  - 核心业务规则/用例变化
-  - 验收标准、里程碑、版本计划变化
-  - 项目阶段变化
-  - 出现阻塞或阻塞解除
-  - 完成了一个有意义的实现步骤
-  - 关键技术/流程决策发生变化
-
-- 更新 PRD 的稳定区：产品核心规范、里程碑、验收标准、架构/实体/用例
-- 更新 PRD 的流动区：当前快照、当前进度、最近决策记录、风险与假设、工作日志
-
-- 可不更新文档的场景：
-  - 纯重构且不改变行为
-  - 测试或注释微调
-
-若未更新，最终说明必须写：
-- \`README: 未更新，原因：...\`
-- \`PRD: 未更新，原因：...\`
-
-## 6. 交付前验证
-至少执行：
-1. \`$test_cmd\`
-2. \`$lint_cmd\`（如启用）
-3. \`$type_cmd\`（如启用）
-4. \`$smoke_cmd\`（如启用）
-
-## 7. 最终输出格式
-1. 变更文件列表
-2. 验证结果
-3. README 是否更新 + 原因
-4. PRD 是否更新 + 原因
-
-## 8. 项目上下文
-- 项目名称：$project_name
-- 建议技术栈：$tech_stack
+  cat >"$agents_file" <<'EOF'
+@CLAUDE.md
 EOF
-}
-
-claude_wrapper_content() {
-  cat <<'EOF'
-@AGENTS.md
-
-AGENTS.md is the source of truth for project-level AI instructions in this repository.
-EOF
-}
-
-write_claude_template() {
-  local target_dir="$1"
-  local claude_file="$target_dir/CLAUDE.md"
-
-  claude_wrapper_content >"$claude_file"
 }
 
 write_prd_template() {
@@ -367,36 +265,26 @@ generate_templates() {
   local agents_status=""
   local claude_status=""
   local prd_status=""
-  local claude_file="$target_dir/CLAUDE.md"
   local prd_file="$target_dir/PRD.md"
-  local wrapper_expected
 
   # SECURITY FIX: Sanitize project_name to prevent template injection
   # Only allow alphanumeric characters, underscores, and hyphens
   project_name="$(basename "$target_dir" | sed 's/[^a-zA-Z0-9_-]//g')"
 
   date_today="$(date +%F)"
-  wrapper_expected="$(claude_wrapper_content)"
 
   if [ -f "$target_dir/AGENTS.md" ]; then
-    agents_status="已保留（当前版本已覆盖核心骨架）"
-  else
-    write_agents_template "$target_dir" "$project_name" "$tech_stack" "$test_cmd" "$lint_cmd" "$type_cmd" "$smoke_cmd"
-    agents_status="已生成"
-  fi
-
-  if [ -f "$claude_file" ]; then
-    if [ "$(cat "$claude_file")" = "$wrapper_expected" ]; then
-      claude_status="已保留（已是 @AGENTS.md 引用包装）"
+    if grep -Fxq "@CLAUDE.md" "$target_dir/AGENTS.md" || grep -Fxq "@./CLAUDE.md" "$target_dir/AGENTS.md"; then
+      agents_status="已保留（已是 @CLAUDE.md 引用包装）"
     else
-      cp "$claude_file" "$claude_file.codesop.bak"
-      write_claude_template "$target_dir"
-      claude_status="已规范化为 @AGENTS.md 引用（备份: CLAUDE.md.codesop.bak）"
+      agents_status="已保留（非引用包装，建议收敛为 @CLAUDE.md）"
     fi
   else
-    write_claude_template "$target_dir"
-    claude_status="已生成（@AGENTS.md 引用包装）"
+    write_agents_template "$target_dir" "$project_name" "$tech_stack" "$test_cmd" "$lint_cmd" "$type_cmd" "$smoke_cmd"
+    agents_status="已生成（@CLAUDE.md 引用包装）"
   fi
+
+  claude_status="由 Claude Code 的 /init 生成，codesop 不覆盖"
 
   if [ -f "$prd_file" ]; then
     if grep -Fq "## 0. 使用说明" "$prd_file" && grep -Fq "## 1. 当前快照" "$prd_file"; then
@@ -471,7 +359,6 @@ generate_templates() {
 print_agents_merge_suggestions() {
   local target_dir="$1"
   local agents_file="$target_dir/AGENTS.md"
-  local has_suggestions=0
 
   if [ ! -f "$agents_file" ]; then
     return
@@ -481,31 +368,10 @@ print_agents_merge_suggestions() {
   printf '%s\n' "--- current/AGENTS.md"
   printf '%s\n' "+++ suggested/AGENTS.md"
 
-  if ! contains_text "$agents_file" "## 5. 自动文档同步规则（强制）"; then
-    printf '%s\n' "+## 5. 自动文档同步规则（强制）"
-    printf '%s\n' "+- README / PRD 变更场景需要显式检查并说明"
-    has_suggestions=1
-  fi
-
-  if ! contains_text "$agents_file" "## 6. 交付前验证"; then
-    printf '%s\n' "+## 6. 交付前验证"
-    printf '%s\n' "+- 至少执行 <TEST_CMD> / <LINT_CMD> / <TYPE_CMD> / <SMOKE_CMD>"
-    has_suggestions=1
-  fi
-
-  if ! contains_text "$agents_file" "## 7. 最终输出格式"; then
-    printf '%s\n' "+## 7. 最终输出格式"
-    printf '%s\n' "+- 变更文件列表 / 验证结果 / README 是否更新 / PRD 是否更新"
-    has_suggestions=1
-  fi
-
-  if ! contains_text "$agents_file" "## 2. 架构边界（Pragmatic Clean）"; then
-    printf '%s\n' "+## 2. 架构边界（Pragmatic Clean）"
-    printf '%s\n' "+- 建议明确 domain / usecases / infra / app 的依赖边界"
-    has_suggestions=1
-  fi
-
-  if [ "$has_suggestions" -eq 0 ]; then
+  if grep -Fxq "@CLAUDE.md" "$agents_file" || grep -Fxq "@./CLAUDE.md" "$agents_file"; then
     printf '%s\n' "  (当前 AGENTS.md 已覆盖 codesop 关注的核心骨架，无额外建议)"
+  else
+    printf '%s\n' "- 建议把项目级 AGENTS.md 收敛成轻量包装，正文只保留在 CLAUDE.md"
+    printf '%s\n' "+@CLAUDE.md"
   fi
 }

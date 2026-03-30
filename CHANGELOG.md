@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.2] - 2026-03-30
+
+### Changed
+- Product contract narrowed to one workflow entry (`/codesop`) plus three mechanical commands (`init`, `update`, `setup`)
+- `SKILL.md` is now the single source of truth for `/codesop`; `setup` installs it into `~/.claude/commands/codesop.md`
+- Router integration test now provisions a temporary Claude home instead of depending on the real `~/.claude`
+- Release versioning now uses `VERSION` as the single source of truth; `CHANGELOG.md` stays `Unreleased` until ship
+- Skill runtime `skill.json` is now synchronized from `VERSION` during `setup`
+
+### Fixed
+- `codesop init` no longer exits early during best-effort skill dependency checks
+- Setup integration test now matches the actual system AGENTS/CLAUDE symlink model
+- `codesop update` no longer reports "已是最新" when upstream has new commits but `VERSION` has not been bumped yet
+
+### Removed
+- `status` / `diagnose` CLI surface and the supporting scripts/tests
+- Repo-local `commands/codesop.md` duplicate
+- Repo-local `agents/openai.yaml` runtime residue
+- Outdated design/spec docs that still described the old dual-source router model
+- Redundant `QUICKSTART.md` document
+
 ## [1.1.1] - 2026-03-30
 
 ### Changed
@@ -70,4 +91,4 @@
 - Environment detection for Claude Code, Codex, OpenCode
 - Host integration via `setup` script
 - Skill dependency checking (superpowers, gstack)
-- `/codesop-init`, `/codesop-status`, `/codesop-setup`, `/codesop-update` slash commands
+- `/codesop-init`, `/codesop-setup`, `/codesop-update` slash commands

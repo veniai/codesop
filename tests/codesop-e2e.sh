@@ -19,35 +19,24 @@ assert_contains() {
   fi
 }
 
-tmpdir="$(mktemp -d)"
-trap 'rm -rf "$tmpdir"' EXIT
+usage_output="$(bash "$CLI" 2>&1)"
+assert_contains "$usage_output" "Usage:"
+assert_contains "$usage_output" "codesop init [path]"
+assert_contains "$usage_output" "codesop setup [--host X]"
+assert_contains "$usage_output" "codesop update"
 
-cd "$tmpdir"
-mkdir project1 && cd project1
-git init -q
-git checkout -q -b feature/new-feature
-echo '{"name":"test"}' > package.json
-git add . && git commit -q -m "init"
+if unknown_output="$(bash "$CLI" status 2>&1)"; then
+  fail "expected removed status subcommand to fail"
+fi
 
-output="$(bash "$CLI" 2>&1)"
+assert_contains "$unknown_output" "未知子命令：status"
+assert_contains "$unknown_output" "Usage:"
 
-assert_contains "$output" "## 项目诊断"
-assert_contains "$output" "**当前阶段**"
-assert_contains "$output" "**健康状态**"
-assert_contains "$output" "## 技能推荐"
+if version_output="$(bash "$CLI" version 2>&1)"; then
+  fail "expected removed version subcommand to fail"
+fi
 
-cd "$tmpdir"
-mkdir project2 && cd project2
-git init -q
-echo '# AGENTS' > AGENTS.md
-echo '# PRD' > PRD.md
-git add . && git commit -q -m "init"
-
-output="$(bash "$CLI" 2>&1)"
-
-assert_contains "$output" "## 项目诊断"
-assert_contains "$output" "**当前阶段**"
-assert_contains "$output" "**健康状态**"
-assert_contains "$output" "## 技能推荐"
+assert_contains "$version_output" "未知子命令：version"
+assert_contains "$version_output" "Usage:"
 
 echo "PASS"

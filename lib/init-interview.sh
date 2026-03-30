@@ -218,7 +218,7 @@ check_skill_dependencies() {
   echo "=== 技能依赖检查 ==="
 
   if declare -f git_update_check &>/dev/null; then
-    _check_skills_all
+    _check_skills_all || true
   else
     echo "⚠ 更新检查不可用（lib/updates.sh 未加载）"
     if ! has_superpowers; then
@@ -232,6 +232,8 @@ check_skill_dependencies() {
       echo "✓ gstack 已安装"
     fi
   fi
+
+  return 0
 }
 
 # Check all skill installations across Claude Code and Codex
@@ -342,6 +344,8 @@ _check_skills_all() {
       [ $gs_codex -eq 0 ] && echo "    Codex：git clone https://github.com/garrytan/gstack.git ~/.agents/skills/gstack"
     fi
   fi
+
+  return 0
 }
 
 # Print CHANGELOG update for non-git installations (plugin cache)
@@ -870,7 +874,7 @@ run_init_interview() {
   echo "下一步："
   echo "  1. 在 Claude Code 中运行 /init 生成 CLAUDE.md"
   echo "  2. 编辑 PRD.md 定义产品需求"
-  echo "  3. 运行 'codesop status' 检查项目状态"
+  echo "  3. 运行 '/codesop' 进入工作台并选择下一步 workflow"
   echo ""
 
   return 0

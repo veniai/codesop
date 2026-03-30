@@ -1,10 +1,8 @@
 #!/bin/bash
 # codesop - AI coding workflow CLI
-# Modular version - sources lib/*.sh modules
 
 set -euo pipefail
 
-# Resolve installation directory (handles symlinks)
 SOURCE_PATH="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE_PATH" ]; do
   SOURCE_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
@@ -14,7 +12,6 @@ done
 ROOT_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
 VERSION_FILE="$ROOT_DIR/VERSION"
 
-# Source modules in dependency order (explicit, no wildcards)
 source "$ROOT_DIR/lib/output.sh"
 source "$ROOT_DIR/lib/detection.sh"
 source "$ROOT_DIR/lib/templates.sh"
@@ -22,32 +19,23 @@ source "$ROOT_DIR/lib/updates.sh"
 source "$ROOT_DIR/lib/commands.sh"
 source "$ROOT_DIR/lib/init-interview.sh"
 
-# Main entry utilities
 usage() {
   cat <<'EOF'
 Usage:
-  codesop [path]
   codesop init [path]
-  codesop status [path]
   codesop setup [--host X]
   codesop update
-  codesop version
 
 Hosts: claude, codex, opencode, openclaw, auto
 EOF
 }
 
-# Subcommand routing
 subcommand="${1:-}"
 
 case "$subcommand" in
   init)
     shift || true
     run_init_interview "${1:-.}"
-    ;;
-  status)
-    shift || true
-    run_status "${1:-.}"
     ;;
   setup)
     shift || true
@@ -56,23 +44,12 @@ case "$subcommand" in
   update)
     run_update
     ;;
-  version|--version|-v)
-    run_version
-    ;;
-  "" )
-    run_diagnose "."
-    ;;
-  -h|--help|help)
+  ""|-h|--help|help)
     usage
     ;;
   *)
-    # If argument is a directory, diagnose it
-    if [ -d "$subcommand" ]; then
-      run_diagnose "$subcommand"
-    else
-      printf '%s\n' "未知子命令：$subcommand" >&2
-      usage >&2
-      exit 1
-    fi
+    printf '%s\n' "未知子命令：$subcommand" >&2
+    usage >&2
+    exit 1
     ;;
 esac

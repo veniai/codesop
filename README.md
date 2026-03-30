@@ -2,15 +2,15 @@
 
 **AI 编码标准操作流程 / AI Coding Standard Operating Procedure**
 
-A skill-first operating system for AI-assisted coding work. One `/codesop` command routes every task to the right skill pipeline across Claude Code, Codex CLI, and OpenCode.
+A skill-first operating system for AI-assisted coding work. The current core keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `setup`.
 
 ---
 
 ## 这是什么？ / What is this?
 
-**[中文]** 跨工具的 AI 编码工作流操作系统。`/codesop` skill 读取项目上下文，推荐下一步 workflow，路由到 superpowers + gstack 的 skill pipeline。CLI 提供项目初始化、环境检测、版本管理。
+**[中文]** 跨工具的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 3 个机械命令 `init / update / setup`。CLI 负责项目初始化、宿主同步和版本更新。
 
-**[English]** A cross-tool AI coding workflow OS. The `/codesop` skill reads project context, recommends next workflows, and routes to superpowers + gstack skill pipelines. The CLI handles project init, environment detection, and version management.
+**[English]** A cross-tool AI coding workflow OS. The current core keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `setup`. The CLI handles project initialization, host sync, and updates.
 
 ## 安装 / Install
 
@@ -30,7 +30,7 @@ codesop setup --host auto
 | Component | Target | Purpose |
 |-----------|--------|---------|
 | Router card | `~/.claude/codesop-router.md` | SessionStart hook 注入纪律表 |
-| Slash commands | `~/.claude/commands/` | `/codesop`, `/codesop-init`, `/codesop-setup`, `/codesop-update` |
+| Slash commands | `~/.claude/commands/` | `/codesop` workflow + `/codesop-init` + `/codesop-setup` + `/codesop-update` |
 | System AGENTS.md | `~/.claude/CLAUDE.md` → `templates/system/AGENTS.md` | 全局 AI 契约 + skill 纪律 |
 | Skill runtime | `~/.claude/skills/codesop/` | Skill 文件运行时 |
 | CLI | `~/.local/bin/codesop` | 命令行工具 |
@@ -43,7 +43,7 @@ codesop setup --host auto
 /codesop init .
 ```
 
-**查看项目状态：**
+**进入工作台：**
 ```bash
 /codesop
 ```
@@ -75,6 +75,27 @@ codesop update
 - `PRD.md` 同时承担产品规范和当前工作记录
 - 默认中文，自动推断 test/lint/typecheck/smoke 命令
 
+## 文档收尾规则 / Document Gate
+
+- `/codesop` 路由后的实现任务，在最终回复前必须判定 `CLAUDE.md`、`PRD.md`、`README.md` 是否需要更新
+- 如果任一文档需要更新，优先调用 `document-release`
+- `AGENTS.md` 不进入默认判定集合，因为它应始终保持为 `@CLAUDE.md` 的薄包装
+- `CHANGELOG.md` 不属于默认强制集合
+
+## 版本规则 / Versioning
+
+- `VERSION` 是发布版本的唯一真相源
+- `skill.json` 和 `PRD.md` 中的版本号必须与 `VERSION` 一致
+- `CHANGELOG.md` 顶部默认使用 `Unreleased`，真正进入发布流程时再切成具体版本
+- git tag 只在 ship 阶段创建，例如 `v1.1.2`
+
+## 产品边界 / Product Contract
+
+- 主流程只有一个：`/codesop`
+- 机械命令只有三个：`codesop init`、`codesop update`、`codesop setup`
+- `status` / `diagnose` 已从产品合同中移除
+- 本仓库正在做架构收口，与上面合同无关的能力不会优先扩展
+
 ## 覆盖场景 / Workflow Scenarios
 
 | 场景 | Pipeline |
@@ -101,21 +122,25 @@ codesop 编排以下 skill 生态：
 
 ```
 codesop                     # CLI entrypoint
-├── lib/                    # Shell modules (output, detection, templates, updates, commands, init-interview)
-├── commands/               # Slash command skill files
+setup                       # Host integration sync
+├── lib/                    # Core shell modules
+├── SKILL.md                # /codesop definition
+├── commands/               # Mechanical slash command files
 ├── config/
-│   └── codesop-router.md   # Router card source of truth
+│   └── codesop-router.md   # Router card
 ├── templates/
 │   ├── system/             # System-level AGENTS.md template
 │   ├── project/            # PRD.md, README.md templates
 │   └── init/               # Init prompt templates
-├── scripts/                # Diagnose pipeline scripts
-├── tests/                  # Test suite (12 files)
-├── AGENTS.md               # → @CLAUDE.md (项目级引用)
+├── tests/                  # Contract-aligned tests
+├── AGENTS.md               # → @CLAUDE.md
 ├── CLAUDE.md               # Claude Code 项目指南
 ├── PRD.md                  # 活文档
-└── setup                   # Host-aware installation script
 ```
+
+说明：
+- 这是当前稳定内核，不再包含 `status/diagnose` 这类历史入口
+- `/codesop` 的唯一真相源是 `SKILL.md`
 
 ## License
 

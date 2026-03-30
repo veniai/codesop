@@ -78,6 +78,8 @@ git_update_check() {
   local repo_dir="$1"
   local tool_name="${2:-tool}"
   local update_cmd="${3:-}"
+  local ahead="0"
+  local behind="0"
 
   if [ ! -d "$repo_dir/.git" ]; then
     printf '%s\n' "无法检查（非 git 安装）"
@@ -117,67 +119,51 @@ git_update_check() {
     fi
   fi
 
-  # 如果版本号相同，说明是最新
-  if [ "$local_version" = "$remote_version" ] && [ "$local_version" != "unknown" ]; then
-    printf '%s\n' "- $tool_name：$local_version（已是最新）"
-    return
-  fi
-
-  # 如果有版本差异，显示更新信息
-  if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
-    printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
-
-    # 优先从 CHANGELOG.md 提取更新内容
-    local changelog_excerpt
-    changelog_excerpt=$(extract_changelog_entries "$repo_dir" "$local_version")
-
-    # 如果本地 CHANGELOG 没有更新的条目，尝试从远程获取
-    if [ -z "$changelog_excerpt" ] && [ -n "$upstream" ]; then
-      local remote_changelog
-      remote_changelog=$(git -C "$repo_dir" show "$upstream:CHANGELOG.md" 2>/dev/null)
-      if [ -n "$remote_changelog" ]; then
-        local tmp_changelog
-        tmp_changelog=$(mktemp)
-        echo "$remote_changelog" > "$tmp_changelog"
-        changelog_excerpt=$(extract_changelog_entries "$tmp_changelog" "$local_version")
-        rm -f "$tmp_changelog"
-      fi
-    fi
-
-    if [ -n "$changelog_excerpt" ]; then
-      printf '%s\n' "  更新内容："
-      echo "$changelog_excerpt" | head -n 20 | sed 's/^/    /' | sed 's/    $//'
-    else
-      # Fallback: git log
-      local update_count
-      update_count=$(git -C "$repo_dir" rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
-      if [ "$update_count" != "0" ]; then
-        printf '%s\n' "  更新内容（最近 3 条）："
-        git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
-      fi
-    fi
-    if [ -n "$update_cmd" ]; then
-      printf '\n  更新命令：%s\n' "$update_cmd"
-    else
-      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
-    fi
-    return
-  fi
-
-  # 兜底：使用原有的逻辑
-  local ahead behind
-  read -r ahead behind <<EOF
+  if [ -n "$upstream" ]; then
+    read -r ahead behind <<EOF
 $(git -C "$repo_dir" rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0")
 EOF
+  fi
 
   if [ "${ahead:-0}" = "0" ] && [ "${behind:-0}" = "0" ]; then
     printf '%s\n' "- $tool_name：$local_version（已是最新）"
     return
   fi
 
+  # 远端领先时，优先展示版本变化；若版本未变，则退化为“待更新提交”
   if [ "${behind:-0}" != "0" ] && [ "${ahead:-0}" = "0" ]; then
-    printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
-    git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+    if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
+      printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
+
+      # 优先从 CHANGELOG.md 提取更新内容
+      local changelog_excerpt
+      changelog_excerpt=$(extract_changelog_entries "$repo_dir" "$local_version")
+
+      # 如果本地 CHANGELOG 没有更新的条目，尝试从远程获取
+      if [ -z "$changelog_excerpt" ] && [ -n "$upstream" ]; then
+        local remote_changelog
+        remote_changelog=$(git -C "$repo_dir" show "$upstream:CHANGELOG.md" 2>/dev/null)
+        if [ -n "$remote_changelog" ]; then
+          local tmp_changelog
+          tmp_changelog=$(mktemp)
+          echo "$remote_changelog" > "$tmp_changelog"
+          changelog_excerpt=$(extract_changelog_entries "$tmp_changelog" "$local_version")
+          rm -f "$tmp_changelog"
+        fi
+      fi
+
+      if [ -n "$changelog_excerpt" ]; then
+        printf '%s\n' "  更新内容："
+        echo "$changelog_excerpt" | head -n 20 | sed 's/^/    /' | sed 's/    $//'
+      else
+        printf '%s\n' "  更新内容（最近 3 条）："
+        git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+      fi
+    else
+      printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
+      git -C "$repo_dir" log --oneline HEAD..@{u} 2>/dev/null | head -n 3 | sed 's/^/    - /' || true
+    fi
+
     if [ -n "$update_cmd" ]; then
       printf '\n  更新命令：%s\n' "$update_cmd"
     else
@@ -191,7 +177,34 @@ EOF
     return
   fi
 
-  printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
+  # 兜底：分叉状态
+  if [ "${ahead:-0}" != "0" ] || [ "${behind:-0}" != "0" ]; then
+    printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
+    return
+  fi
+
+  # 无法读取 upstream 提交差异时，最后再退回到版本判断
+  if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
+    printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
+    if [ -n "$update_cmd" ]; then
+      printf '\n  更新命令：%s\n' "$update_cmd"
+    else
+      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    fi
+    return
+  fi
+
+  if [ "$local_version" = "$remote_version" ] && [ "$local_version" != "unknown" ]; then
+    printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
+    if [ -n "$update_cmd" ]; then
+      printf '\n  更新命令：%s\n' "$update_cmd"
+    else
+      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
+    fi
+    return
+  fi
+
+  printf '%s\n' "- $tool_name：无法确认更新状态"
 }
 
 print_dependency_update_checks() {

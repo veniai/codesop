@@ -62,6 +62,21 @@ copy_file() {
   cp "$src" "$dst"
 }
 
+copy_skill_manifest() {
+  local src="$1"
+  local dst="$2"
+  local version
+
+  version="$(tr -d '[:space:]' < "$SOURCE_DIR/VERSION" 2>/dev/null || true)"
+  if [ -z "$version" ]; then
+    copy_file "$src" "$dst"
+    return
+  fi
+
+  mkdir -p "$(dirname "$dst")"
+  sed "s/\"version\": \".*\"/\"version\": \"$version\"/" "$src" > "$dst"
+}
+
 ensure_symlink() {
   local src="$1"
   local dst="$2"
@@ -109,13 +124,11 @@ write_skill_runtime() {
   prepare_runtime_dir "$target_dir"
   reset_runtime_path "$target_dir/SKILL.md"
   reset_runtime_path "$target_dir/skill.json"
-  reset_runtime_path "$target_dir/agents"
   reset_runtime_path "$target_dir/codesop"
   reset_runtime_path "$target_dir/VERSION"
   reset_runtime_path "$target_dir/.codesop-source"
   copy_file "$SOURCE_DIR/SKILL.md" "$target_dir/SKILL.md"
-  copy_file "$SOURCE_DIR/skill.json" "$target_dir/skill.json"
-  ensure_symlink "$SOURCE_DIR/agents" "$target_dir/agents"
+  copy_skill_manifest "$SOURCE_DIR/skill.json" "$target_dir/skill.json"
   ensure_symlink "$SOURCE_DIR/codesop" "$target_dir/codesop"
   copy_file "$SOURCE_DIR/VERSION" "$target_dir/VERSION"
   printf '%s\n' "$SOURCE_DIR" > "$target_dir/.codesop-source"
@@ -197,7 +210,7 @@ install_claude() {
   ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.claude/CLAUDE.md"
   write_skill_runtime "$HOME/.claude/skills/codesop"
   prepare_runtime_dir "$HOME/.claude/commands"
-  copy_file "$SOURCE_DIR/commands/codesop.md" "$HOME/.claude/commands/codesop.md"
+  copy_file "$SOURCE_DIR/SKILL.md" "$HOME/.claude/commands/codesop.md"
   copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
   copy_file "$SOURCE_DIR/commands/codesop-setup.md" "$HOME/.claude/commands/codesop-setup.md"

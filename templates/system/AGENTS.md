@@ -26,3 +26,19 @@
 ## Skill 纪律
 新任务先输出任务对齐块（理解 + 阶段 + Skill）。详细路由见 /codesop。
 如果 AI 跳过了应走的 skill，用户可以指出 "你跳过了 X"，AI 应立即输出对齐块并重新走 pipeline。
+
+## 文档判定
+任务结束前必须显式判定以下 3 个文档是否需要更新：
+- `CLAUDE.md`
+- `PRD.md`
+- `README.md`
+
+输出格式固定为：
+- `CLAUDE.md: 已更新 / 未更新，原因：...`
+- `PRD.md: 已更新 / 未更新，原因：...`
+- `README.md: 已更新 / 未更新，原因：...`
+
+若任一文档需要更新，优先走 `document-release`；若不可用，则手动更新。
+
+## Project AGENTS.md
+项目级 `AGENTS.md` 默认应为薄包装 `@CLAUDE.md`，不要和 `CLAUDE.md` 维护两份重复正文。

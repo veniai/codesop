@@ -84,7 +84,7 @@ bash ~/.local/bin/codesop init $ARGUMENTS
 This handles:
 - Phase 0: tool detection, system links, enable CLAUDE_CODE_NEW_INIT
 - Phase 1: user preferences (skipped if already done in Step 2-3)
-- Phase 3: AGENTS.md, PRD.md, README.md
+- Phase 3: normalize `AGENTS.md` → `@CLAUDE.md`, then generate `PRD.md` and `README.md`
 - Phase 4: skill dependency checks
 
 ## Step 5: Prompt user to run /init
@@ -98,6 +98,7 @@ Do NOT generate CLAUDE.md yourself. Claude Code's official `/init` handles this 
 ## After running:
 
 - report which files were generated or preserved
+- make it explicit that project `AGENTS.md` is expected to stay a thin wrapper to `CLAUDE.md`
 - if AGENTS.md is not a simple reference and CLAUDE.md exists, suggest replacing AGENTS.md content with `@CLAUDE.md`
 - for skill dependency checks: summarize each item as one line with version info and key changes (2-3 bullet points max). Preserve update commands exactly as-is.
   Example format:

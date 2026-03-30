@@ -1,6 +1,6 @@
 ---
 name: codesop
-description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop status`, `/codesop setup`, `/codesop update`, or `/codesop version`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
+description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop setup`, or `/codesop update`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
 ---
 
 # codesop: Project Workbench and Workflow Router
@@ -29,10 +29,8 @@ If the user is explicitly asking to run a mechanical `codesop` subcommand, do no
 Treat these as command execution requests first:
 
 - `/codesop init`
-- `/codesop status`
 - `/codesop setup`
 - `/codesop update`
-- `/codesop version`
 
 For these requests:
 
@@ -293,6 +291,29 @@ When recommending, always include:
 - one backup option
 - one thing not to do yet
 
+## 7.1 Completion Gate
+
+Before the final answer on any routed implementation task:
+
+1. decide whether `CLAUDE.md`, `PRD.md`, and `README.md` need updates
+2. if any one needs updates, prefer `document-release (gstack)` as the executor
+3. if `document-release` is unavailable, update the docs manually instead of skipping the check
+4. include this exact block in the final answer:
+
+```md
+## 文档判定
+
+- CLAUDE.md: 已更新 / 未更新，原因：...
+- PRD.md: 已更新 / 未更新，原因：...
+- README.md: 已更新 / 未更新，原因：...
+```
+
+Notes:
+
+- do not list `AGENTS.md` as a separate document decision target; project `AGENTS.md` should stay a thin wrapper to `CLAUDE.md`
+- `CHANGELOG.md` is not part of the default document gate
+- for pure refactors, test-only changes, or formatting-only changes, it is valid to mark all three as "未更新" with a concrete reason
+
 ## 8. Sub-commands
 
 ### 8.1 /codesop init [path]
@@ -309,13 +330,13 @@ bash ~/codesop/codesop init <target-dir>
 
 Expected command responsibilities:
 
-- `AGENTS.md` — 填充技术栈、命令、架构规则
-- `CLAUDE.md` — 轻量包装：`@AGENTS.md`
+- `AGENTS.md` — 轻量包装：`@CLAUDE.md`
 - `PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志
 
 条件生成（不存在时）：
 
 - `README.md` — 填充安装/运行/测试命令
+- `CLAUDE.md` — 由 Claude Code 的 `/init` 生成，codesop 不覆盖
 
 `AGENTS.md` 已存在 → 保留，输出 diff 建议。
 
@@ -329,16 +350,7 @@ When reporting back after `init`:
 - do not add a separate project scorecard
 - do not add workbench routing unless the user explicitly asks for next-step advice
 
-### 8.2 /codesop status
-
-Show skill and project health facts without recommendations.
-
-1. Scan superpowers + gstack skill directories
-2. Check versions
-3. Read usage stats if available
-4. Output dashboard + facts only
-
-### 8.3 /codesop update
+### 8.2 /codesop update
 
 Check and apply updates.
 
