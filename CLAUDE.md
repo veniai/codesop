@@ -4,25 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-codesop is a cross-tool AI coding SOP (Standard Operating Procedure) that provides unified workflow guidance for Claude Code, OpenClaw, and Codex CLI. It consists of slash command skills for workflow routing and a modular CLI for project initialization, environment detection, and skill dependency management.
+codesop is a skill-first operating system for AI-assisted coding work. It provides the `/codesop` slash command skill for workflow routing and a modular CLI (`bash codesop`) for project initialization, environment detection, and skill dependency management.
 
 ## Commands
 
 ```bash
 # Run the CLI
-bash codesop                    # Diagnose current project
-bash codesop init [path]        # Initialize AGENTS.md, PRD.md, README.md (CLAUDE.md via /init)
-bash codesop status [path]      # Show project health status
+bash codesop init [path]        # Initialize project: AGENTS.md + PRD.md + README.md
 bash codesop setup --host X     # Configure host integration (claude|codex|opencode|auto)
 bash codesop update             # Update via git pull + setup sync
 bash codesop version            # Show current version
 
 # Run tests
 bash tests/codesop-router.sh          # Router card consistency + setup integration
-bash tests/codesop-init-interview.sh  # Init interview tests
+bash tests/codesop-init-interview.sh  # Init interview tests (34 tests)
+bash tests/detect-environment.sh      # Documentation consistency tests
 bash tests/codesop-e2e.sh             # End-to-end test
 bash tests/codesop-diagnose.sh        # Diagnose command tests
-bash tests/detect-environment.sh      # Environment detection tests
+bash tests/codesop-init.sh            # Init command tests
+bash tests/codesop-status.sh          # Status command tests
+bash tests/codesop-symlink.sh         # Symlink tests
 
 # Resync after local edits
 bash codesop setup --host claude
@@ -33,35 +34,37 @@ bash codesop setup --host claude
 ```
 codesop                     # CLI entrypoint, sources lib modules in order
 ├── lib/
-│   ├── output.sh           # Formatting utilities, tech stack rendering
-│   ├── detection.sh        # Project language/framework/tool detection
+│   ├── output.sh           # Formatting: tech stack rendering, tool state display
+│   ├── detection.sh        # Project detection: language, framework, shape, tool presence
 │   ├── templates.sh        # AGENTS.md template generation
-│   ├── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, skill checks
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
-│   └── commands.sh         # Subcommand implementations (run_init, run_status, run_update)
+│   ├── commands.sh         # Subcommands: run_init, run_status, run_update, run_version, run_diagnose
+│   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, skill checks
 ├── commands/                # Slash command skill files (synced to ~/.claude/commands/)
-│   ├── codesop-init.md     # /codesop-init — project initialization with self-heal sync
-│   ├── codesop.md          # /codesop — workflow router with task alignment
-│   ├── codesop-status.md   # /codesop-status
+│   ├── codesop.md          # /codesop — workflow router
+│   ├── codesop-init.md     # /codesop-init
 │   ├── codesop-setup.md    # /codesop-setup
 │   └── codesop-update.md   # /codesop-update
 ├── config/
 │   └── codesop-router.md   # Router card source of truth (synced to ~/.claude/ by setup)
 ├── templates/
-│   ├── system/             # System-level templates (AGENTS.md with skill discipline)
+│   ├── system/             # System-level AGENTS.md template (symlinked to host config dirs)
 │   ├── project/            # Project-level templates (PRD.md, README.md)
 │   └── init/               # Init prompt templates
+├── scripts/                # Diagnose pipeline scripts
+│   ├── collect-signals.sh  # Signal collection
+│   ├── diagnose.sh         # Phase diagnosis
+│   └── recommend.sh        # Skill recommendation
 ├── setup                   # Host-aware installation script (router card + hook config)
-└── AGENTS.md                # Universal AI instructions (symlinked to host config dirs)
+├── SKILL.md                # Full skill definition for /codesop
+├── AGENTS.md               # → @CLAUDE.md (project-level reference)
+├── CLAUDE.md               # This file
+├── PRD.md                  # Living document (product spec + progress + work log)
+└── README.md               # Project README
 ```
 
 **Module loading order** (in codesop entrypoint):
-1. `lib/output.sh`
-2. `lib/detection.sh`
-3. `lib/templates.sh`
-4. `lib/updates.sh`
-5. `lib/commands.sh`
-6. `lib/init-interview.sh`
+1. `lib/output.sh` → 2. `lib/detection.sh` → 3. `lib/templates.sh` → 4. `lib/updates.sh` → 5. `lib/commands.sh` → 6. `lib/init-interview.sh`
 
 ## Init Flow
 
@@ -74,7 +77,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 | 1 | Skill Step 2-3 | User preference interview (language, style, etc.) |
 | 1 | CLI | Skip if preferences already set |
 | 2 | — | **User runs `/init`** to generate project CLAUDE.md |
-| 3 | CLI | AGENTS.md, PRD.md, README.md |
+| 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md |
 | 4 | CLI | Skill dependency checks (superpowers, gstack) |
 
 CLAUDE.md is NOT generated by codesop — Claude Code's official `/init` handles it.
@@ -83,30 +86,24 @@ CLAUDE.md is NOT generated by codesop — Claude Code's official `/init` handles
 
 The `setup` script handles host-specific installations:
 
-| Host | Config Target | Commands | Skill Runtime | Hook |
-|------|--------------|----------|---------------|------|
-| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/commands/` | `~/.claude/skills/codesop/` | SessionStart hook in settings.json |
-| Codex | `~/.codex/AGENTS.md` | `~/.codex/commands/` | `~/.agents/skills/codesop/` | — |
-| OpenCode | `~/.config/opencode/AGENTS.md` | — | `~/.agents/skills/codesop/` | — |
+| Host | Config Target | Commands | Hook |
+|------|--------------|----------|------|
+| Claude Code | `~/.claude/CLAUDE.md` → symlink → `templates/system/AGENTS.md` | `~/.claude/commands/` | SessionStart hook in settings.json |
+| Codex | `~/.codex/AGENTS.md` | `~/.codex/commands/` | — |
+| OpenCode | `~/.config/opencode/AGENTS.md` | — | — |
 
 The CLI is symlinked to `~/.local/bin/codesop`.
-
-## Dependencies
-
-codesop orchestrates skills from:
-- **superpowers**: brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev
-- **gstack**: office-hours, autoplan, review, ship, qa, investigate
-
-Update commands: `/plugin update superpowers` (CC plugin), `/gstack-upgrade` (gstack), `cd ~/.codex/superpowers && git pull` (Codex).
 
 ## Key Gotchas
 
 - `set -euo pipefail` in the entrypoint — every pipe command that might fail needs `|| true` or `|| fallback`
 - `bare return` inherits exit status of preceding command — use `return 0` explicitly
-- `git fetch` can hang — always wrap with `timeout 10`
+- `git fetch` can hang — always wrap with `timeout 10` (with macOS fallback for no GNU coreutils)
 - `wc -l` output has leading whitespace — pipe through `tr -d ' '` before arithmetic
 - setup's `configure_hooks()` uses jq with nested schema: `{ "matcher": "", "hooks": [{ "type": "command", ... }] }` — NOT flat objects
 - Router card at `config/codesop-router.md` is the index of `commands/codesop.md` pipeline — must list ALL mandatory skills
+- jq `test()` can fail on null values — always guard with `type == "string" and test(...)`
+- `git stash pop` conflict is a real failure — exit 1, don't just warn
 
 ## File References
 

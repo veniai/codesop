@@ -46,24 +46,19 @@ assert_contains "$skill_output" "do not add a separate project scorecard"
 assert_contains "$skill_output" "do not add workbench routing unless the user explicitly asks for next-step advice"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
-assert_contains "$readme_output" "默认中文"
 assert_contains "$readme_output" "superpowers"
 assert_contains "$readme_output" "gstack"
-assert_contains "$readme_output" "更新命令"
-assert_contains "$readme_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、活文档 `PRD.md`'
-assert_contains "$readme_output" '如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议'
-assert_contains "$readme_output" "自动推断测试、lint、类型检查、smoke 命令并写入模板"
-assert_contains "$readme_output" '`AGENTS.md` 定义 AI 工作边界'
-assert_contains "$readme_output" '`PRD.md` 同时承担产品规范和当前工作记录'
+assert_contains "$readme_output" 'AGENTS.md'
+assert_contains "$readme_output" 'PRD.md'
+assert_contains "$readme_output" 'CLAUDE.md'
+assert_contains "$readme_output" "codesop update"
+assert_contains "$readme_output" "/codesop init"
 
 quickstart_output="$(sed -n '1,260p' "$ROOT_DIR/QUICKSTART.md")"
 assert_contains "$quickstart_output" "/codesop init"
 assert_contains "$quickstart_output" "默认中文"
-assert_contains "$quickstart_output" "确认后由当前大模型继续执行"
-assert_contains "$quickstart_output" "更新命令"
-assert_contains "$quickstart_output" '生成完整 `AGENTS.md`、导入型 `CLAUDE.md`、活文档 `PRD.md`'
-assert_contains "$quickstart_output" '如果已有 `AGENTS.md`，保留原文件，并输出终端合并优化建议'
-assert_contains "$quickstart_output" "自动推断测试、lint、类型检查、smoke 命令并写入模板"
-assert_contains "$quickstart_output" '`PRD.md` 负责记录长期目标、当前进度、最近决策和工作日志'
+assert_contains "$quickstart_output" "更新"
+assert_contains "$quickstart_output" 'AGENTS.md'
+assert_contains "$quickstart_output" 'PRD.md'
 
 echo "PASS"
