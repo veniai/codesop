@@ -121,11 +121,66 @@ write_skill_runtime() {
   printf '%s\n' "$SOURCE_DIR" > "$target_dir/.codesop-source"
 }
 
+install_router_card() {
+  local src="$SOURCE_DIR/config/codesop-router.md"
+  local dst="$HOME/.claude/codesop-router.md"
+
+  if [ ! -f "$src" ]; then
+    echo "  ⚠ config/codesop-router.md not found — skipping router card install"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  echo "  ✓ Router card: $dst"
+}
+
+configure_hooks() {
+  local settings="$HOME/.claude/settings.json"
+
+  # Bootstrap settings.json if missing
+  if [ ! -f "$settings" ]; then
+    mkdir -p "$(dirname "$settings")"
+    echo '{}' > "$settings"
+  fi
+
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "  ⚠ jq not found — hook auto-config skipped"
+    echo "    Manual step: add to $settings:"
+    echo '    "hooks":{"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"cat ~/.claude/codesop-router.md"}]}]}'
+    return 0
+  fi
+
+  # Idempotency: check if hook already exists
+  local existing
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command == "cat ~/.claude/codesop-router.md")] | length' "$settings" 2>/dev/null || echo "0")
+  if [ "$existing" != "0" ]; then
+    echo "  ✓ codesop-router hook already configured"
+    return 0
+  fi
+
+  # Ensure hooks.SessionStart array exists, then append
+  jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat ~/.claude/codesop-router.md"}]}]' \
+    "$settings" > "$settings.tmp" && mv "$settings.tmp" "$settings"
+  echo "  ✓ SessionStart hook configured"
+}
+
+check_discipline_deps() {
+  if [ ! -d "$HOME/.claude/plugins/cache" ] || ! find "$HOME/.claude/plugins/cache" -path "*/superpowers*" -type d -maxdepth 3 2>/dev/null | head -1 | grep -q .; then
+    echo "  ⚠ superpowers plugin not found — router card needs it"
+  fi
+
+  if [ ! -d "$HOME/.claude/skills/gstack" ]; then
+    echo "  ⚠ gstack skills not found — some routes won't work"
+  fi
+}
+
 install_cli() {
   ensure_symlink "$SOURCE_DIR/codesop" "$HOME/.local/bin/codesop"
 }
 
 install_claude() {
+  check_discipline_deps
   ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.claude/CLAUDE.md"
   write_skill_runtime "$HOME/.claude/skills/codesop"
   prepare_runtime_dir "$HOME/.claude/commands"
@@ -135,6 +190,8 @@ install_claude() {
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
   copy_file "$SOURCE_DIR/commands/codesop-setup.md" "$HOME/.claude/commands/codesop-setup.md"
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"
+  install_router_card
+  configure_hooks
 }
 
 install_opencode() {
