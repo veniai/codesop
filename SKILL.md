@@ -10,6 +10,7 @@ description: |
   - wants help deciding whether to plan, debug, implement, review, or ship
   - describes a new feature, bug, refactoring, or small change without specifying a workflow
   - 下一步做什么 / 继续做什么 / 看看项目状态 / 进度总结 / 不确定该怎么做 / 帮我看看 / 接着做
+  - 看 PR / 审核意见 / code review / PR 反馈 / 检查代码
   Do not trigger when the user is explicitly invoking a mechanical subcommand like /codesop init or /codesop update.
   (codesop)
 ---
@@ -277,6 +278,7 @@ Use these routing defaults:
 - weekly retro / "what did I ship" → `retro`
 - learn / "what did we learn" → `learn`
 - create or edit a skill → `writing-skills`
+- PR review / 审核意见 / "看看 PR" / code review feedback → `codex` or `review`
 - report bug only / "just report this" → `qa-only`
 - production incident / "prod is down" → `guard` or `careful`
 

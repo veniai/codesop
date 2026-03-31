@@ -1,6 +1,6 @@
 # Product: codesop
 # Current Version: 1.1.5
-# Last Updated: 2026-03-30
+# Last Updated: 2026-03-31
 # Status: active
 
 ---
@@ -17,14 +17,14 @@
 
 ## 1. 当前快照
 
-- **当前阶段**: release
-- **当前目标**: 发布 v1.1.3，完成技能路由完善 + setup 命令下线 + skill diff 机制
+- **当前阶段**: stable
+- **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v1.1.3 (skill routing coverage + setup removal + skill diff)
+- **当前里程碑**: v1.1.5 已发布 (routing coverage 修复 + SKILL.md v1.2 优化)
 - **完成度**: 100%
-- **下一步**: 完成 ship，打出 v1.1.3 tag
+- **下一步**: bats-core 测试框架引入 / 模块契约文档
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: 进入 v1.1.2 ship 阶段，统一版本号与发布记录
+- **最后更新原因**: PR #7 合并，v1.1.5 发布，同步 PRD 到真实状态
 
 ## 2. 当前进度
 
@@ -32,14 +32,18 @@
 - 无
 
 ### 2.2 Next Up
-- [ ] 观察文档判定 gate 的真实使用摩擦，再决定是否要更强的 `document-release` 自动触发
 - [ ] bats-core 单元测试框架引入
 - [ ] 模块契约文档：每个 lib/*.sh 的公开接口
+- [ ] 观察文档判定 gate 的真实使用摩擦，再决定是否要更强的 `document-release` 自动触发
 
 ### 2.3 Blocked
 - 无
 
 ### 2.4 Done Recently
+- [x] PR #7: 修复 `check_skill_routing_coverage` 误报 (v1.1.5)
+- [x] PR #6: 统一 skill 检测逻辑 (v1.1.4)
+- [x] SKILL.md v1.2 优化：440→348 行，修复 P0/P1/P2 问题
+- [x] Skill Creator TDD 评估：9/9 断言通过 (v1.1→v1.2)
 - [x] 完善 gstack/superpowers 新技能路由覆盖（design-consultation, design-shotgun, cso, benchmark, retro 等）
 - [x] 新增 skill routing coverage check 到 `codesop update` 流程
 - [x] 移除 `codesop setup` CLI 子命令，`setup` 退为内部函数
@@ -74,6 +78,22 @@
 | 2026-03-27 | Init interview 替代 run_init | 面试式交互比静态模板更贴合用户需求 | lib/commands.sh 移除 run_init，lib/init-interview.sh 接管 |
 
 ## 4. 版本历史
+
+### **V1.1.5 - 2026-03-31 - (Routing Coverage Fix)**
+- **目标**: 修复路由覆盖检测的系统性误报
+- **变更摘要**:
+  - `scan_routed_skills()` regex 支持 3 种格式（code block / backtick+tag / routing policy）
+  - `ROOT_DIR` 缺失导致 `scan_routed_skills` 读空路径，现在 SKILL.md 内联命令显式传入
+  - 跳过列表补充 `design-html`
+  - 恢复 `verification-before-comp` → `verification-before-completion` 别名
+  - `tests/detect-environment.sh` 断言适配 v1.2 表格格式
+
+### **V1.1.4 - 2026-03-31 - (Unified Skill Detection)**
+- **目标**: 统一 superpowers/gstack 检测逻辑
+- **变更摘要**:
+  - `has_superpowers()` / `has_gstack()` 改用集中式候选数组
+  - `detect_project_language()` / `detect_project_shape_and_framework()` 提升为顶层函数
+  - `_check_skills_all()` 改用 `find_superpowers_plugin_path()` 主检测
 
 ### **V1.1.3 - 2026-03-30 - (Skill Routing + Setup Removal)**
 - **目标**: 完善技能路由覆盖，移除 setup 用户面，增加 skill diff 检查
@@ -337,6 +357,7 @@ setup                       # 宿主安装与同步
 - **文档纪律执行靠 AI 自觉**: router card 注入规则但没有结构性检查点，AI 在惯性执行时容易跳过
 - **bash 复杂度上限**: 当前 shell 体量继续增长时，可能需要迁移到 Python
 - **跨宿主测试困难**: Codex 和 OpenCode 集成难以在 CI 中自动化验证
+- **PRD 文档滞后风险**: 代码和 PR 先行时 PRD 容易落后，需要收尾 gate 约束
 
 ### 6.2 Assumptions
 - 用户已安装 Claude Code 或 Codex 或 OpenCode 中的至少一个
@@ -345,7 +366,19 @@ setup                       # 宿主安装与同步
 
 ## 7. 工作日志
 
-### 2026-03-30 - 冻结“1 套流程 + 3 个命令”产品合同
+### 2026-03-31 - PR #7 合并：路由覆盖检测修复 (v1.1.5)
+- **背景**: `check_skill_routing_coverage` 一直报所有已安装 skill 缺失，假阳性
+- **动作**: 修复 4 个根因 (ROOT_DIR 缺失、regex 不匹配 v1.2 压缩格式、skip list 缺 design-html、alias 丢失)，独立发 PR 合并
+- **结果**: 路由覆盖检查恢复正常，所有 4 个测试套件通过
+- **影响**: 代码质量审计完整闭环
+
+### 2026-03-31 - SKILL.md v1.2 TDD 优化 (PR #6 内)
+- **背景**: Codex 对抗审查发现 SKILL.md 多处结构性问题
+- **动作**: 三轮修复 (P0 pipeline 顺序、P1 命名漂移、P2 压缩)，440→348 行
+- **结果**: Skill Creator 评估 9/9 断言通过 (v1.1 的 7/8 提升)
+- **影响**: SKILL.md 质量有量化基线
+
+### 2026-03-30 - 冻结”1 套流程 + 3 个命令”产品合同
 - **背景**: 当前目录和文件边界仍混杂，继续加功能会放大历史包袱
 - **动作**: 明确 `/codesop` + `init/update/setup` 为唯一对外承诺，补充收口矩阵
 - **结果**: 后续清理有了依据，`status/diagnose` 被明确标记为退役对象
