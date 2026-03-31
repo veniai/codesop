@@ -293,37 +293,53 @@ EOF
   printf '%s\n' "- $tool_name：无法确认更新状态"
 }
 
+# Resolve install path for a tool given the host.
+# Uses find_superpowers_plugin_path for superpowers, then falls back to host-specific candidates.
+# Arguments:
+#   $1 - tool name ("superpowers" or "gstack")
+#   $2 - host name
+# Prints the resolved path (or nothing if not found)
+_resolve_tool_path() {
+  local tool="$1"
+  local host="$2"
+
+  if [ "$tool" = "superpowers" ]; then
+    # Plugin cache is host-independent
+    local sp_path
+    sp_path="$(find_superpowers_plugin_path 2>/dev/null)" && { printf '%s\n' "$sp_path"; return 0; }
+    case "$host" in
+      claude)  find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" || true ;;
+      codex)   find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system" || true ;;
+      opencode) find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers" || true ;;
+      *)       find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers" || true ;;
+    esac
+  elif [ "$tool" = "gstack" ]; then
+    case "$host" in
+      claude)  find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack" ;;
+      codex)   find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack" ;;
+      opencode) find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack" ;;
+      *)       find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/gstack" ;;
+    esac
+  fi
+}
+
 print_dependency_update_checks() {
   local host="$1"
   local superpowers_state="$2"
   local gstack_state="$3"
-  local superpowers_path=""
-  local gstack_path=""
   local superpowers_update_cmd=""
   local gstack_update_cmd="/gstack-upgrade"
 
   case "$host" in
-    claude)
-      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers")" || true
-      superpowers_update_cmd="/plugin update superpowers"
-      gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack")" || true
-      ;;
-    codex)
-      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system")" || true
-      superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新"
-      gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
-      ;;
-    opencode)
-      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers")" || true
-      superpowers_update_cmd="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新"
-      gstack_path="$(find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack")" || true
-      ;;
-    *)
-      superpowers_path="$(find_superpowers_plugin_path 2>/dev/null || find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers")" || true
-      superpowers_update_cmd="按当前宿主的 superpowers 官方更新方式执行"
-      gstack_path="$(find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/gstack")" || true
-      ;;
+    claude)  superpowers_update_cmd="/plugin update superpowers" ;;
+    codex)   superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新" ;;
+    opencode) superpowers_update_cmd="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新" ;;
+    *)       superpowers_update_cmd="按当前宿主的 superpowers 官方更新方式执行" ;;
   esac
+
+  local superpowers_path gstack_path
+  superpowers_path="$(_resolve_tool_path superpowers "$host")" || true
+  gstack_path="$(_resolve_tool_path gstack "$host")" || true
 
   printf '
 %s

@@ -170,44 +170,48 @@ setup_system_links() {
 # Skill Dependency Checking
 # ============================================================================
 
-# Skill/ECOSYSTEM registry for detection
-# Format: "name:path1,path2,..."
-SKILL_REGISTRY=(
-  "superpowers:$HOME/.claude/skills/superpowers,$HOME/.agents/skills/superpowers,$HOME/.claude/plugins/superpowers,$HOME/.codex/superpowers,$HOME/.codex/skills/.system,$HOME/.config/opencode/plugins/superpowers"
-  "gstack:$HOME/.claude/skills/gstack,$HOME/.agents/skills/gstack,$HOME/.config/opencode/skills/gstack,$HOME/.codex/skills/gstack"
+# Skill paths for has_superpowers/has_gstack (order: most common first)
+_SP_CANDIDATES=(
+  "$HOME/.claude/plugins/cache"
+  "$HOME/.codex/superpowers"
+  "$HOME/.codex/skills/.system"
+  "$HOME/.claude/skills/superpowers"
+  "$HOME/.agents/skills/superpowers"
+  "$HOME/.config/opencode/plugins/superpowers"
+)
+_GS_CANDIDATES=(
+  "$HOME/.claude/skills/gstack"
+  "$HOME/.agents/skills/gstack"
+  "$HOME/.config/opencode/skills/gstack"
+  "$HOME/.codex/skills/gstack"
 )
 
 # Detect if superpowers is installed
+# Uses: find_superpowers_plugin_path (from output.sh) + candidate directories
 # Returns: 0 if installed, 1 if not
 has_superpowers() {
-  local entry="${SKILL_REGISTRY[0]}"
-  local paths="${entry#*:}"
+  # Check plugin cache (Claude Code marketplace install)
+  if type find_superpowers_plugin_path >/dev/null 2>&1; then
+    find_superpowers_plugin_path >/dev/null 2>&1 && return 0
+  fi
 
-  local IFS=','
-  for path in $paths; do
-    if [ -d "$path" ]; then
-      return 0
-    fi
+  # Check candidate directories
+  local path
+  for path in "${_SP_CANDIDATES[@]}"; do
+    [ -d "$path" ] && return 0
   done
 
-  # Additional check for command-based installation
-  [ -f "$HOME/.claude/commands/brainstorming.md" ]
+  return 1
 }
 
 # Detect if gstack is installed
 # Returns: 0 if installed, 1 if not
 has_gstack() {
-  local entry="${SKILL_REGISTRY[1]}"
-  local paths="${entry#*:}"
-
-  local IFS=','
-  for path in $paths; do
-    if [ -d "$path" ]; then
-      return 0
-    fi
+  local path
+  for path in "${_GS_CANDIDATES[@]}"; do
+    [ -d "$path" ] && return 0
   done
 
-  # Check for gstack command
   command -v gstack &>/dev/null
 }
 
@@ -242,17 +246,23 @@ _check_skills_all() {
 
   # superpowers: Claude Code plugin cache (check all marketplaces)
   local cc_plugin cc_marketplace orphaned_plugins=""
-  for cc_marketplace in "$HOME/.claude/plugins/cache/claude-plugins-official/superpowers" \
-                       "$HOME/.claude/plugins/cache/superpowers-marketplace/superpowers"; do
+  if type find_superpowers_plugin_path >/dev/null 2>&1; then
+    local _sp_path
+    _sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
+    if [ -n "$_sp_path" ]; then
+      printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$_sp_path")"
+      _check_changelog "$_sp_path" "$(basename "$_sp_path")" "/plugin update superpowers"
+      sp_found=1; sp_cc_found=1
+    fi
+  fi
+  # Check for orphaned plugins in all marketplaces
+  for cc_marketplace in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
+    [ -d "$cc_marketplace" ] || continue
     cc_plugin=$(find "$cc_marketplace" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
     if [ -n "$cc_plugin" ] && [ "$cc_plugin" != "$cc_marketplace" ]; then
       if [ -f "$cc_plugin/.orphaned_at" ]; then
         orphaned_plugins="$orphaned_plugins $(basename "$cc_plugin")@$(basename "$cc_marketplace")"
-        continue
       fi
-      printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$cc_plugin")"
-      _check_changelog "$cc_plugin" "$(basename "$cc_plugin")" "/plugin update superpowers"
-      sp_found=1; sp_cc_found=1
     fi
   done
 
@@ -446,7 +456,7 @@ ensure_new_init_env() {
   fi
 
   # Check if env.CLAUDE_CODE_NEW_INIT already exists
-  if grep -q '"env"' "$settings_file" && grep -q '"CLAUDE_CODE_NEW_INIT"' "$settings_file"; then
+  if command -v jq >/dev/null 2>&1 && jq -e '.env.CLAUDE_CODE_NEW_INIT' "$settings_file" >/dev/null 2>&1; then
     echo "  ✓ CLAUDE_CODE_NEW_INIT 已设置"
     return 0
   fi

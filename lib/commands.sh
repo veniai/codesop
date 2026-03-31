@@ -1,6 +1,14 @@
 #!/bin/bash
 # commands.sh - Command implementations for the supported codesop CLI surface
 
+# Resync host integration and run skill routing coverage check.
+# Called after every update branch in run_update.
+_resync_and_check() {
+  printf '%s\n' "重新同步本机宿主集成..."
+  bash "$ROOT_DIR/setup" --host auto
+  check_skill_routing_coverage || true
+}
+
 run_update() {
   local repo_dir="$ROOT_DIR"
   local old_ver
@@ -49,9 +57,7 @@ run_update() {
 
   if [ "$local_hash" = "$remote_hash" ]; then
     printf '%s\n' "已是最新版本。"
-    printf '%s\n' "重新同步本机宿主集成..."
-    bash "$ROOT_DIR/setup" --host auto
-    check_skill_routing_coverage || true
+    _resync_and_check
     return 0
   fi
 
@@ -62,17 +68,13 @@ run_update() {
   if [ "$behind" -gt 0 ] && [ "$ahead" -gt 0 ]; then
     printf '%s\n' "本地领先 $ahead 个提交，远程有 $behind 个新提交，存在分叉。"
     printf '%s\n' "请手动处理：cd $repo_dir && git rebase 或 git merge"
-    printf '%s\n' "重新同步本机宿主集成..."
-    bash "$ROOT_DIR/setup" --host auto
-    check_skill_routing_coverage || true
+    _resync_and_check
     return 0
   fi
 
   if [ "$ahead" -gt 0 ]; then
     printf '%s\n' "本地领先上游 $ahead 个提交，远程无新提交。"
-    printf '%s\n' "重新同步本机宿主集成..."
-    bash "$ROOT_DIR/setup" --host auto
-    check_skill_routing_coverage || true
+    _resync_and_check
     return 0
   fi
 
@@ -108,9 +110,7 @@ run_update() {
   new_ver="$(current_version)"
   new_hash="$(git rev-parse HEAD 2>/dev/null || echo "")"
   printf '%s\n' "更新完成：$old_ver → $new_ver"
-  printf '%s\n' "重新同步本机宿主集成..."
-  bash "$ROOT_DIR/setup" --host auto
-  check_skill_routing_coverage || true
+  _resync_and_check
 
   local changes
   if [ -n "$old_hash" ] && [ -n "$new_hash" ] && [ "$old_hash" != "$new_hash" ]; then

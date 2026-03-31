@@ -11,15 +11,16 @@
 # Output:
 #   Key=value pairs describing the project and tool state
 
-detect_environment() {
+# Detect the dominant programming language in a directory.
+# Arguments:
+#   $1 - Target directory
+# Prints: nothing. Sets project_language and optionally project_shape.
+detect_project_language() {
   local TARGET_DIR="${1:-.}"
-
   local project_language="Unknown"
   local project_shape="General Project"
-  local project_framework="None"
-  local output_language="zh-CN"
 
-  detect_project_language() {
+  # Priority 1: Root-level marker files
     # Priority 1: Root-level marker files
     if [ -f "$TARGET_DIR/pyproject.toml" ] || [ -f "$TARGET_DIR/requirements.txt" ]; then
       project_language="Python"
@@ -102,10 +103,24 @@ detect_environment() {
       project_shape="文档项目"
       return
     fi
-  }
 
-  detect_project_shape_and_framework() {
-    if [ -f "$TARGET_DIR/package.json" ]; then
+  # Export results via global variables used by caller
+  _DET_PROJECT_LANGUAGE="$project_language"
+  _DET_PROJECT_SHAPE="$project_shape"
+}
+
+# Detect project shape and framework from package.json or pyproject.toml.
+# Arguments:
+#   $1 - Target directory
+#   $2 - Reference to project_shape variable (updated in place)
+#   $3 - Reference to project_framework variable (updated in place)
+# Sets: _DET_PROJECT_SHAPE, _DET_PROJECT_FRAMEWORK
+detect_project_shape_and_framework() {
+  local TARGET_DIR="${1:-.}"
+  local project_shape="General Project"
+  local project_framework="None"
+
+  if [ -f "$TARGET_DIR/package.json" ]; then
       # Use jq for accurate JSON parsing (supports both dependencies and devDependencies)
       if command -v jq >/dev/null 2>&1; then
         # Check workspaces
@@ -187,10 +202,15 @@ detect_environment() {
         project_shape="Python Project"
       fi
     fi
-  }
+  fi
 
-  # ============================================================================
-  # 工具注册表 (Tool Registry)
+  # Export results
+  _DET_PROJECT_SHAPE="$project_shape"
+  _DET_PROJECT_FRAMEWORK="$project_framework"
+}
+
+# ============================================================================
+# 工具注册表 (Tool Registry)
   # 格式: "名称:检测路径1,检测路径2,..."
   # 新增工具只需在此添加一行
   # ============================================================================
@@ -279,17 +299,27 @@ detect_environment() {
       detect_ecosystem_by_registry "$entry"
     done
   }
+fi
 
-  # ============================================================================
-  # 主检测流程
-  # ============================================================================
-  detect_project_language
-  detect_project_shape_and_framework
+# ============================================================================
+# detect_environment() — main entry point
+# Calls top-level detection functions and prints results.
+# ============================================================================
+detect_environment() {
+  local TARGET_DIR="${1:-.}"
+
+  # Run detection (results in global vars)
+  detect_project_language "$TARGET_DIR"
+  detect_project_shape_and_framework "$TARGET_DIR"
+
+  local project_language="${_DET_PROJECT_LANGUAGE:-Unknown}"
+  local project_shape="${_DET_PROJECT_SHAPE:-General Project}"
+  local project_framework="${_DET_PROJECT_FRAMEWORK:-None}"
 
   echo "project.language=$project_language"
   echo "project.shape=$project_shape"
   echo "project.framework=$project_framework"
-  echo "output.language=$output_language"
+  echo "output.language=zh-CN"
 
   # 使用注册表检测所有工具和生态系统
   detect_all_tools
