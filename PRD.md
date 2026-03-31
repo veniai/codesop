@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 1.1.2
+# Current Version: 1.1.3
 # Last Updated: 2026-03-30
 # Status: active
 
@@ -18,18 +18,18 @@
 ## 1. 当前快照
 
 - **当前阶段**: release
-- **当前目标**: 发布 v1.1.2，完成内核收口、文档 gate 落地和版本规则收敛
+- **当前目标**: 发布 v1.1.3，完成技能路由完善 + setup 命令下线 + skill diff 机制
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v1.1.2 (contract cleanup + doc gate + versioning)
-- **完成度**: 95%
-- **下一步**: 完成 review 与 ship，打出 v1.1.2 tag
+- **当前里程碑**: v1.1.3 (skill routing coverage + setup removal + skill diff)
+- **完成度**: 100%
+- **下一步**: 完成 ship，打出 v1.1.3 tag
 - **负责人/执行主体**: Mixed
 - **最后更新原因**: 进入 v1.1.2 ship 阶段，统一版本号与发布记录
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- [ ] 完成 v1.1.2 发布前最后校验与打 tag
+- 无
 
 ### 2.2 Next Up
 - [ ] 观察文档判定 gate 的真实使用摩擦，再决定是否要更强的 `document-release` 自动触发
@@ -40,6 +40,10 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] 完善 gstack/superpowers 新技能路由覆盖（design-consultation, design-shotgun, cso, benchmark, retro 等）
+- [x] 新增 skill routing coverage check 到 `codesop update` 流程
+- [x] 移除 `codesop setup` CLI 子命令，`setup` 退为内部函数
+- [x] 删除 `/codesop-setup` slash command
 - [x] 修复 `codesop update`：同版本但上游有新提交时不再误报“已是最新”
 - [x] `VERSION` / `skill.json` / `PRD.md` / `CHANGELOG.md` 的发布规则已收敛
 - [x] 删除重复的 `QUICKSTART.md`
@@ -70,6 +74,15 @@
 | 2026-03-27 | Init interview 替代 run_init | 面试式交互比静态模板更贴合用户需求 | lib/commands.sh 移除 run_init，lib/init-interview.sh 接管 |
 
 ## 4. 版本历史
+
+### **V1.1.3 - 2026-03-30 - (Skill Routing + Setup Removal)**
+- **目标**: 完善技能路由覆盖，移除 setup 用户面，增加 skill diff 检查
+- **变更摘要**:
+  - 补齐 gstack/superpowers 新技能到 SKILL.md 路由表
+  - `codesop update` 新增 skill routing coverage check
+  - `setup` 从 CLI 子命令退回内部函数
+  - 删除 `/codesop-setup` slash command
+  - 产品合同从"1 套流程 + 3 个命令"收窄为"1 套流程 + 2 个命令"
 
 ### **V1.1.1 - 2026-03-30 - (Bug Fix + Cleanup)**
 - **目标**: 修复 update 命令 bug，清理死代码
