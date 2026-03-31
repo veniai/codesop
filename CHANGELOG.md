@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.4] - 2026-03-31
+
+### Changed
+- Unified skill detection: `has_superpowers()` and `has_gstack()` in `lib/init-interview.sh` now use centralized candidate arrays (`_SP_CANDIDATES`, `_GS_CANDIDATES`) instead of ad-hoc sentinel files
+- `has_superpowers()` now checks `find_superpowers_plugin_path()` first, then candidate directories — consistent with `lib/updates.sh`
+- `_check_skills_all()` uses `find_superpowers_plugin_path()` for primary detection, with glob-based orphaned plugin scanning
+- `detect_project_language()` and `detect_project_shape_and_framework()` promoted to top-level functions with explicit parameters and global variable results (`_DET_PROJECT_LANGUAGE`, `_DET_PROJECT_SHAPE`, `_DET_PROJECT_FRAMEWORK`)
+- `_resolve_tool_path()` in `lib/updates.sh` centralizes host-to-path resolution, replacing duplicated case statements in `print_dependency_update_checks()`
+- Extracted `_resync_and_check()` helper in `lib/commands.sh`, replacing 4x repeated setup + coverage check calls
+- `setup` uses glob `rm -f codesop*.md` before reinstall — handles any future stale command cleanup without per-file lines
+- `ensure_new_init_env()` uses `jq -e` for JSON key existence instead of fragile `grep`
+- Removed `SKILL_REGISTRY` array — replaced with focused `_SP_CANDIDATES` / `_GS_CANDIDATES`
+
+### Removed
+- Nested function definitions inside `detect_environment()` — promoted to top level for clarity
+- `brainstorming.md` sentinel file check in `has_superpowers()`
+- Hardcoded individual `rm -f` lines for stale commands in `setup`
+
 ## [1.1.3] - 2026-03-30
 
 ### Added
