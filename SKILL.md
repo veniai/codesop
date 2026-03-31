@@ -85,7 +85,7 @@ When this skill triggers:
 4. Decide whether `README.md` is needed
 5. Run skill routing coverage check:
    ```bash
-   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage) || echo "路由检查跳过: 模块不可用"
+   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage) || echo "路由检查跳过: 模块不可用"
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. Recommend the most relevant next skill or action
