@@ -21,7 +21,6 @@ detect_project_language() {
   local project_shape="General Project"
 
   # Priority 1: Root-level marker files
-    # Priority 1: Root-level marker files
     if [ -f "$TARGET_DIR/pyproject.toml" ] || [ -f "$TARGET_DIR/requirements.txt" ]; then
       project_language="Python"
       return
