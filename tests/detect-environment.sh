@@ -18,7 +18,7 @@ assert_contains() {
   fi
 }
 
-skill_output="$(sed -n '/^### 8\.1 \/codesop init \[path\]/,/^### 8\.2 /p' "$ROOT_DIR/SKILL.md")"
+skill_output="$(sed -n '/^## 8\. Sub-commands/,/^## 9\./p' "$ROOT_DIR/SKILL.md")"
 skill_header="$(sed -n '1,120p' "$ROOT_DIR/SKILL.md")"
 skill_full="$(cat "$ROOT_DIR/SKILL.md")"
 assert_contains "$skill_header" "skill-first operating system for AI-assisted coding work"
@@ -37,17 +37,13 @@ assert_contains "$skill_header" "## 工作台摘要"
 assert_contains "$skill_header" "**长期目标**:"
 assert_contains "$skill_header" "**当前阶段**:"
 assert_contains "$skill_header" "## Skill 建议"
-assert_contains "$skill_output" "Initialize project scaffolding and environment guidance."
-assert_contains "$skill_output" "This is a mechanical command, not a workbench-summary command."
-assert_contains "$skill_output" '`AGENTS.md` — 轻量包装：`@CLAUDE.md`'
-assert_contains "$skill_output" '`PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志'
-assert_contains "$skill_output" '`CLAUDE.md` — 由 Claude Code 的 `/init` 生成，codesop 不覆盖'
+assert_contains "$skill_output" "Generate AGENTS.md"
+assert_contains "$skill_output" '`/codesop init [path]`'
+assert_contains "$skill_output" '`/codesop update`'
 assert_contains "$skill_full" "## 7.1 Completion Gate"
 assert_contains "$skill_full" "## 文档判定"
 assert_contains "$skill_full" "- CLAUDE.md: 已更新 / 未更新，原因：..."
-assert_contains "$skill_output" '`AGENTS.md` 已存在 → 保留，输出 diff 建议。'
-assert_contains "$skill_output" "do not add a separate project scorecard"
-assert_contains "$skill_output" "do not add workbench routing unless the user explicitly asks for next-step advice"
+assert_contains "$skill_output" "Defaults to 中文"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "superpowers"

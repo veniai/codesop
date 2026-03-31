@@ -50,16 +50,24 @@ scan_installed_skills() {
 scan_routed_skills() {
   local skill_file="$ROOT_DIR/SKILL.md"
   [ -f "$skill_file" ] || return 0
-  # Extract skill names from section 6 workflow mappings
-  # Matches patterns like "skill-name (gstack)" or "skill-name (sp)"
-  sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
-    | { grep -oE '[a-zA-Z][a-zA-Z0-9-]+ \((gstack|sp|superpowers)\)' || true; } \
-    | sed 's/ *([^)]*)$//' \
-    | sort -u \
-    | sed \
+  # Extract skill names from sections 6 and 7 of SKILL.md
+  # Matches three formats:
+  #   1. code block: skill-name (gstack|sp|superpowers)
+  #   2. backtick+tag: `skill-name` (gstack|sp|superpowers)
+  #   3. routing policy: `skill-name` in arrow mappings
+  {
+    # Section 6: Workflow Mapping (code block and backtick styles)
+    sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
+      | { grep -oE '`?[a-zA-Z][a-zA-Z0-9-]+`? *\((gstack|sp|superpowers)\)' || true; } \
+      | sed 's/`//g; s/ *([^)]*)$//'
+    # Section 7: Routing Policy (backtick arrow style)
+    sed -n '/^## 7\. Routing Policy/,/^## 7\.1 Completion Gate/p' "$skill_file" \
+      | { grep -oE '`[a-zA-Z][a-zA-Z0-9-]+`' || true; } \
+      | sed 's/`//g'
+  } | sort -u | sed \
       -e 's/^subagent-driven-dev$/subagent-driven-development/' \
-      -e 's/^verification-before-comp$/verification-before-completion/' \
-      -e 's/^TDD$/test-driven-development/'
+      -e 's/^TDD$/test-driven-development/' \
+      -e 's/^verification-before-comp$/verification-before-completion/'
 }
 
 # Compare installed skills against routed skills, report gaps
@@ -81,7 +89,7 @@ check_skill_routing_coverage() {
     # Skip internal/infrastructure skills that don't need routing
     case "$name" in
       gstack-upgrade|using-superpowers|connect-chrome|setup-browser-cookies| \
-      plan-ceo-review|plan-design-review|plan-eng-review|browse) continue ;;
+      plan-ceo-review|plan-design-review|plan-eng-review|browse|design-html) continue ;;
     esac
     if ! printf '%s\n' "$routed" | grep -qxF "$name"; then
       case "$source" in
