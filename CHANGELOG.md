@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.5] - 2026-03-31
+
+### Fixed
+
+- `scan_routed_skills()` regex updated to handle three formats: code block, backtick+tag, and routing policy arrow styles
+- `verification-before-comp` → `verification-before-completion` alias restored (was dropped in v1.2 cleanup but still needed for test fixtures)
+- `check_skill_routing_coverage()` skip list updated to include `design-html` gstack skill
+- SKILL.md coverage check command now passes `ROOT_DIR=~/codesop` — was causing `scan_routed_skills` to look for `/SKILL.md`
+- `tests/detect-environment.sh` assertions updated to match v1.2 Section 8 table format (was expecting old `### 8.1` subsection format)
+- Fixed backtick execution bug in `detect-environment.sh` test assertions
+
 ## [1.1.4] - 2026-03-31
 
 ### Changed
