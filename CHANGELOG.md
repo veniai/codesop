@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.3] - 2026-03-30
+
+### Added
+- Skill routing coverage for new gstack/superpowers skills (design-consultation, design-shotgun, design-review, cso, benchmark, retro, learn, writing-skills, qa-only, freeze/unfreeze, guard, careful, setup-deploy, land-and-deploy, dispatching-parallel-agents, codex review, canary)
+- Skill routing coverage check in `codesop update`: warns when installed skills differ from routed skills
+
+### Changed
+- Product contract narrowed from 3 mechanical commands to 2: `init` + `update` only
+- `setup` is now internal-only, called by `install.sh` and `run_update()`, not exposed as a CLI subcommand
+- Removed `/codesop-setup` slash command
+
+### Removed
+- `codesop setup` CLI subcommand and `/codesop-setup` slash command
+- `commands/codesop-setup.md`
+
 ## [1.1.2] - 2026-03-30
 
 ### Changed

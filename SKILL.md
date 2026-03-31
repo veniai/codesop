@@ -1,6 +1,6 @@
 ---
 name: codesop
-description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop setup`, or `/codesop update`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
+description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init` or `/codesop update`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
 ---
 
 # codesop: Project Workbench and Workflow Router
@@ -29,7 +29,6 @@ If the user is explicitly asking to run a mechanical `codesop` subcommand, do no
 Treat these as command execution requests first:
 
 - `/codesop init`
-- `/codesop setup`
 - `/codesop update`
 
 For these requests:
@@ -151,6 +150,10 @@ autoplan (gstack)              ← CEO + Design + Eng auto review
 using-git-worktrees (sp)       ← Isolated workspace
   ↓
 subagent-driven-dev (sp)       ← Implement (TDD + per-task review)
+  or executing-plans (sp)      ← Alternative: parallel session mode
+  or dispatching-parallel-agents (sp) ← Alternative: 2+ independent tasks in parallel
+  ↓
+finishing-a-development-branch (sp) ← Clean up branch before review
   ↓
 codex (gstack)                 ← Adversarial review
   ↓
@@ -159,6 +162,8 @@ qa (gstack)                    ← Browser testing
 review (gstack)                ← PR diff review
   ↓
 ship (gstack)                  ← Create PR
+  ↓
+setup-deploy (gstack)          ← Configure deployment (first time)
   ↓
 land-and-deploy (gstack)       ← Merge + production verify
   ↓
@@ -208,6 +213,8 @@ using-git-worktrees (sp)       ← Isolated workspace
   ↓
 subagent-driven-dev (sp)       ← Implement (TDD preserves behavior)
   ↓
+finishing-a-development-branch (sp) ← Clean up branch
+  ↓
 verification-before-comp (sp)  ← All tests pass
   ↓
 review (gstack)                ← PR review
@@ -220,6 +227,8 @@ ship (gstack)                  ← Release
 ```
 receiving-code-review (sp)     ← Evaluate feedback (verify > blind agree)
   ↓
+requesting-code-review (sp)    ← Request re-review after fixes
+  ↓
 (if fix needed) TDD → modify → verification
   ↓
 Reply in thread
@@ -228,7 +237,8 @@ Reply in thread
 ### 6.6 Production Incident / "Production is down"
 
 ```
-careful (gstack)               ← Safety mode
+guard (gstack)                 ← Full safety: destructive warnings + scoped edits
+  or careful (gstack)          ← Safety mode only
   ↓
 investigate (gstack)           ← Locate problem
   ↓
@@ -259,6 +269,7 @@ Locate bottleneck → optimize → benchmark verify
 office-hours (gstack)          ← Product context
   ↓
 design-consultation (gstack)   ← Create DESIGN.md + preview
+  or design-shotgun (gstack)   ← Generate multiple AI design variants
   ↓
 design-review (gstack)         ← Visual audit (if existing site)
 ```
@@ -273,6 +284,24 @@ design-review (gstack)         ← 10-dimension audit + fix + screenshots
 
 ```
 retro (gstack)                 ← Analyze commit history + work patterns
+```
+
+### 6.12 Learn / "What did we learn" / "Did we fix this before"
+
+```
+learn (gstack)                 ← Review, search, prune, export session learnings
+```
+
+### 6.13 Write a New Skill / "Create a skill"
+
+```
+writing-skills (superpowers)   ← Create or edit skills with proper structure
+```
+
+### 6.14 Report Bug Only / "Just report this bug"
+
+```
+qa-only (gstack)               ← Bug report without code changes
 ```
 
 ## 7. Routing Policy

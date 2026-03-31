@@ -21,6 +21,89 @@ current_version() {
   cat "$VERSION_FILE" 2>/dev/null || echo "unknown"
 }
 
+# Scan installed skill names from gstack and superpowers
+# Outputs one skill name per line: "gstack:skillname" or "superpowers:skillname"
+scan_installed_skills() {
+  local skill_dir skill_name
+
+  # gstack skills
+  for skill_dir in "$HOME/.claude/skills/gstack"/*/SKILL.md "$HOME/.agents/skills/gstack"/*/SKILL.md; do
+    [ -f "$skill_dir" ] || continue
+    skill_name="$(basename "$(dirname "$skill_dir")")"
+    printf 'gstack:%s\n' "$skill_name"
+  done 2>/dev/null || true
+
+  # superpowers skills (plugin cache)
+  local sp_path
+  sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
+  if [ -n "$sp_path" ] && [ -d "$sp_path/skills" ]; then
+    for skill_dir in "$sp_path/skills"/*/SKILL.md; do
+      [ -f "$skill_dir" ] || continue
+      skill_name="$(basename "$(dirname "$skill_dir")")"
+      printf 'superpowers:%s\n' "$skill_name"
+    done 2>/dev/null || true
+  fi
+}
+
+# Extract skill names referenced in SKILL.md routing (section 6)
+# Outputs one name per line (normalized to match directory names)
+scan_routed_skills() {
+  local skill_file="$ROOT_DIR/SKILL.md"
+  [ -f "$skill_file" ] || return 0
+  # Extract skill names from section 6 workflow mappings
+  # Matches patterns like "skill-name (gstack)" or "skill-name (sp)"
+  sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
+    | { grep -oE '[a-zA-Z][a-zA-Z0-9-]+ \((gstack|sp|superpowers)\)' || true; } \
+    | sed 's/ *([^)]*)$//' \
+    | sort -u \
+    | sed \
+      -e 's/^subagent-driven-dev$/subagent-driven-development/' \
+      -e 's/^verification-before-comp$/verification-before-completion/' \
+      -e 's/^TDD$/test-driven-development/'
+}
+
+# Compare installed skills against routed skills, report gaps
+# Returns 0 if all installed skills are routed, 1 if gaps found
+check_skill_routing_coverage() {
+  local installed routed missing_gstack=() missing_sp=()
+
+  installed="$(scan_installed_skills)" || true
+  routed="$(scan_routed_skills)" || true
+
+  [ -z "$installed" ] && return 0
+
+  while IFS= read -r line; do
+    local source="${line%%:*}"
+    local name="${line#*:}"
+    # Skip internal/infrastructure skills that don't need routing
+    case "$name" in
+      gstack-upgrade|using-superpowers|connect-chrome|setup-browser-cookies| \
+      plan-ceo-review|plan-design-review|plan-eng-review|browse) continue ;;
+    esac
+    if ! printf '%s\n' "$routed" | grep -qxF "$name"; then
+      case "$source" in
+        gstack) missing_gstack+=("$name") ;;
+        superpowers) missing_sp+=("$name") ;;
+      esac
+    fi
+  done <<< "$installed"
+
+  if [ ${#missing_gstack[@]} -eq 0 ] && [ ${#missing_sp[@]} -eq 0 ]; then
+    printf '%s\n' "路由覆盖：所有已安装 skill 均已收录"
+    return 0
+  fi
+
+  printf '%s\n' "⚠ 路由覆盖检查：以下 skill 已安装但未收录到路由"
+  if [ ${#missing_gstack[@]} -gt 0 ]; then
+    printf '  gstack: %s\n' "${missing_gstack[*]}"
+  fi
+  if [ ${#missing_sp[@]} -gt 0 ]; then
+    printf '  superpowers: %s\n' "${missing_sp[*]}"
+  fi
+  printf '%s\n' "  建议：更新 SKILL.md 第 6 节和 config/codesop-router.md，然后运行 bash setup --host auto"
+  return 1
+}
+
 # Extract CHANGELOG entries between two versions
 # Reads CHANGELOG.md from the repo and returns entries for versions > local_version
 # Arguments:
@@ -336,4 +419,10 @@ print_install_suggestions() {
 ' "下一步："
   printf '%s
 ' "- 如需我继续执行安装、修复或更新，请明确指定依赖。"
+
+  # Skill routing coverage check
+  printf '
+%s
+' "路由覆盖："
+  check_skill_routing_coverage || true
 }

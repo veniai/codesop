@@ -4,14 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-codesop is a skill-first operating system for AI-assisted coding work. The current product contract keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `setup`.
+codesop is a skill-first operating system for AI-assisted coding work. The current product contract keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
 
 ## Commands
 
 ```bash
 # Core contract
 bash codesop init [path]        # Initialize project: AGENTS.md + PRD.md + README.md
-bash codesop setup --host X     # Configure host integration (claude|codex|opencode|auto)
 bash codesop update             # Update via git pull + setup sync
 
 # Core tests
@@ -24,13 +23,13 @@ bash tests/setup.sh                   # Host setup tests
 bash tests/codesop-symlink.sh         # Symlink tests
 
 # Resync after local edits
-bash codesop setup --host claude
+bash setup --host claude
 ```
 
 ## Product Contract
 
 - Supported user-facing flow: `/codesop`
-- Supported user-facing commands: `codesop init`, `codesop update`, `codesop setup`
+- Supported user-facing commands: `codesop init`, `codesop update`
 - `status` / `diagnose` have been removed from the product contract
 - During cleanup, do not add new features outside this contract
 
@@ -43,11 +42,10 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   ├── detection.sh        # Project detection for init/setup
 │   ├── templates.sh        # AGENTS.md template generation
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
-│   ├── commands.sh         # Subcommands; target contract keeps init/update/setup only
+│   ├── commands.sh         # Subcommands; target contract keeps init/update only
 │   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, skill checks
 ├── commands/               # Slash command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
-│   ├── codesop-setup.md    # /codesop-setup
 │   └── codesop-update.md   # /codesop-update
 ├── config/
 │   └── codesop-router.md   # Router card

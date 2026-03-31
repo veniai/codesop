@@ -213,7 +213,8 @@ install_claude() {
   copy_file "$SOURCE_DIR/SKILL.md" "$HOME/.claude/commands/codesop.md"
   copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
-  copy_file "$SOURCE_DIR/commands/codesop-setup.md" "$HOME/.claude/commands/codesop-setup.md"
+  # Clean up legacy command file if present
+  rm -f "$HOME/.claude/commands/codesop-setup.md"
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"
   install_router_card
   configure_hooks
@@ -262,4 +263,4 @@ echo "  ✓ CLI: ~/.local/bin/codesop"
 
 echo
 echo "Done."
-echo "To resync hosts after editing codesop locally: codesop setup auto"
+echo "To resync hosts after editing codesop locally: bash setup --host auto"

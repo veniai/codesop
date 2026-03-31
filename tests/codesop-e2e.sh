@@ -22,8 +22,14 @@ assert_contains() {
 usage_output="$(bash "$CLI" 2>&1)"
 assert_contains "$usage_output" "Usage:"
 assert_contains "$usage_output" "codesop init [path]"
-assert_contains "$usage_output" "codesop setup [--host X]"
 assert_contains "$usage_output" "codesop update"
+
+if setup_output="$(bash "$CLI" setup --host claude 2>&1)"; then
+  fail "expected removed setup subcommand to fail"
+fi
+
+assert_contains "$setup_output" "未知子命令：setup"
+assert_contains "$setup_output" "Usage:"
 
 if unknown_output="$(bash "$CLI" status 2>&1)"; then
   fail "expected removed status subcommand to fail"
