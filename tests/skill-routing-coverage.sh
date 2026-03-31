@@ -125,9 +125,11 @@ echo "  PASS"
 # --- Test 4: check_skill_routing_coverage handles no installed skills ---
 echo "Test 4: check_skill_routing_coverage with no installed skills"
 
-# scan_installed_skills returns nothing when dirs don't exist
-result="$(check_skill_routing_coverage)" || fail "expected exit 0 when no skills installed"
-[ "$result" = "路由覆盖：所有已安装 skill 均已收录" ] || fail "unexpected output: $result"
+# Isolate HOME so scan_installed_skills finds no skill directories
+_isolated_home="$(mktemp -d)"
+result="$(HOME="$_isolated_home" check_skill_routing_coverage)" || { rm -rf "$_isolated_home"; fail "expected exit 0 when no skills installed"; }
+rm -rf "$_isolated_home"
+[ "$result" = "路由覆盖：无已安装 skill，跳过检查" ] || fail "unexpected output: $result"
 
 echo "  PASS"
 

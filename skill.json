@@ -2,7 +2,7 @@
   "name": "codesop",
   "displayName": "codesop",
   "version": "1.1.3",
-  "description": "Project workbench and workflow router for AI-assisted coding across Claude Code, Codex, and OpenCode/OpenClaw",
+  "description": "Project workbench and workflow router. Proactively invoke when user asks what to do next, wants status, needs workflow guidance, or describes a feature/bug/refactor without specifying a workflow. (codesop)",
   "author": "veniai",
   "repository": "https://github.com/veniai/codesop",
   "license": "MIT",

@@ -32,7 +32,7 @@ assert_contains "$skill_header" 'Call `/codesop` when you need fresh project-sta
 assert_contains "$skill_header" 'Do not call `/codesop` for abstract workflow questions that do not depend on repo state.'
 assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.'
 assert_contains "$skill_header" "## 1.1 CLI Command Bypass"
-assert_contains "$skill_header" 'Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`'
+assert_contains "$skill_header" 'Do not trigger when the user is explicitly invoking a mechanical subcommand'
 assert_contains "$skill_header" "## 工作台摘要"
 assert_contains "$skill_header" "**长期目标**:"
 assert_contains "$skill_header" "**当前阶段**:"

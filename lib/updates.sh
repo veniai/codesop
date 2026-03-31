@@ -70,7 +70,10 @@ check_skill_routing_coverage() {
   installed="$(scan_installed_skills)" || true
   routed="$(scan_routed_skills)" || true
 
-  [ -z "$installed" ] && return 0
+  if [ -z "$installed" ]; then
+    printf '%s\n' "路由覆盖：无已安装 skill，跳过检查"
+    return 0
+  fi
 
   while IFS= read -r line; do
     local source="${line%%:*}"
