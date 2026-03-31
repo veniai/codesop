@@ -53,7 +53,8 @@ scan_routed_skills() {
   # Extract skill names from section 6 workflow mappings
   # Matches patterns like "skill-name (gstack)" or "skill-name (sp)"
   sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
-    | grep -oP '[a-zA-Z][a-zA-Z0-9-]+(?= \((?:gstack|sp|superpowers)\))' \
+    | grep -oE '[a-zA-Z][a-zA-Z0-9-]+ \((gstack|sp|superpowers)\)' \
+    | sed 's/ *([^)]*)$//' \
     | sort -u \
     | sed \
       -e 's/^subagent-driven-dev$/subagent-driven-development/' \
@@ -79,7 +80,7 @@ check_skill_routing_coverage() {
       gstack-upgrade|using-superpowers|connect-chrome|setup-browser-cookies| \
       plan-ceo-review|plan-design-review|plan-eng-review|browse) continue ;;
     esac
-    if ! printf '%s\n' "$routed" | grep -qx "$name"; then
+    if ! printf '%s\n' "$routed" | grep -qxF "$name"; then
       case "$source" in
         gstack) missing_gstack+=("$name") ;;
         superpowers) missing_sp+=("$name") ;;
