@@ -80,8 +80,10 @@ detect_project_language() {
 # Sets: _DET_PROJECT_SHAPE, _DET_PROJECT_FRAMEWORK
 detect_project_shape_and_framework() {
   local TARGET_DIR="${1:-.}"
-  local project_shape="General Project"
   local project_framework="None"
+
+  # Preserve shape from language detection unless we find something more specific
+  local project_shape="${_DET_PROJECT_SHAPE:-General Project}"
 
   if [ -f "$TARGET_DIR/package.json" ]; then
     if command -v jq >/dev/null 2>&1; then
@@ -119,7 +121,8 @@ detect_project_shape_and_framework() {
       fi
     fi
 
-    if [ "$project_shape" = "General Project" ]; then
+    # package.json present but no framework detected → Node Project
+    if [ "$project_framework" = "None" ] && [ "$project_shape" = "General Project" ]; then
       project_shape="Node Project"
     fi
   fi
