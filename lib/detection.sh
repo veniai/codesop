@@ -21,37 +21,21 @@ detect_project_language() {
   local project_shape="General Project"
 
   # Priority 1: Root-level marker files
-    if [ -f "$TARGET_DIR/pyproject.toml" ] || [ -f "$TARGET_DIR/requirements.txt" ]; then
-      project_language="Python"
-      return
-    fi
+  if [ -f "$TARGET_DIR/pyproject.toml" ] || [ -f "$TARGET_DIR/requirements.txt" ]; then
+    project_language="Python"
+  elif [ -f "$TARGET_DIR/go.mod" ]; then
+    project_language="Go"
+  elif [ -f "$TARGET_DIR/Cargo.toml" ]; then
+    project_language="Rust"
+  elif [ -f "$TARGET_DIR/package.json" ]; then
+    project_language="TypeScript/JavaScript"
 
-    if [ -f "$TARGET_DIR/go.mod" ]; then
-      project_language="Go"
-      return
-    fi
-
-    if [ -f "$TARGET_DIR/Cargo.toml" ]; then
-      project_language="Rust"
-      return
-    fi
-
-    if [ -f "$TARGET_DIR/package.json" ]; then
-      project_language="TypeScript/JavaScript"
-      return
-    fi
-
-    # Priority 2: Subdirectory marker files (depth 1-2)
-    if find "$TARGET_DIR" -maxdepth 2 -name "package.json" -not -path "*/node_modules/*" 2>/dev/null | head -1 | grep -q .; then
-      project_language="TypeScript/JavaScript"
-      return
-    fi
-
-    if find "$TARGET_DIR" -maxdepth 2 -name "pyproject.toml" 2>/dev/null | head -1 | grep -q .; then
-      project_language="Python"
-      return
-    fi
-
+  # Priority 2: Subdirectory marker files (depth 1-2)
+  elif find "$TARGET_DIR" -maxdepth 2 -name "package.json" -not -path "*/node_modules/*" 2>/dev/null | head -1 | grep -q .; then
+    project_language="TypeScript/JavaScript"
+  elif find "$TARGET_DIR" -maxdepth 2 -name "pyproject.toml" 2>/dev/null | head -1 | grep -q .; then
+    project_language="Python"
+  else
     # Priority 3: File extension heuristic (count files, pick dominant)
     local sh_count md_count py_count js_count config_count total
 
@@ -63,47 +47,27 @@ detect_project_language() {
 
     total=$((sh_count + md_count + py_count + js_count + config_count))
 
-    if [ "$total" -eq 0 ]; then
-      project_language="Unknown"
-      return
+    if [ "$total" -gt 0 ]; then
+      if [ "$sh_count" -gt 0 ] && [ "$sh_count" -ge "$md_count" ] && [ "$py_count" -eq 0 ] && [ "$js_count" -eq 0 ]; then
+        project_language="Shell"
+        project_shape="脚本集合"
+      elif [ "$py_count" -gt "$js_count" ] && [ "$py_count" -gt 0 ]; then
+        project_language="Python"
+      elif [ "$js_count" -gt 0 ]; then
+        project_language="TypeScript/JavaScript"
+      elif [ "$sh_count" -gt 0 ]; then
+        project_language="Shell"
+        project_shape="脚本集合"
+      elif [ "$config_count" -gt "$md_count" ] && [ "$config_count" -gt 0 ]; then
+        project_language="Config"
+        project_shape="配置项目"
+      elif [ "$md_count" -gt 0 ]; then
+        project_language="Markdown"
+        project_shape="文档项目"
+      fi
     fi
+  fi
 
-    # Pick the dominant type
-    if [ "$sh_count" -gt 0 ] && [ "$sh_count" -ge "$md_count" ] && [ "$py_count" -eq 0 ] && [ "$js_count" -eq 0 ]; then
-      project_language="Shell"
-      project_shape="脚本集合"
-      return
-    fi
-
-    if [ "$py_count" -gt "$js_count" ] && [ "$py_count" -gt 0 ]; then
-      project_language="Python"
-      return
-    fi
-
-    if [ "$js_count" -gt 0 ]; then
-      project_language="TypeScript/JavaScript"
-      return
-    fi
-
-    if [ "$sh_count" -gt 0 ]; then
-      project_language="Shell"
-      project_shape="脚本集合"
-      return
-    fi
-
-    if [ "$config_count" -gt "$md_count" ] && [ "$config_count" -gt 0 ]; then
-      project_language="Config"
-      project_shape="配置项目"
-      return
-    fi
-
-    if [ "$md_count" -gt 0 ]; then
-      project_language="Markdown"
-      project_shape="文档项目"
-      return
-    fi
-
-  # Export results via global variables used by caller
   _DET_PROJECT_LANGUAGE="$project_language"
   _DET_PROJECT_SHAPE="$project_shape"
 }
@@ -120,90 +84,61 @@ detect_project_shape_and_framework() {
   local project_framework="None"
 
   if [ -f "$TARGET_DIR/package.json" ]; then
-      # Use jq for accurate JSON parsing (supports both dependencies and devDependencies)
-      if command -v jq >/dev/null 2>&1; then
-        # Check workspaces
-        if jq -e '.workspaces' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
-          project_shape="Monorepo"
-        fi
-
-        # Check Next.js (dependencies or devDependencies)
-        if jq -e '.dependencies.next // .devDependencies.next' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
-          project_shape="Web App"
-          project_framework="Next.js"
-          return
-        fi
-
-        # Check React
-        if jq -e '.dependencies.react // .devDependencies.react' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
-          project_shape="Web App"
-          project_framework="React"
-          return
-        fi
-
-        # Check Vue
-        if jq -e '.dependencies.vue // .devDependencies.vue' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
-          project_shape="Web App"
-          project_framework="Vue"
-          return
-        fi
-
-        # Check Express
-        if jq -e '.dependencies.express // .devDependencies.express' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
-          project_shape="Backend Service"
-          project_framework="Express"
-          return
-        fi
-      else
-        # Fallback to grep if jq not available
-        if grep -q '"workspaces"' "$TARGET_DIR/package.json"; then
-          project_shape="Monorepo"
-        fi
-
-        if grep -q '"next"' "$TARGET_DIR/package.json"; then
-          project_shape="Web App"
-          project_framework="Next.js"
-          return
-        fi
-
-        if grep -q '"react"' "$TARGET_DIR/package.json"; then
-          project_shape="Web App"
-          project_framework="React"
-          return
-        fi
+    if command -v jq >/dev/null 2>&1; then
+      # Check workspaces
+      if jq -e '.workspaces' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
+        project_shape="Monorepo"
       fi
 
-      if [ "$project_shape" = "General Project" ]; then
-        project_shape="Node Project"
+      # Check Next.js (dependencies or devDependencies)
+      if jq -e '.dependencies.next // .devDependencies.next' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
+        project_shape="Web App"
+        project_framework="Next.js"
+      elif jq -e '.dependencies.react // .devDependencies.react' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
+        project_shape="Web App"
+        project_framework="React"
+      elif jq -e '.dependencies.vue // .devDependencies.vue' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
+        project_shape="Web App"
+        project_framework="Vue"
+      elif jq -e '.dependencies.express // .devDependencies.express' "$TARGET_DIR/package.json" >/dev/null 2>&1; then
+        project_shape="Backend Service"
+        project_framework="Express"
+      fi
+    else
+      # Fallback to grep if jq not available
+      if grep -q '"workspaces"' "$TARGET_DIR/package.json"; then
+        project_shape="Monorepo"
+      fi
+
+      if grep -q '"next"' "$TARGET_DIR/package.json"; then
+        project_shape="Web App"
+        project_framework="Next.js"
+      elif grep -q '"react"' "$TARGET_DIR/package.json"; then
+        project_shape="Web App"
+        project_framework="React"
       fi
     fi
 
-    if [ -f "$TARGET_DIR/pyproject.toml" ]; then
-      if grep -qi 'fastapi' "$TARGET_DIR/pyproject.toml"; then
-        project_shape="Backend Service"
-        project_framework="FastAPI"
-        return
-      fi
-
-      if grep -qi 'django' "$TARGET_DIR/pyproject.toml"; then
-        project_shape="Backend Service"
-        project_framework="Django"
-        return
-      fi
-
-      if grep -qi 'flask' "$TARGET_DIR/pyproject.toml"; then
-        project_shape="Backend Service"
-        project_framework="Flask"
-        return
-      fi
-
-      if [ "$project_shape" = "General Project" ]; then
-        project_shape="Python Project"
-      fi
+    if [ "$project_shape" = "General Project" ]; then
+      project_shape="Node Project"
     fi
   fi
 
-  # Export results
+  if [ -f "$TARGET_DIR/pyproject.toml" ]; then
+    if grep -qi 'fastapi' "$TARGET_DIR/pyproject.toml"; then
+      project_shape="Backend Service"
+      project_framework="FastAPI"
+    elif grep -qi 'django' "$TARGET_DIR/pyproject.toml"; then
+      project_shape="Backend Service"
+      project_framework="Django"
+    elif grep -qi 'flask' "$TARGET_DIR/pyproject.toml"; then
+      project_shape="Backend Service"
+      project_framework="Flask"
+    elif [ "$project_shape" = "General Project" ]; then
+      project_shape="Python Project"
+    fi
+  fi
+
   _DET_PROJECT_SHAPE="$project_shape"
   _DET_PROJECT_FRAMEWORK="$project_framework"
 }
@@ -298,7 +233,6 @@ detect_project_shape_and_framework() {
       detect_ecosystem_by_registry "$entry"
     done
   }
-fi
 
 # ============================================================================
 # detect_environment() — main entry point
