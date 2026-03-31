@@ -82,8 +82,12 @@ When this skill triggers:
 2. Read `PRD.md`
 3. Decide whether fresh repo facts are needed and call `/codesop` if they are
 4. Decide whether `README.md` is needed
-5. Produce a workbench summary
-6. Recommend the most relevant next skill or action
+5. Run skill routing coverage check:
+   ```bash
+   source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage
+   ```
+6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
+7. Recommend the most relevant next skill or action
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
@@ -114,6 +118,12 @@ Always prefer this shape when the user needs orientation:
   - 原因: ...
 - 暂不建议: ...
   - 原因: ...
+
+## Skill 生态
+- 路由覆盖：（粘贴 check_skill_routing_coverage 的输出，一行即可）
+  - 如输出"所有已安装 skill 均已收录"→ 显示"✓ 路由覆盖完整"
+  - 如输出含缺失 skill → 显示原文
+  - 如输出"无已安装 skill"→ 显示"路由覆盖：未检测到已安装 skill"
 ```
 
 If the user only wants a quick answer, compress it, but keep the same mental model.
