@@ -26,7 +26,7 @@ Then make sure `~/.local/bin` is on your `PATH`.
 | Component | Target | Purpose |
 |-----------|--------|---------|
 | Router card | `~/.claude/codesop-router.md` | SessionStart hook 注入纪律表 |
-| Slash commands | `~/.claude/commands/` | `/codesop` workflow + `/codesop-init` + `/codesop-setup` + `/codesop-update` |
+| Slash commands | `~/.claude/commands/` | `/codesop` workflow + `/codesop-init` + `/codesop-update` |
 | System AGENTS.md | `~/.claude/CLAUDE.md` → `templates/system/AGENTS.md` | 全局 AI 契约 + skill 纪律 |
 | Skill runtime | `~/.claude/skills/codesop/` | Skill 文件运行时 |
 | CLI | `~/.local/bin/codesop` | 命令行工具 |

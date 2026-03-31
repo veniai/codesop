@@ -172,7 +172,6 @@ setup                       # 宿主安装与同步
 ├── SKILL.md                # /codesop 唯一真相源
 ├── commands/               # 机械 slash command 文件
 │   ├── codesop-init.md     # /codesop-init
-│   ├── codesop-setup.md    # /codesop-setup
 │   └── codesop-update.md   # /codesop-update
 ├── config/
 │   └── codesop-router.md   # Router card

@@ -46,7 +46,6 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, skill checks
 ├── commands/               # Slash command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
-│   ├── codesop-setup.md    # /codesop-setup
 │   └── codesop-update.md   # /codesop-update
 ├── config/
 │   └── codesop-router.md   # Router card

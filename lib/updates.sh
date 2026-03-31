@@ -99,7 +99,7 @@ check_skill_routing_coverage() {
   if [ ${#missing_sp[@]} -gt 0 ]; then
     printf '  superpowers: %s\n' "${missing_sp[*]}"
   fi
-  printf '%s\n' "  建议：更新 SKILL.md 第 6 节和 config/codesop-router.md，然后运行 codesop setup"
+  printf '%s\n' "  建议：更新 SKILL.md 第 6 节和 config/codesop-router.md，然后运行 bash setup --host auto"
   return 1
 }
 

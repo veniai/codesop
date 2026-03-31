@@ -1,6 +1,6 @@
 ---
 name: codesop
-description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init`, `/codesop setup`, or `/codesop update`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
+description: "Use when the user seems lost, asks what to do next, asks what skill to use, wants to continue an existing project, wants a status/progress summary, wants help choosing a workflow before implementation, or explicitly mentions codesop or /codesop for project orientation. Do not trigger this skill when the user is explicitly invoking a mechanical subcommand like `/codesop init` or `/codesop update`. This skill is the project workbench and workflow router: it restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and explains what not to do yet."
 ---
 
 # codesop: Project Workbench and Workflow Router
