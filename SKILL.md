@@ -9,6 +9,7 @@ description: |
   - explicitly mentions codesop, /codesop, workflow, project status, or next step
   - wants help deciding whether to plan, debug, implement, review, or ship
   - describes a new feature, bug, refactoring, or small change without specifying a workflow
+  - 下一步做什么 / 继续做什么 / 看看项目状态 / 进度总结 / 不确定该怎么做 / 帮我看看 / 接着做
   Do not trigger when the user is explicitly invoking a mechanical subcommand like /codesop init or /codesop update.
   (codesop)
 ---
@@ -84,7 +85,7 @@ When this skill triggers:
 4. Decide whether `README.md` is needed
 5. Run skill routing coverage check:
    ```bash
-   source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage
+   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage) || echo "路由检查跳过: 模块不可用"
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. Recommend the most relevant next skill or action
@@ -99,60 +100,30 @@ When `/codesop` is used, treat it as a diagnosis/context layer:
 
 ## 4. Default Output
 
-Always prefer this shape when the user needs orientation:
-
 ```md
 ## 工作台摘要
-
-**长期目标**: ...
-**当前阶段**: ...
-**当前进度**: ...
-**阻塞/风险**: ...
-**最近决策**: ...
-**下一步**: ...
+**长期目标**: ... **当前阶段**: ... **当前进度**: ...
+**阻塞/风险**: ... **最近决策**: ... **下一步**: ...
 
 ## Skill 建议
-- 推荐: ...
-  - 原因: ...
-- 备选: ...
-  - 原因: ...
-- 暂不建议: ...
-  - 原因: ...
+- 推荐: ... (原因: ...)
+- 备选: ... (原因: ...)
+- 暂不建议: ... (原因: ...)
 
 ## Skill 生态
-- 路由覆盖：（粘贴 check_skill_routing_coverage 的输出，一行即可）
-  - 如输出"所有已安装 skill 均已收录"→ 显示"✓ 路由覆盖完整"
-  - 如输出含缺失 skill → 显示原文
-  - 如输出"无已安装 skill"→ 显示"路由覆盖：未检测到已安装 skill"
+- 路由覆盖：（粘贴 check_skill_routing_coverage 输出）
+  - "所有已安装 skill 均已收录"→ "✓ 路由覆盖完整"
+  - 含缺失 skill → 显示原文
+  - "无已安装 skill"→ "路由覆盖：未检测到已安装 skill"
 ```
 
-If the user only wants a quick answer, compress it, but keep the same mental model.
+Compress for quick answers, but keep the same mental model.
 
 ## 5. Trigger Guidance
 
-Use this skill aggressively, not conservatively.
+Trigger aggressively. See frontmatter for the full trigger list.
 
-Trigger when the user:
-
-- asks what to do next
-- asks what skill to use
-- says "continue"
-- returns to an existing project after a gap
-- wants a status or progress summary
-- looks confused or unstructured
-- wants to resume work
-- wants help deciding whether to plan, debug, implement, review, or ship
-
-Also trigger when the user explicitly mentions:
-
-- `codesop`
-- `/codesop`
-- workflow
-- project status
-- next step
-- progress summary
-
-Do not use explicit `codesop` mention alone as a trigger if the message is clearly just a CLI subcommand execution request.
+Key rule: do not use explicit `codesop` mention alone as a trigger if the message is clearly just a CLI subcommand execution request.
 
 ## 6. Workflow Mapping
 
@@ -170,7 +141,7 @@ autoplan (gstack)              ← CEO + Design + Eng auto review
 using-git-worktrees (sp)       ← Isolated workspace
   ↓
 subagent-driven-dev (sp)       ← Implement (TDD + per-task review)
-  or executing-plans (sp)      ← Alternative: parallel session mode
+  or executing-plans (sp)      ← Alternative: serial execution per task
   or dispatching-parallel-agents (sp) ← Alternative: 2+ independent tasks in parallel
   ↓
 finishing-a-development-branch (sp) ← Clean up branch before review
@@ -179,9 +150,9 @@ codex (gstack)                 ← Adversarial review
   ↓
 qa (gstack)                    ← Browser testing
   ↓
-review (gstack)                ← PR diff review
-  ↓
 ship (gstack)                  ← Create PR
+  ↓
+review (gstack)                ← PR diff review
   ↓
 setup-deploy (gstack)          ← Configure deployment (first time)
   ↓
@@ -201,7 +172,7 @@ systematic-debugging (sp)      ← Root cause → hypothesis → verify → fix
   ↓
 TDD (sp)                       ← Write failing test first
   ↓
-verification-before-comp (sp)  ← Verification evidence
+verification-before-completion (sp)  ← Verification evidence
   ↓
 unfreeze (gstack)              ← Remove edit restriction
   ↓
@@ -213,9 +184,9 @@ ship (gstack)                  ← Release (if needed)
 ### 6.3 Small Change / "Tweak XX"
 
 ```
-Direct change + TDD (sp)       ← Write test, then change code
+test-driven-development (sp)    ← Write failing test, then change code
   ↓
-verification-before-comp (sp)  ← Verification evidence
+verification-before-completion (sp)  ← Verification evidence
   ↓
 review (gstack)                ← PR review (if multi-file)
   ↓
@@ -235,7 +206,7 @@ subagent-driven-dev (sp)       ← Implement (TDD preserves behavior)
   ↓
 finishing-a-development-branch (sp) ← Clean up branch
   ↓
-verification-before-comp (sp)  ← All tests pass
+verification-before-completion (sp)  ← All tests pass
   ↓
 review (gstack)                ← PR review
   ↓
@@ -247,82 +218,48 @@ ship (gstack)                  ← Release
 ```
 receiving-code-review (sp)     ← Evaluate feedback (verify > blind agree)
   ↓
-requesting-code-review (sp)    ← Request re-review after fixes
+(if fix needed) test-driven-development (sp) → modify → verification-before-completion (sp)
   ↓
-(if fix needed) TDD → modify → verification
+requesting-code-review (sp)    ← Request re-review after fixes
   ↓
 Reply in thread
 ```
 
 ### 6.6 Production Incident / "Production is down"
 
-```
-guard (gstack)                 ← Full safety: destructive warnings + scoped edits
-  or careful (gstack)          ← Safety mode only
-  ↓
-investigate (gstack)           ← Locate problem
-  ↓
-systematic-debugging (sp)      ← Root cause analysis
-  ↓
-Fix → canary (gstack)          ← Post-fix monitoring
-```
+`guard` or `careful` (gstack) → `investigate` (gstack) → `systematic-debugging` (sp) → fix → `canary` (gstack)
 
 ### 6.7 Security Audit / "Check security"
 
-```
-cso (gstack)                   ← OWASP + STRIDE + attack surface
-  ↓
-(if issues found) systematic-debugging → TDD fix → review
-```
+`cso` (gstack) → (if issues) `systematic-debugging` → `TDD` fix → `review`
 
 ### 6.8 Performance / "Too slow"
 
-```
-benchmark (gstack)             ← Baseline test
-  ↓
-Locate bottleneck → optimize → benchmark verify
-```
+`benchmark` (gstack) → `systematic-debugging` (sp) → optimize → `benchmark` (gstack)
 
 ### 6.9 Design System / "Need DESIGN.md"
 
-```
-office-hours (gstack)          ← Product context
-  ↓
-design-consultation (gstack)   ← Create DESIGN.md + preview
-  or design-shotgun (gstack)   ← Generate multiple AI design variants
-  ↓
-design-review (gstack)         ← Visual audit (if existing site)
-```
+`office-hours` (gstack) → `design-consultation` or `design-shotgun` (gstack) → `design-review` (gstack)
 
 ### 6.10 Visual Review / "UI looks wrong"
 
-```
-design-review (gstack)         ← 10-dimension audit + fix + screenshots
-```
+`design-review` (gstack) ← 10-dimension audit + fix + screenshots
 
 ### 6.11 Weekly Retro / "What did I ship"
 
-```
-retro (gstack)                 ← Analyze commit history + work patterns
-```
+`retro` (gstack) ← Analyze commit history + work patterns
 
 ### 6.12 Learn / "What did we learn" / "Did we fix this before"
 
-```
-learn (gstack)                 ← Review, search, prune, export session learnings
-```
+`learn` (gstack) ← Review, search, prune, export session learnings
 
 ### 6.13 Write a New Skill / "Create a skill"
 
-```
-writing-skills (superpowers)   ← Create or edit skills with proper structure
-```
+`writing-skills` (superpowers) ← Create or edit skills with proper structure
 
 ### 6.14 Report Bug Only / "Just report this bug"
 
-```
-qa-only (gstack)               ← Bug report without code changes
-```
+`qa-only` (gstack) ← Bug report without code changes
 
 ## 7. Routing Policy
 
@@ -333,6 +270,15 @@ Use these routing defaults:
 - active implementation with existing plan → `subagent-driven-dev`
 - bug / broken behavior → `investigate` or `systematic-debugging`
 - ready for release/review → `review`, `ship`
+- performance / "too slow" → `benchmark`
+- security / "check security" → `cso`
+- design system / "need DESIGN.md" → `design-consultation` or `design-shotgun`
+- visual review / "UI looks wrong" → `design-review`
+- weekly retro / "what did I ship" → `retro`
+- learn / "what did we learn" → `learn`
+- create or edit a skill → `writing-skills`
+- report bug only / "just report this" → `qa-only`
+- production incident / "prod is down" → `guard` or `careful`
 
 When recommending, always include:
 
@@ -365,48 +311,10 @@ Notes:
 
 ## 8. Sub-commands
 
-### 8.1 /codesop init [path]
-
-Initialize project scaffolding and environment guidance.
-
-This is a mechanical command, not a workbench-summary command.
-
-Run:
-
-```bash
-bash ~/codesop/codesop init <target-dir>
-```
-
-Expected command responsibilities:
-
-- `AGENTS.md` — 轻量包装：`@CLAUDE.md`
-- `PRD.md` — 活文档：同时记录产品规范、当前进度、最近决策、风险与工作日志
-
-条件生成（不存在时）：
-
-- `README.md` — 填充安装/运行/测试命令
-- `CLAUDE.md` — 由 Claude Code 的 `/init` 生成，codesop 不覆盖
-
-`AGENTS.md` 已存在 → 保留，输出 diff 建议。
-
-全部默认中文。根据检测到的技术栈推断 test/lint/typecheck/smoke 命令。
-
-When reporting back after `init`:
-
-- keep the response centered on the command output
-- say which files were generated or preserved
-- say whether ecosystem dependencies are installed, partially installed, or missing
-- do not add a separate project scorecard
-- do not add workbench routing unless the user explicitly asks for next-step advice
-
-### 8.2 /codesop update
-
-Check and apply updates.
-
-1. Check gstack version → show diff
-2. Check superpowers version → show diff
-3. Check this file's version number
-4. Ask user if they want to update
+| Command | Run | What it does |
+|---------|-----|-------------|
+| `/codesop init [path]` | `bash ~/codesop/codesop init <dir>` | Generate AGENTS.md (`@CLAUDE.md`), PRD.md (活文档), README.md (if missing). Defaults to 中文. |
+| `/codesop update` | `bash ~/codesop/codesop update` | Check gstack/superpowers/SKILL.md versions → show diff → ask to update. |
 
 ## 9. Conflict Resolution
 
