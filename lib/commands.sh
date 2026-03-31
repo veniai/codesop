@@ -64,6 +64,7 @@ run_update() {
     printf '%s\n' "请手动处理：cd $repo_dir && git rebase 或 git merge"
     printf '%s\n' "重新同步本机宿主集成..."
     bash "$ROOT_DIR/setup" --host auto
+    check_skill_routing_coverage || true
     return 0
   fi
 
@@ -71,6 +72,7 @@ run_update() {
     printf '%s\n' "本地领先上游 $ahead 个提交，远程无新提交。"
     printf '%s\n' "重新同步本机宿主集成..."
     bash "$ROOT_DIR/setup" --host auto
+    check_skill_routing_coverage || true
     return 0
   fi
 

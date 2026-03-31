@@ -53,7 +53,7 @@ scan_routed_skills() {
   # Extract skill names from section 6 workflow mappings
   # Matches patterns like "skill-name (gstack)" or "skill-name (sp)"
   sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
-    | grep -oE '[a-zA-Z][a-zA-Z0-9-]+ \((gstack|sp|superpowers)\)' \
+    | { grep -oE '[a-zA-Z][a-zA-Z0-9-]+ \((gstack|sp|superpowers)\)' || true; } \
     | sed 's/ *([^)]*)$//' \
     | sort -u \
     | sed \
