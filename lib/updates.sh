@@ -405,7 +405,11 @@ print_dependency_update_checks() {
 ' "更新检查："
 
   if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
-    plugin_update_check "superpowers"
+    if [ -d "$superpowers_path/.git" ]; then
+      git_update_check "$superpowers_path" "superpowers"
+    else
+      plugin_update_check "superpowers"
+    fi
     printf '%s\n' "  更新命令：$superpowers_update_cmd"
   elif [ "$superpowers_state" = "installed" ]; then
     printf '%s\n' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
