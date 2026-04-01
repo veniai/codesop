@@ -168,6 +168,57 @@ extract_changelog_entries() {
   echo "$entry" | sed '1{/^# /d}' | sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'
 }
 
+# Check update status for plugin-marketplace-installed tools (e.g. superpowers).
+# These lack .git directories; version is read from installed_plugins.json.
+# Arguments:
+#   $1 - tool name (e.g. "superpowers")
+# Prints a human-readable status line with latest CHANGELOG entry.
+plugin_update_check() {
+  local tool="$1"
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+
+  if [ ! -f "$plugins_json" ]; then
+    printf '%s\n' "- $tool：无法检查（未找到插件注册信息）"
+    return
+  fi
+
+  # Find the version and install path from the JSON
+  local version install_path
+  read -r version install_path <<< "$(jq -r --arg tool "$tool" '
+    .plugins | to_entries[]
+    | select(.key | contains($tool))
+    | .value[0] | "\(.version // "") \(.installPath // "")"
+  ' "$plugins_json" 2>/dev/null)" || true
+
+  if [ -z "$version" ]; then
+    printf '%s\n' "- $tool：无法检查（未找到版本信息）"
+    return
+  fi
+
+  printf '%s\n' "- $tool：$version（插件安装）"
+
+  # Extract latest CHANGELOG entry
+  local changelog
+  if [ -n "$install_path" ] && [ -f "$install_path/CHANGELOG.md" ]; then
+    changelog="$install_path/CHANGELOG.md"
+  else
+    return
+  fi
+
+  # Extract the first (latest) entry: from first "## [" to just before the second "## ["
+  local entry
+  entry=$(sed -n '/^## \[/,/^## \[/{ /^## \[/!{ /^## \[/q }; p }' "$changelog" 2>/dev/null) || true
+  # Fallback: grab lines between first and second version headings
+  if [ -z "$entry" ]; then
+    entry=$(awk '/^## \[/{if(p++) exit; next} p' "$changelog" 2>/dev/null) || true
+  fi
+
+  if [ -n "$entry" ]; then
+    printf '%s\n' "  最近更新："
+    echo "$entry" | head -n 15 | sed 's/^/    /' | sed 's/    $//'
+  fi
+}
+
 git_update_check() {
   local repo_dir="$1"
   local tool_name="${2:-tool}"
@@ -354,7 +405,7 @@ print_dependency_update_checks() {
 ' "更新检查："
 
   if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
-    git_update_check "$superpowers_path" "superpowers"
+    plugin_update_check "superpowers"
     printf '%s\n' "  更新命令：$superpowers_update_cmd"
   elif [ "$superpowers_state" = "installed" ]; then
     printf '%s\n' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
