@@ -28,6 +28,7 @@
 | 写新 skill | writing-skills |
 | 收 code review | requesting-code-review |
 | 处理 code review 反馈 | receiving-code-review |
+| 对抗性 review / adversarial review | codex |
 | 更新文档 / sync docs | document-release |
 
 ### 铁律
