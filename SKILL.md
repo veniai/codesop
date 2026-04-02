@@ -90,6 +90,12 @@ When this skill triggers:
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. Recommend the most relevant next skill or action
+8. If step 7 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
+   - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
+   - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
+   - ❌ 不适合 — skill mismatch; another skill would be significantly better
+   - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
+   The routing table is the sole authority. Validation is informational and can never override it.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
@@ -101,16 +107,54 @@ When `/codesop` is used, treat it as a diagnosis/context layer:
 
 ## 4. Default Output
 
+Output `## 工作台摘要` followed by `## Skill 建议` using one of these three templates, then `## Skill 生态`.
+
+### 4.1 Workbench Summary
+
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
 **阻塞/风险**: ... **最近决策**: ... **下一步**: ...
+```
 
+### 4.2 Skill Recommendation Templates
+
+**Case A — ✅ Fit validated (suitable, consistent with routing table):**
+
+```md
 ## Skill 建议
-- 推荐: ... (原因: ...)
-- 备选: ... (原因: ...)
-- 暂不建议: ... (原因: ...)
+- 推荐: → {skill-name} ✅ 适合 (信号: "{user signal}")
+- 备选: → {backup-skill} (原因: {...})
+- 暂不建议: ... (原因: {...})
+```
 
+**Case B — ⚠️/❌ Partial fit or mismatch:**
+
+```md
+## Skill 建议
+- 路由表: → {skill-name} (信号: "{user signal}")
+- 验证:   {⚠️/❌} {one-line assessment}
+           备选参考: {alternative} (原因: {...})
+- 暂不建议: ... (原因: {...})
+```
+
+**Case C — Validation skipped (no recommendation from step 7, or skill unreadable, or ❓ info insufficient):**
+
+```md
+## Skill 建议
+- 推荐: → {routing-table-skill} (信号: "{user signal}")
+         (验证跳过: {reason})
+- 备选: → {backup-skill} (原因: {...})
+- 暂不建议: ... (原因: {...})
+```
+
+In Case C, `{routing-table-skill}` comes from the routing table in section 7 — do not invent a skill name. If the routing table also provides no match, fall back to section 10 (ask one focused question) and omit the recommendation lines entirely.
+
+Routing table is the final authority. Validation line is informational. User decides.
+
+### 4.3 Skill Ecosystem
+
+```md
 ## Skill 生态
 - 路由覆盖：（粘贴 check_skill_routing_coverage 输出）
   - "所有已安装 skill 均已收录"→ "✓ 路由覆盖完整"
@@ -281,10 +325,11 @@ Use these routing defaults:
 - PR review / 审核意见 / "看看 PR" / code review feedback → `codex` or `review`
 - report bug only / "just report this" → `qa-only`
 - production incident / "prod is down" → `guard` or `careful`
+- 文档更新 / 更新文档 / sync docs → `document-release`
 
 When recommending, always include:
 
-- the best next skill
+- the best next skill (with fit validation status per section 4 template)
 - one backup option
 - one thing not to do yet
 

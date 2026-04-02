@@ -6,8 +6,8 @@
 ### 必走路径（不可跳过）
 | 用户信号 | Pipeline 阶段 | 必走 Skill 序列 |
 |---------|--------------|----------------|
-| 做功能 / 加东西 / 重构 | 探索→计划→执行→验证→review | brainstorming → writing-plans → autoplan → using-git-worktrees → subagent-driven-development (or executing-plans / dispatching-parallel-agents) → test-driven-development → verification-before-completion → review |
-| 修 bug / 测试挂了 | 调试→验证→review | systematic-debugging → verification-before-completion → review |
+| 做功能 / 加东西 / 重构 | 探索→计划→执行→验证→review | office-hours (direction unclear) or brainstorming (direction clear) → writing-plans → autoplan → using-git-worktrees → subagent-driven-development (or executing-plans / dispatching-parallel-agents) → test-driven-development → verification-before-completion → review |
+| 修 bug / 测试挂了 | 调试→验证→review | investigate (system-level) or systematic-debugging (single-file) → verification-before-completion → review |
 | 做完了 / 修好了 | 验证→review | verification-before-completion → qa(web) → review |
 | 发布 / ship | 发布→清理 | ship → setup-deploy (首次) → land-and-deploy → document-release |
 
@@ -28,6 +28,8 @@
 | 写新 skill | writing-skills |
 | 收 code review | requesting-code-review |
 | 处理 code review 反馈 | receiving-code-review |
+| 对抗性 review / adversarial review | codex |
+| 更新文档 / sync docs | document-release |
 
 ### 铁律
 - 跳过必走 Skill = 先输出对齐块说明原因

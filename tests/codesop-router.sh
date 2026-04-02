@@ -63,6 +63,23 @@ echo "Test 8: Iron Laws section..."
 grep -q "Iron Laws" "$ROOT_DIR/SKILL.md" || fail "Iron Laws section missing from SKILL.md"
 echo "  PASS"
 
+# Test 8.5: Routing consistency between SKILL.md section 7 and codesop-router.md
+echo "Test 8.5: Routing consistency between SKILL.md and router card..."
+router_card="$ROOT_DIR/config/codesop-router.md"
+missing=""
+while IFS= read -r skill; do
+  [ -z "$skill" ] && continue
+  if ! grep -q "$skill" "$router_card"; then
+    missing="${missing:+$missing, }$skill"
+  fi
+done < <(sed -n '/^## 7\. Routing Policy/,/^## 7\.1 Completion Gate/p' "$ROOT_DIR/SKILL.md" \
+  | grep -oE '→ `[a-zA-Z][a-zA-Z0-9-]+`' \
+  | sed 's/→ `//;s/`//')
+if [ -n "$missing" ]; then
+  fail "Skills in SKILL.md section 7 but NOT in router card: $missing"
+fi
+echo "  PASS"
+
 echo ""
 echo "--- Integration Tests ---"
 tmpdir="$(mktemp -d)"
