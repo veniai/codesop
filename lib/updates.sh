@@ -204,9 +204,12 @@ plugin_update_check() {
     return
   fi
 
-  # Get version from latest CHANGELOG heading (e.g. "## [5.0.5]" → "5.0.5")
+  # Get version from latest CHANGELOG heading
+  # Supports: "## [5.0.5]", "## [5.0.5] - 2026-03-17", "## 5.0.5"
   local changelog_version
-  changelog_version=$(grep -m1 '^## \[' "$changelog" 2>/dev/null | sed 's/^## \[\(.*\)\].*/\1/') || true
+  changelog_version=$(grep -m1 '^## ' "$changelog" 2>/dev/null \
+    | sed -e 's/^## \[\([^]\]*\)\].*/\1/' -e 's/^## \([0-9][0-9.]*\).*/\1/' \
+    | grep -E '^[0-9]+(\.[0-9]+)+$') || true
 
   # Compare installed version against CHANGELOG's latest heading
   # Plugin installs have no remote — CHANGELOG IS the installed copy.
@@ -219,10 +222,14 @@ plugin_update_check() {
       return 0
     fi
     # Installed < changelog version — shouldn't happen for plugin installs,
-    # but handle gracefully by showing what we have
+    # but handle gracefully: suggest update.
+    printf '%s\n' "- $tool：$version → $changelog_version（插件安装，发现新版本）"
+    return 1
   fi
 
-  printf '%s\n' "- $tool：$version（插件安装）"
+  # No parseable version heading — assume up to date
+  printf '%s\n' "- $tool：$version（插件安装，已是最新）"
+  return 0
 }
 
 git_update_check() {
