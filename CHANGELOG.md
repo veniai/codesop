@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.6] - 2026-04-02
+
+### Added
+
+- Fit validation: codesop now reads the recommended skill's full content and assesses fit (✅/⚠️/❌/❓) alongside the routing table recommendation
+- Compression rule: ✅ results merge into one line; ⚠️/❌ show two lines with backup reference
+- "文档更新 / 更新文档 / sync docs" now routes to `document-release`
+
+### Fixed
+
+- Unified routing rules between `SKILL.md` section 7 and `config/codesop-router.md` (bug 路由 now includes investigate; 做功能 now includes office-hours)
+
 ## [1.1.5] - 2026-03-31
 
 ### Fixed
