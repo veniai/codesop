@@ -113,9 +113,20 @@ When `/codesop` is used, treat it as a diagnosis/context layer:
 **阻塞/风险**: ... **最近决策**: ... **下一步**: ...
 
 ## Skill 建议
-- 推荐: ... (原因: ...)
-- 备选: ... (原因: ...)
-- 暂不建议: ... (原因: ...)
+
+If fit validation ran and result is ✅ (suitable, consistent with routing table):
+- 推荐: → {skill-name} ✅ 适合 (信号: "{user signal}")
+
+If fit validation ran and result is ⚠️/❌ (inconsistent with routing table):
+- 路由表: → {skill-name} (信号: "{user signal}")
+- 验证:   {⚠️/❌} {one-line assessment}
+           备选参考: {alternative} (原因: {...})
+
+If fit validation was skipped (no recommendation, or skill unreadable, or info insufficient):
+- 推荐: → {skill-name} (信号: "{user signal}")
+         (验证跳过: {reason})
+
+Routing table is the final authority. Validation line is informational. User decides.
 
 ## Skill 生态
 - 路由覆盖：（粘贴 check_skill_routing_coverage 输出）
@@ -291,7 +302,7 @@ Use these routing defaults:
 
 When recommending, always include:
 
-- the best next skill
+- the best next skill (with fit validation status per section 4 template)
 - one backup option
 - one thing not to do yet
 
