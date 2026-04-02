@@ -195,28 +195,34 @@ plugin_update_check() {
     return
   fi
 
-  printf '%s\n' "- $tool：$version（插件安装）"
-
-  # Extract latest CHANGELOG entry
+  # Extract latest CHANGELOG entry and compare version
   local changelog
   if [ -n "$install_path" ] && [ -f "$install_path/CHANGELOG.md" ]; then
     changelog="$install_path/CHANGELOG.md"
   else
+    printf '%s\n' "- $tool：$version（插件安装，已是最新）"
     return
   fi
 
-  # Extract the first (latest) entry: from first "## [" to just before the second "## ["
-  local entry
-  entry=$(sed -n '/^## \[/,/^## \[/{ /^## \[/!{ /^## \[/q }; p }' "$changelog" 2>/dev/null) || true
-  # Fallback: grab lines between first and second version headings
-  if [ -z "$entry" ]; then
-    entry=$(awk '/^## \[/{if(p++) exit; next} p' "$changelog" 2>/dev/null) || true
+  # Get version from latest CHANGELOG heading (e.g. "## [5.0.5]" → "5.0.5")
+  local changelog_version
+  changelog_version=$(grep -m1 '^## \[' "$changelog" 2>/dev/null | sed 's/^## \[\(.*\)\].*/\1/') || true
+
+  # Compare installed version against CHANGELOG's latest heading
+  # Plugin installs have no remote — CHANGELOG IS the installed copy.
+  # If installed >= changelog version, user is already up to date.
+  if [ -n "$changelog_version" ]; then
+    local sorted
+    sorted=$(printf '%s\n%s' "$version" "$changelog_version" | sort -V | tail -1)
+    if [ "$sorted" = "$version" ]; then
+      printf '%s\n' "- $tool：$version（插件安装，已是最新）"
+      return 0
+    fi
+    # Installed < changelog version — shouldn't happen for plugin installs,
+    # but handle gracefully by showing what we have
   fi
 
-  if [ -n "$entry" ]; then
-    printf '%s\n' "  最近更新："
-    echo "$entry" | head -n 15 | sed 's/^/    /' | sed 's/    $//'
-  fi
+  printf '%s\n' "- $tool：$version（插件安装）"
 }
 
 git_update_check() {
@@ -407,10 +413,12 @@ print_dependency_update_checks() {
   if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
     if [ -d "$superpowers_path/.git" ]; then
       git_update_check "$superpowers_path" "superpowers"
+      printf '%s\n' "  更新命令：$superpowers_update_cmd"
     else
-      plugin_update_check "superpowers"
+      if ! plugin_update_check "superpowers"; then
+        printf '%s\n' "  更新命令：$superpowers_update_cmd"
+      fi
     fi
-    printf '%s\n' "  更新命令：$superpowers_update_cmd"
   elif [ "$superpowers_state" = "installed" ]; then
     printf '%s\n' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
     printf '%s\n' "  更新命令：$superpowers_update_cmd"
