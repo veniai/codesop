@@ -281,6 +281,7 @@ Use these routing defaults:
 - PR review / 审核意见 / "看看 PR" / code review feedback → `codex` or `review`
 - report bug only / "just report this" → `qa-only`
 - production incident / "prod is down" → `guard` or `careful`
+- 文档更新 / 更新文档 / sync docs → `document-release`
 
 When recommending, always include:
 
