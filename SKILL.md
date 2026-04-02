@@ -90,6 +90,12 @@ When this skill triggers:
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. Recommend the most relevant next skill or action
+8. If step 7 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
+   - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
+   - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
+   - ❌ 不适合 — skill mismatch; another skill would be significantly better
+   - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
+   The routing table is the sole authority. Validation is informational and can never override it.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
