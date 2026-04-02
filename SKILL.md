@@ -89,8 +89,20 @@ When this skill triggers:
    (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_skill_routing_coverage) || echo "路由检查跳过: 模块不可用"
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
-7. Recommend the most relevant next skill or action
-8. If step 7 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
+7. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts, not assumptions:
+   ```bash
+   git branch --show-current 2>/dev/null
+   git log --oneline -5 2>/dev/null
+   gh pr list --state open --head "$(git branch --show-current 2>/dev/null)" 2>/dev/null || echo "无 open PR"
+   git status --short 2>/dev/null | head -10
+   ```
+   Use the results to disambiguate the user's intent. Examples:
+   - User says "处理PR" → open PR exists → route to merge/review, not /ship
+   - User says "继续做" → recent commits reference a plan → route to execution, not planning
+   - User says "提交" → recent commit has PR number → route to update existing PR, not create new
+   These are illustrations of the principle, not exhaustive rules. The principle is: **when the signal could mean multiple things, observed git state breaks the tie.**
+8. Recommend the most relevant next skill or action (informed by step 7's git context)
+9. If step 8 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
    - ❌ 不适合 — skill mismatch; another skill would be significantly better
@@ -138,7 +150,7 @@ Output `## 工作台摘要` followed by `## Skill 建议` using one of these thr
 - 暂不建议: ... (原因: {...})
 ```
 
-**Case C — Validation skipped (no recommendation from step 7, or skill unreadable, or ❓ info insufficient):**
+**Case C — Validation skipped (no recommendation from step 8, or skill unreadable, or ❓ info insufficient):**
 
 ```md
 ## Skill 建议
@@ -322,6 +334,7 @@ Use these routing defaults:
 - weekly retro / "what did I ship" → `retro`
 - learn / "what did we learn" → `learn`
 - create or edit a skill → `writing-skills`
+- 处理 PR / "处理pr" / PR 合并后扫尾 → 先 `git log` 查最近 PR 上下文 → `review` 或 `ship` 或 `finishing-a-development-branch`
 - PR review / 审核意见 / "看看 PR" / code review feedback → `codex` or `review`
 - report bug only / "just report this" → `qa-only`
 - production incident / "prod is down" → `guard` or `careful`
@@ -369,6 +382,7 @@ Notes:
 |----------|------|
 | brainstorming vs office-hours | New feature → office-hours; small change → brainstorming |
 | requesting-code-review vs /review | Task-level → requesting-code-review; PR-level → /review |
+| 处理 PR vs 发 PR | 处理已有 PR → 先查 git log 确认上下文 → ship/review/finish; 发新 PR → ship (未提交→提交→PR) |
 | systematic-debugging vs /investigate | Single file → systematic-debugging; system-level → /investigate |
 | subagent vs executing-plans | Independent tasks → subagent (parallel); serial → executing-plans |
 | User says "just fix it" vs skill workflow | User instruction wins, but still obey verification and delivery rules from `AGENTS.md` |
