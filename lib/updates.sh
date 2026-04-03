@@ -1,10 +1,13 @@
 #!/bin/bash
-# updates.sh - Version checking and update utilities for codesop
+# updates.sh - Version checking and dependency utilities for codesop v2
 #
 # This module provides functions for:
+# - Checking plugin completeness (CORE + OPTIONAL)
+# - Checking independent skill completeness
+# - Checking plugin versions
+# - Checking routing coverage against the router table
+# - Printing a unified dependency report
 # - Checking git repository update status
-# - Printing dependency update information
-# - Displaying installation suggestions
 # - Getting current version
 #
 # Dependencies:
@@ -21,98 +24,173 @@ current_version() {
   cat "$VERSION_FILE" 2>/dev/null || echo "unknown"
 }
 
-# Scan installed skill names from gstack and superpowers
-# Outputs one skill name per line: "gstack:skillname" or "superpowers:skillname"
-scan_installed_skills() {
-  local skill_dir skill_name
+# Core plugins — missing = error
+CORE_PLUGINS=(
+  "superpowers@claude-plugins-official"
+  "code-review@claude-plugins-official"
+)
 
-  # gstack skills
-  for skill_dir in "$HOME/.claude/skills/gstack"/*/SKILL.md "$HOME/.agents/skills/gstack"/*/SKILL.md; do
-    [ -f "$skill_dir" ] || continue
-    skill_name="$(basename "$(dirname "$skill_dir")")"
-    printf 'gstack:%s\n' "$skill_name"
-  done 2>/dev/null || true
+# Optional plugins — missing = warning
+OPTIONAL_PLUGINS=(
+  "skill-creator@claude-plugins-official"
+  "frontend-design@claude-plugins-official"
+  "context7@claude-plugins-official"
+  "code-simplifier@claude-plugins-official"
+  "playwright@claude-plugins-official"
+  "claude-md-management@claude-plugins-official"
+  "codex@openai-codex"
+)
 
-  # superpowers skills (plugin cache)
-  local sp_path
-  sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
-  if [ -n "$sp_path" ] && [ -d "$sp_path/skills" ]; then
-    for skill_dir in "$sp_path/skills"/*/SKILL.md; do
-      [ -f "$skill_dir" ] || continue
-      skill_name="$(basename "$(dirname "$skill_dir")")"
-      printf 'superpowers:%s\n' "$skill_name"
-    done 2>/dev/null || true
-  fi
-}
+# Independent skills — missing = warning
+OPTIONAL_SKILLS=(
+  "codesop"
+  "browser-use"
+  "claude-to-im"
+)
 
-# Extract skill names referenced in SKILL.md routing (section 6)
-# Outputs one name per line (normalized to match directory names)
-scan_routed_skills() {
-  local skill_file="$ROOT_DIR/SKILL.md"
-  [ -f "$skill_file" ] || return 0
-  # Extract skill names from sections 6 and 7 of SKILL.md
-  # Matches three formats:
-  #   1. code block: skill-name (gstack|sp|superpowers)
-  #   2. backtick+tag: `skill-name` (gstack|sp|superpowers)
-  #   3. routing policy: `skill-name` in arrow mappings
-  {
-    # Section 6: Workflow Mapping (code block and backtick styles)
-    sed -n '/^## 6\. Workflow Mapping/,/^## 7\. Routing Policy/p' "$skill_file" \
-      | { grep -oE '`?[a-zA-Z][a-zA-Z0-9-]+`? *\((gstack|sp|superpowers)\)' || true; } \
-      | sed 's/`//g; s/ *([^)]*)$//'
-    # Section 7: Routing Policy (backtick arrow style)
-    sed -n '/^## 7\. Routing Policy/,/^## 7\.1 Completion Gate/p' "$skill_file" \
-      | { grep -oE '`[a-zA-Z][a-zA-Z0-9-]+`' || true; } \
-      | sed 's/`//g'
-  } | sort -u | sed \
-      -e 's/^subagent-driven-dev$/subagent-driven-development/' \
-      -e 's/^TDD$/test-driven-development/' \
-      -e 's/^verification-before-comp$/verification-before-completion/'
-}
+check_plugin_completeness() {
+  local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
+  local missing_core=() missing_optional=()
 
-# Compare installed skills against routed skills, report gaps
-# Returns 0 if all installed skills are routed, 1 if gaps found
-check_skill_routing_coverage() {
-  local installed routed missing_gstack=() missing_sp=()
-
-  installed="$(scan_installed_skills)" || true
-  routed="$(scan_routed_skills)" || true
-
-  if [ -z "$installed" ]; then
-    printf '%s\n' "路由覆盖：无已安装 skill，跳过检查"
-    return 0
+  if [ ! -f "$plugins_file" ]; then
+    printf '%s\n' "❌ 插件配置文件不存在: $plugins_file"
+    return 1
   fi
 
-  while IFS= read -r line; do
-    local source="${line%%:*}"
-    local name="${line#*:}"
-    # Skip internal/infrastructure skills that don't need routing
-    case "$name" in
-      gstack-upgrade|using-superpowers|connect-chrome|setup-browser-cookies| \
-      plan-ceo-review|plan-design-review|plan-eng-review|browse|design-html) continue ;;
-    esac
-    if ! printf '%s\n' "$routed" | grep -qxF "$name"; then
-      case "$source" in
-        gstack) missing_gstack+=("$name") ;;
-        superpowers) missing_sp+=("$name") ;;
-      esac
+  for plugin in "${CORE_PLUGINS[@]}"; do
+    if ! jq -e --arg id "$plugin" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      missing_core+=("$plugin")
     fi
-  done <<< "$installed"
+  done
 
-  if [ ${#missing_gstack[@]} -eq 0 ] && [ ${#missing_sp[@]} -eq 0 ]; then
-    printf '%s\n' "路由覆盖：所有已安装 skill 均已收录"
+  for plugin in "${OPTIONAL_PLUGINS[@]}"; do
+    if ! jq -e --arg id "$plugin" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      missing_optional+=("$plugin")
+    fi
+  done
+
+  if [ ${#missing_core[@]} -gt 0 ]; then
+    printf '%s\n' "❌ 核心插件缺失:"
+    for p in "${missing_core[@]}"; do printf '  - %s\n' "$p"; done
+  fi
+
+  if [ ${#missing_optional[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 可选插件缺失:"
+    for p in "${missing_optional[@]}"; do printf '  - %s\n' "$p"; done
+  fi
+
+  if [ ${#missing_core[@]} -eq 0 ] && [ ${#missing_optional[@]} -eq 0 ]; then
+    printf '%s\n' "✓ 所有插件已安装"
+  fi
+
+  [ ${#missing_core[@]} -eq 0 ]
+}
+
+check_skill_completeness() {
+  local missing=()
+  local skill_dirs=(
+    "$HOME/.claude/skills"
+    "$HOME/.agents/skills"
+  )
+
+  for skill in "${OPTIONAL_SKILLS[@]}"; do
+    local found=false
+    for dir in "${skill_dirs[@]}"; do
+      if [ -d "$dir/$skill" ]; then
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      missing+=("$skill")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 独立 Skill 缺失:"
+    for s in "${missing[@]}"; do printf '  - %s\n' "$s"; done
+  else
+    printf '%s\n' "✓ 所有独立 Skill 已安装"
+  fi
+
+  return 0
+}
+
+check_plugin_versions() {
+  local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
+  [ -f "$plugins_file" ] || return 1
+
+  # Superpowers: GitHub tags version comparison
+  local sp_current
+  sp_current=$(jq -r '."superpowers@claude-plugins-official".version // "unknown"' "$plugins_file" 2>/dev/null)
+  if [ "$sp_current" != "unknown" ]; then
+    local sp_latest
+    sp_latest=$(timeout 10 git ls-remote --tags --sort=-v:refname https://github.com/anthropics/claude-plugins-official.git 2>/dev/null \
+      | grep -oP 'refs/tags/superpowers/\K[0-9.]+' | head -1) || true
+    if [ -n "$sp_latest" ] && [ "$sp_current" != "$sp_latest" ]; then
+      printf '⬆ superpowers: %s → %s 可用\n' "$sp_current" "$sp_latest"
+    elif [ -n "$sp_latest" ]; then
+      printf '✓ superpowers: %s（最新）\n' "$sp_current"
+    fi
+  fi
+
+  return 0
+}
+
+check_routing_coverage() {
+  local router_file="${ROOT_DIR:-$HOME/codesop}/config/codesop-router.md"
+  if [ ! -f "$router_file" ]; then
+    printf '%s\n' "⚠️ 路由表不存在: $router_file"
     return 0
   fi
 
-  printf '%s\n' "⚠ 路由覆盖检查：以下 skill 已安装但未收录到路由"
-  if [ ${#missing_gstack[@]} -gt 0 ]; then
-    printf '  gstack: %s\n' "${missing_gstack[*]}"
+  local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
+  local missing=()
+
+  # Extract skill names from the table's 4th column (Skill)
+  # Table format: | 大类 | 优选 | 来源 | Skill | 什么时候用 |
+  # With | delimiters: $1=empty, $2=大类, $3=优选, $4=来源, $5=Skill, $6=什么时候用
+  while IFS= read -r line; do
+    local source skill_name
+    source=$(echo "$line" | awk -F'|' '{gsub(/^ +| +$/, "", $4); print $4}')
+    skill_name=$(echo "$line" | awk -F'|' '{gsub(/^ +| +$/, "", $5); print $5}')
+
+    [ -z "$skill_name" ] && continue
+    # Skip headers and separators
+    [[ "$skill_name" =~ ^[A-Z] ]] && continue
+    [[ "$skill_name" =~ ^Skill$ ]] && continue
+
+    # Strip codex: prefix for plugin lookup
+    local lookup_name="$skill_name"
+    [[ "$lookup_name" =~ ^codex: ]] && lookup_name="codex@openai-codex"
+
+    if [ "$source" = "sp" ]; then
+      # Superpowers skills — check superpowers plugin
+      if [ -f "$plugins_file" ] && ! jq -e --arg id "superpowers@claude-plugins-official" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+        missing+=("$skill_name (需要 superpowers)")
+      fi
+    elif [ "$source" = "plugin" ]; then
+      # Named plugin — check specific plugin
+      local plugin_id="${lookup_name}@claude-plugins-official"
+      if [ -f "$plugins_file" ] && ! jq -e --arg id "$plugin_id" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+        missing+=("$skill_name (需要 $plugin_id)")
+      fi
+    elif [ "$source" = "skill" ]; then
+      # Independent skill — check directory
+      if [ ! -d "$HOME/.claude/skills/$skill_name" ] && [ ! -d "$HOME/.agents/skills/$skill_name" ]; then
+        missing+=("$skill_name (独立 Skill)")
+      fi
+    fi
+  done < <(grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' "$router_file" | grep -v '^|.*---')
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 路由表引用但未安装:"
+    for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
+  else
+    printf '%s\n' "✓ 路由覆盖完整"
   fi
-  if [ ${#missing_sp[@]} -gt 0 ]; then
-    printf '  superpowers: %s\n' "${missing_sp[*]}"
-  fi
-  printf '%s\n' "  建议：更新 SKILL.md 第 6 节和 config/codesop-router.md，然后运行 bash setup --host auto"
-  return 1
+
+  return 0
 }
 
 # Extract CHANGELOG entries between two versions
@@ -365,161 +443,35 @@ EOF
   printf '%s\n' "- $tool_name：无法确认更新状态"
 }
 
-# Resolve install path for a tool given the host.
-# Uses find_superpowers_plugin_path for superpowers, then falls back to host-specific candidates.
-# Arguments:
-#   $1 - tool name ("superpowers" or "gstack")
-#   $2 - host name
-# Prints the resolved path (or nothing if not found)
-_resolve_tool_path() {
-  local tool="$1"
-  local host="$2"
+print_dependency_report() {
+  local host="$1"
 
-  if [ "$tool" = "superpowers" ]; then
-    # Plugin cache is host-independent
+  printf '\n%s\n' "=== 依赖检查 ==="
+
+  printf '%s\n' "插件完整性："
+  check_plugin_completeness || true
+
+  printf '\n%s\n' "独立 Skill："
+  check_skill_completeness
+
+  printf '\n%s\n' "版本检查："
+  check_plugin_versions
+
+  printf '\n%s\n' "路由覆盖："
+  check_routing_coverage
+
+  # Superpowers update check (keep existing git-based logic for git installs)
+  if [ "$host" = "claude" ]; then
+    printf '\n%s\n' "更新建议："
     local sp_path
-    sp_path="$(find_superpowers_plugin_path 2>/dev/null)" && { printf '%s\n' "$sp_path"; return 0; }
-    case "$host" in
-      claude)  find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" || true ;;
-      codex)   find_first_existing_path "$HOME/.codex/superpowers" "$HOME/.codex/skills/.system" || true ;;
-      opencode) find_first_existing_path "$HOME/.config/opencode/plugins/superpowers" "$HOME/.agents/skills/superpowers" || true ;;
-      *)       find_first_existing_path "$HOME/.claude/plugins/superpowers" "$HOME/.codex/superpowers" "$HOME/.config/opencode/plugins/superpowers" || true ;;
-    esac
-  elif [ "$tool" = "gstack" ]; then
-    case "$host" in
-      claude)  find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/gstack" ;;
-      codex)   find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack" ;;
-      opencode) find_first_existing_path "$HOME/.agents/skills/gstack" "$HOME/gstack" "$HOME/.claude/skills/gstack" ;;
-      *)       find_first_existing_path "$HOME/.claude/skills/gstack" "$HOME/.agents/skills/gstack" "$HOME/gstack" ;;
-    esac
-  fi
-}
-
-print_dependency_update_checks() {
-  local host="$1"
-  local superpowers_state="$2"
-  local gstack_state="$3"
-  local superpowers_update_cmd=""
-  local gstack_update_cmd="/gstack-upgrade"
-
-  case "$host" in
-    claude)  superpowers_update_cmd="/plugin update superpowers" ;;
-    codex)   superpowers_update_cmd="按 Codex 官方 superpowers 安装文档重新执行更新" ;;
-    opencode) superpowers_update_cmd="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新" ;;
-    *)       superpowers_update_cmd="按当前宿主的 superpowers 官方更新方式执行" ;;
-  esac
-
-  local superpowers_path gstack_path
-  superpowers_path="$(_resolve_tool_path superpowers "$host")" || true
-  gstack_path="$(_resolve_tool_path gstack "$host")" || true
-
-  printf '
-%s
-' "更新检查："
-
-  if [ "$superpowers_state" = "installed" ] && [ -n "$superpowers_path" ]; then
-    if [ -d "$superpowers_path/.git" ]; then
-      git_update_check "$superpowers_path" "superpowers"
-      printf '%s\n' "  更新命令：$superpowers_update_cmd"
+    sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
+    if [ -n "$sp_path" ] && [ -d "$sp_path/.git" ]; then
+      git_update_check "$sp_path" "superpowers" "/plugin update superpowers"
     else
-      if ! plugin_update_check "superpowers"; then
-        printf '%s\n' "  更新命令：$superpowers_update_cmd"
-      fi
+      plugin_update_check "superpowers"
+      printf '%s\n' "  更新命令：/plugin update superpowers"
     fi
-  elif [ "$superpowers_state" = "installed" ]; then
-    printf '%s\n' "- superpowers：已安装，但当前无法定位安装目录，无法检查更新"
-    printf '%s\n' "  更新命令：$superpowers_update_cmd"
   else
-    printf '%s\n' "- superpowers：未安装，跳过更新检查"
+    printf '%s\n' "  插件检查仅支持 Claude Code 宿主"
   fi
-
-  if [ "$gstack_state" = "installed" ] && [ -n "$gstack_path" ]; then
-    git_update_check "$gstack_path" "gstack"
-    printf '%s\n' "  更新命令：$gstack_update_cmd"
-  elif [ "$gstack_state" = "partial" ]; then
-    printf '%s
-' "- gstack：仅检测到残留安装，先修复宿主接入，再检查更新"
-  else
-    printf '%s
-' "- gstack：未安装，跳过更新检查"
-  fi
-}
-
-print_install_suggestions() {
-  local host="$1"
-  local superpowers_state="$2"
-  local gstack_state="$3"
-  local superpowers_install=""
-  local superpowers_update=""
-  local gstack_install=""
-  local gstack_update=""
-  local gstack_repair=""
-
-  case "$host" in
-    claude)
-      superpowers_install="在 Claude Code 中执行：/plugin install superpowers@claude-plugins-official"
-      superpowers_update="/plugin update superpowers"
-      gstack_install="git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup"
-      gstack_update="/gstack-upgrade"
-      gstack_repair="检测到 gstack 残留，但 Claude Code 宿主接入不完整。建议执行：$gstack_install"
-      ;;
-    codex)
-      superpowers_install="在 Codex 中执行：Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
-      superpowers_update="按 Codex 官方 superpowers 安装文档重新执行更新"
-      gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host codex"
-      gstack_update="/gstack-upgrade"
-      gstack_repair="检测到 gstack 仓库或命令，但 Codex 宿主接入不完整。建议重新执行：$gstack_install"
-      ;;
-    opencode)
-      superpowers_install="在 OpenCode/OpenClaw 中执行：Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md"
-      superpowers_update="按 OpenCode/OpenClaw 官方 superpowers 安装文档重新执行更新"
-      gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host auto"
-      gstack_update="/gstack-upgrade"
-      gstack_repair="检测到 gstack 仓库或命令，但 OpenCode/OpenClaw 宿主接入不完整。建议重新执行：$gstack_install"
-      ;;
-    *)
-      superpowers_install="先安装 Claude Code、Codex 或 OpenCode/OpenClaw 之后再按对应宿主安装"
-      superpowers_update="按当前宿主的 superpowers 官方更新方式执行"
-      gstack_install="git clone https://github.com/garrytan/gstack.git ~/gstack && cd ~/gstack && ./setup --host auto"
-      gstack_update="/gstack-upgrade"
-      gstack_repair="检测到 gstack 仓库或命令，但未确认当前宿主已完成接入。建议执行：$gstack_install"
-      ;;
-  esac
-
-  print_dependency_update_checks "$host" "$superpowers_state" "$gstack_state"
-
-  printf '
-%s
-' "安装/修复建议："
-
-  if [ "$superpowers_state" = "missing" ]; then
-    printf '%s
-' "- superpowers：$superpowers_install"
-  else
-    printf '%s
-' "- superpowers：如需更新，执行：$superpowers_update"
-  fi
-
-  if [ "$gstack_state" = "missing" ]; then
-    printf '%s
-' "- gstack：$gstack_install"
-  elif [ "$gstack_state" = "partial" ]; then
-    printf '%s
-' "- gstack：$gstack_repair"
-  else
-    printf '%s
-' "- gstack：如需更新，执行：$gstack_update"
-  fi
-
-  printf '
-%s
-' "下一步："
-  printf '%s
-' "- 如需我继续执行安装、修复或更新，请明确指定依赖。"
-
-  # Skill routing coverage check
-  printf '
-%s
-' "路由覆盖："
-  check_skill_routing_coverage || true
 }
