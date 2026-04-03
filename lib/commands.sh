@@ -7,16 +7,12 @@ _resync_and_check() {
   printf '%s\n' "重新同步本机宿主集成..."
   bash "$ROOT_DIR/setup" --host auto
 
-  # Check gstack/superpowers dependency updates
+  # Check plugin dependencies
   local host="unknown"
   [ -d "$HOME/.config/opencode" ] && host="opencode"
   [ -d "$HOME/.codex" ] && host="codex"
   [ -d "$HOME/.claude" ] && host="claude"
-  local sp_state="missing"
-  local gs_state="missing"
-  has_superpowers && sp_state="installed"
-  has_gstack && gs_state="installed"
-  print_dependency_update_checks "$host" "$sp_state" "$gs_state"
+  print_dependency_report "$host"
 
   check_skill_routing_coverage || true
 }
