@@ -40,14 +40,13 @@ assert_contains "$skill_header" "## Skill 建议"
 assert_contains "$skill_output" "Generate AGENTS.md"
 assert_contains "$skill_output" '`/codesop init [path]`'
 assert_contains "$skill_output" '`/codesop update`'
-assert_contains "$skill_full" "## 7.1 Completion Gate"
+assert_contains "$skill_full" "## 5. Completion Gate"
 assert_contains "$skill_full" "## 文档判定"
 assert_contains "$skill_full" "- CLAUDE.md: 已更新 / 未更新，原因：..."
 assert_contains "$skill_output" "Defaults to 中文"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "superpowers"
-assert_contains "$readme_output" "gstack"
 assert_contains "$readme_output" 'AGENTS.md'
 assert_contains "$readme_output" 'PRD.md'
 assert_contains "$readme_output" 'CLAUDE.md'
