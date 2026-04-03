@@ -170,7 +170,7 @@ setup_system_links() {
 # Skill Dependency Checking
 # ============================================================================
 
-# Skill paths for has_superpowers/has_gstack (order: most common first)
+# Skill paths for has_superpowers (order: most common first)
 _SP_CANDIDATES=(
   "$HOME/.claude/plugins/cache"
   "$HOME/.codex/superpowers"
@@ -178,12 +178,6 @@ _SP_CANDIDATES=(
   "$HOME/.claude/skills/superpowers"
   "$HOME/.agents/skills/superpowers"
   "$HOME/.config/opencode/plugins/superpowers"
-)
-_GS_CANDIDATES=(
-  "$HOME/.claude/skills/gstack"
-  "$HOME/.agents/skills/gstack"
-  "$HOME/.config/opencode/skills/gstack"
-  "$HOME/.codex/skills/gstack"
 )
 
 # Detect if superpowers is installed
@@ -204,17 +198,6 @@ has_superpowers() {
   return 1
 }
 
-# Detect if gstack is installed
-# Returns: 0 if installed, 1 if not
-has_gstack() {
-  local path
-  for path in "${_GS_CANDIDATES[@]}"; do
-    [ -d "$path" ] && return 0
-  done
-
-  command -v gstack &>/dev/null
-}
-
 # Check skill dependencies and print status
 # Checks multiple installation locations (Claude Code + Codex)
 check_skill_dependencies() {
@@ -230,11 +213,11 @@ check_skill_dependencies() {
     else
       echo "✓ superpowers 已安装"
     fi
-    if ! has_gstack; then
-      echo "⚠ gstack 未安装"
-    else
-      echo "✓ gstack 已安装"
-    fi
+  fi
+
+  # Check plugin completeness
+  if declare -f check_plugin_completeness >/dev/null 2>&1; then
+    check_plugin_completeness || true
   fi
 
   return 0
@@ -303,55 +286,6 @@ _check_skills_all() {
       echo "  ⚠ superpowers 未安装于：$sp_missing"
       [ $sp_cc_found -eq 0 ] && echo "    Claude Code：/plugin install superpowers"
       [ $sp_codex_found -eq 0 ] && echo "    Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
-    fi
-  fi
-
-  # gstack: check per-host installations
-  local gs_found=0
-  local gs_cc=0 gs_codex=0
-
-  # Claude Code gstack
-  if [ -d "$HOME/.claude/skills/gstack" ]; then
-    gs_cc=1; gs_found=1
-    local gs_ver="unknown"
-    [ -f "$HOME/.claude/skills/gstack/VERSION" ] && gs_ver=$(cat "$HOME/.claude/skills/gstack/VERSION" | tr -d '[:space:]') || true
-    printf '  %-14s %s（Claude Code）\n' "gstack:" "$gs_ver"
-    if [ -d "$HOME/.claude/skills/gstack/.git" ]; then
-      git_update_check "$HOME/.claude/skills/gstack" "gstack (Claude Code)" "/gstack-upgrade"
-    else
-      _check_changelog "$HOME/.claude/skills/gstack" "$gs_ver" "/gstack-upgrade"
-    fi
-  fi
-
-  # Codex gstack (check both paths)
-  for gs_path in "$HOME/.agents/skills/gstack" "$HOME/.codex/skills/gstack"; do
-    if [ -d "$gs_path" ]; then
-      gs_codex=1; gs_found=1
-      local gs_ver="unknown" gs_label="Codex (agents)"
-      [ -f "$gs_path/VERSION" ] && gs_ver=$(cat "$gs_path/VERSION" | tr -d '[:space:]') || true
-      [ "$gs_path" = "$HOME/.codex/skills/gstack" ] && gs_label="Codex"
-      printf '  %-14s %s（%s）\n' "gstack:" "$gs_ver" "$gs_label"
-      if [ -d "$gs_path/.git" ]; then
-        git_update_check "$gs_path" "gstack ($gs_label)" "/gstack-upgrade"
-      else
-        _check_changelog "$gs_path" "$gs_ver" "/gstack-upgrade"
-      fi
-    fi
-  done
-
-  if [ $gs_found -eq 0 ]; then
-    echo "⚠ gstack 未安装"
-    echo "  Claude Code：git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack"
-    echo "  Codex：git clone https://github.com/garrytan/gstack.git ~/.agents/skills/gstack"
-  else
-    # Suggest missing per-host installations
-    local gs_missing=""
-    if [ $gs_cc -eq 0 ]; then gs_missing="$gs_missing Claude Code"; fi
-    if [ $gs_codex -eq 0 ]; then gs_missing="$gs_missing Codex"; fi
-    if [ -n "$gs_missing" ]; then
-      echo "  ⚠ gstack 未安装于：$gs_missing"
-      [ $gs_cc -eq 0 ] && echo "    Claude Code：git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack"
-      [ $gs_codex -eq 0 ] && echo "    Codex：git clone https://github.com/garrytan/gstack.git ~/.agents/skills/gstack"
     fi
   fi
 
