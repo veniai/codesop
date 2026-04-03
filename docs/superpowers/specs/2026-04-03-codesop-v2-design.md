@@ -216,7 +216,10 @@ OPTIONAL_SKILLS=(
 
 1. `check_plugin_completeness()` — 遍历 CORE + OPTIONAL，读 installed_plugins.json，核心缺失报错，可选缺失提示
 2. `check_skill_completeness()` — 遍历 OPTIONAL_SKILLS，检查目录存在，缺失提示
-3. `check_plugin_versions()` — superpowers 通过 GitHub tags 对比最新版本（保留现有逻辑）；其他插件只检查存在性，不做版本对比（Codex P2-4 修正）
+3. `check_plugin_versions()` — 版本检查策略（基于调研确认）：
+   - **superpowers**：通过 GitHub tags (`git ls-remote --tags anthropics/claude-plugins-official`) 对比最新版本，保留现有逻辑。这是唯一能做语义版本对比的插件（package.json 有版本 + tags 有版本）
+   - **其他 8 个插件**：只检查存在性，不做版本对比。原因：`installed_plugins.json` 中 5 个插件版本为 `"unknown"`，3 个虽有版本号但无"最新版"来源（市场 repo 无 tags/package.json）。用户通过 `/plugin update` 重装即为最新
+   - 不对 codex 做 gitCommitSha 对比（重装即最新，不值得加复杂度）
 4. `check_routing_coverage()` — 读 codesop-router.md 表格中所有 skill 名称，验证每个都有对应的插件/skill 安装
 5. `print_dependency_report()` — 汇总输出
 
