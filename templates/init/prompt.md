@@ -4,4 +4,4 @@
 - 依赖方向：domain ← usecases ← infra/app
 
 ## 技能依赖
-项目依赖 Superpowers 和 GStack 技能集驱动工作流。
+项目依赖 Superpowers 和插件生态驱动工作流。
