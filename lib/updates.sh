@@ -58,13 +58,13 @@ check_plugin_completeness() {
   fi
 
   for plugin in "${CORE_PLUGINS[@]}"; do
-    if ! jq -e --arg id "$plugin" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+    if ! jq -e --arg id "$plugin" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
       missing_core+=("$plugin")
     fi
   done
 
   for plugin in "${OPTIONAL_PLUGINS[@]}"; do
-    if ! jq -e --arg id "$plugin" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+    if ! jq -e --arg id "$plugin" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
       missing_optional+=("$plugin")
     fi
   done
@@ -122,7 +122,7 @@ check_plugin_versions() {
 
   # Superpowers: GitHub tags version comparison
   local sp_current
-  sp_current=$(jq -r '."superpowers@claude-plugins-official".version // "unknown"' "$plugins_file" 2>/dev/null)
+  sp_current=$(jq -r '.plugins."superpowers@claude-plugins-official"[0].version // "unknown"' "$plugins_file" 2>/dev/null)
   if [ "$sp_current" != "unknown" ]; then
     local sp_latest
     sp_latest=$(timeout 10 git ls-remote --tags --sort=-v:refname https://github.com/anthropics/claude-plugins-official.git 2>/dev/null \
@@ -166,7 +166,7 @@ check_routing_coverage() {
 
     if [ "$source" = "sp" ]; then
       # Superpowers skills — check superpowers plugin
-      if [ -f "$plugins_file" ] && ! jq -e --arg id "superpowers@claude-plugins-official" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      if [ -f "$plugins_file" ] && ! jq -e --arg id "superpowers@claude-plugins-official" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
         missing+=("$skill_name (需要 superpowers)")
       fi
     elif [ "$source" = "plugin" ]; then
@@ -177,7 +177,7 @@ check_routing_coverage() {
       else
         plugin_id="${lookup_name}@claude-plugins-official"
       fi
-      if [ -f "$plugins_file" ] && ! jq -e --arg id "$plugin_id" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      if [ -f "$plugins_file" ] && ! jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
         missing+=("$skill_name (需要 $plugin_id)")
       fi
     elif [ "$source" = "skill" ]; then
