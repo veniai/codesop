@@ -69,7 +69,7 @@ codesop update
 ## 文档收尾规则 / Document Gate
 
 - `/codesop` 路由后的实现任务，在最终回复前必须判定 `CLAUDE.md`、`PRD.md`、`README.md` 是否需要更新
-- 如果任一文档需要更新，优先调用 `document-release`
+- 如果任一文档需要更新，优先调用 `claude-md-management`
 - `AGENTS.md` 不进入默认判定集合，因为它应始终保持为 `@CLAUDE.md` 的薄包装
 - `CHANGELOG.md` 不属于默认强制集合
 
@@ -91,12 +91,11 @@ codesop update
 
 | 场景 | Pipeline |
 |------|----------|
-| 新功能 | office-hours → writing-plans → autoplan → worktree → subagent-dev → TDD → verification → review → ship |
-| Bug 修复 | investigate → systematic-debugging → TDD → verification → review |
-| 小改动 | TDD → verification → review (if multi-file) |
-| 重构 | brainstorming → writing-plans → worktree → subagent-dev → verification → review → ship |
-| Code Review 反馈 | receiving-code-review → TDD fix → verification → reply |
-| 生产事故 | careful → investigate → systematic-debugging → fix → canary |
+| 新功能 | brainstorming → writing-plans → worktree → subagent-dev → verification → finishing |
+| Bug 修复 | systematic-debugging → verification → finishing |
+| 小改动 | subagent-dev → verification → finishing (if multi-file) |
+| 重构 | brainstorming → writing-plans → worktree → subagent-dev → verification → finishing |
+| Code Review 反馈 | receiving-code-review → fix → verification → reply |
 
 ## 依赖 / Dependencies
 
