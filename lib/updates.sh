@@ -171,7 +171,12 @@ check_routing_coverage() {
       fi
     elif [ "$source" = "plugin" ]; then
       # Named plugin — check specific plugin
-      local plugin_id="${lookup_name}@claude-plugins-official"
+      local plugin_id
+      if [[ "$lookup_name" == *@* ]]; then
+        plugin_id="$lookup_name"
+      else
+        plugin_id="${lookup_name}@claude-plugins-official"
+      fi
       if [ -f "$plugins_file" ] && ! jq -e --arg id "$plugin_id" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
         missing+=("$skill_name (需要 $plugin_id)")
       fi
