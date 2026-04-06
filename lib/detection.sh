@@ -220,7 +220,7 @@ detect_project_shape_and_framework() {
     local plugin_id="$1"
     local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
     [ -f "$plugins_file" ] || return 1
-    jq -e --arg id "$plugin_id" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true
+    jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true
   }
 
   detect_all_tools() {
