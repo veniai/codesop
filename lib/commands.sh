@@ -14,7 +14,7 @@ _resync_and_check() {
   [ -d "$HOME/.claude" ] && host="claude"
   print_dependency_report "$host"
 
-  check_skill_routing_coverage || true
+  check_routing_coverage || true
 }
 
 run_update() {

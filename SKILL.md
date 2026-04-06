@@ -86,6 +86,7 @@ When this skill triggers:
 5. Run dependency report:
    ```bash
    (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_routing_coverage) || echo "依赖检查跳过: 模块不可用"
+   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_document_consistency) || echo "文档一致性检查跳过: 模块不可用"
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts:
@@ -161,6 +162,10 @@ Routing table is the final authority. Validation line is informational. User dec
   - "路由覆盖完整"→ "✓ 路由覆盖完整"
   - 含缺失 → 显示原文
   - 模块不可用 → "路由覆盖：模块不可用"
+- 文档一致性：（粘贴 check_document_consistency 输出）
+  - 全部 ✓ → 合并为一行 "✓ 文档一致"
+  - 含 ⚠️ → 显示原文
+  - 模块不可用 → "文档一致性：模块不可用"
 ```
 
 Compress for quick answers, but keep the same mental model.

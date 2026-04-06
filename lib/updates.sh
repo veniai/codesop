@@ -48,6 +48,36 @@ OPTIONAL_SKILLS=(
   "claude-to-im"
 )
 
+# Stale terms — removed in v2.0, should not appear in active docs
+STALE_TERMS=(
+  "document-release"       # gstack skill, replaced by claude-md-management
+  "gstack-upgrade"         # gstack command, removed
+  "codesop-setup"          # removed command
+  "/codesop-setup"         # removed slash command
+  "codesop status"         # removed product surface
+  "codesop diagnose"       # removed product surface
+)
+
+# Active docs — scanned for stale references (excludes CHANGELOG.md, PRD.md where historical refs are ok)
+DOC_SCAN_TARGETS=(
+  "README.md"
+  "SKILL.md"
+  "templates/system/AGENTS.md"
+  "config/codesop-router.md"
+  "commands/codesop-init.md"
+  "commands/codesop-update.md"
+)
+
+# README workflow shorthand → routing table full skill name
+README_SKILL_ALIASES=(
+  "brainstorming:brainstorming"
+  "writing-plans:writing-plans"
+  "worktree:using-git-worktrees"
+  "subagent-dev:subagent-driven-development"
+  "verification:verification-before-completion"
+  "finishing:finishing-a-development-branch"
+)
+
 check_plugin_completeness() {
   local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
   local missing_core=() missing_optional=()
@@ -193,6 +223,108 @@ check_routing_coverage() {
     for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
   else
     printf '%s\n' "✓ 路由覆盖完整"
+  fi
+
+  return 0
+}
+
+check_document_consistency() {
+  local root="${ROOT_DIR:-$HOME/codesop}"
+  local version_file="${VERSION_FILE:-$root/VERSION}"
+
+  # --- A: Version alignment ---
+  local ver_file="" ver_json="" ver_prd=""
+
+  if [ -f "$version_file" ]; then
+    ver_file="$(tr -d '[:space:]' < "$version_file")" || true
+  fi
+
+  if [ -f "$root/skill.json" ] && command -v jq >/dev/null 2>&1; then
+    ver_json="$(jq -r '.version // ""' "$root/skill.json" 2>/dev/null)" || ver_json=""
+  fi
+
+  if [ -f "$root/PRD.md" ]; then
+    ver_prd="$(grep -m1 '^# Current Version:' "$root/PRD.md" 2>/dev/null | sed 's/^# Current Version: //' | tr -d '[:space:]')" || ver_prd=""
+  fi
+
+  if [ -n "$ver_file" ] && [ "$ver_file" = "$ver_json" ] && [ "$ver_file" = "$ver_prd" ]; then
+    printf '%s\n' "✓ 版本对齐: VERSION=$ver_file skill.json=$ver_json PRD.md=$ver_prd"
+  else
+    printf '%s\n' "⚠️ 版本不一致: VERSION=${ver_file:-<missing>} skill.json=${ver_json:-<missing>} PRD.md=${ver_prd:-<missing>}"
+  fi
+
+  # --- B: Stale reference scan ---
+  local stale_hits=()
+  local target term file_path
+  for target in "${DOC_SCAN_TARGETS[@]}"; do
+    file_path="$root/$target"
+    [ -f "$file_path" ] || continue
+    for term in "${STALE_TERMS[@]}"; do
+      if grep -q "$term" "$file_path" 2>/dev/null; then
+        stale_hits+=("$target: '$term'")
+      fi
+    done
+  done
+
+  if [ ${#stale_hits[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 过时引用:"
+    for hit in "${stale_hits[@]}"; do printf '  - %s\n' "$hit"; done
+  else
+    printf '%s\n' "✓ 无过时引用"
+  fi
+
+  # --- C: Contract consistency (README aliases → routing table) ---
+  local router_file="$root/config/codesop-router.md"
+  local readme_file="$root/README.md"
+  local contract_issues=()
+
+  if [ ! -f "$router_file" ]; then
+    contract_issues+=("路由表缺失: $router_file")
+  elif [ ! -f "$readme_file" ]; then
+    contract_issues+=("README 缺失: $readme_file")
+  else
+    # Build set of routing table skill names
+    local -a router_skills=()
+    local line skill_name
+    while IFS= read -r line; do
+      skill_name="$(echo "$line" | awk -F'|' '{gsub(/^ +| +$/, "", $5); print $5}')"
+      [ -z "$skill_name" ] && continue
+      [[ "$skill_name" =~ ^[A-Z] ]] && continue
+      [[ "$skill_name" =~ ^\* ]] && continue
+      router_skills+=("$skill_name")
+    done < <(grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' "$router_file" | grep -v '^|.*---')
+
+    # For each README alias, verify the resolved full name exists in routing table
+    local mapping alias full found rs
+    for mapping in "${README_SKILL_ALIASES[@]}"; do
+      alias="${mapping%%:*}"
+      full="${mapping#*:}"
+      found=false
+      for rs in "${router_skills[@]}"; do
+        if [ "$full" = "$rs" ]; then
+          found=true
+          break
+        fi
+      done
+      if [ "$found" = false ]; then
+        contract_issues+=("别名 '$alias' → '$full' 不在路由表中")
+      fi
+    done
+
+    # Check README mentions each alias at least once
+    for mapping in "${README_SKILL_ALIASES[@]}"; do
+      alias="${mapping%%:*}"
+      if ! grep -q "$alias" "$readme_file" 2>/dev/null; then
+        contract_issues+=("README 未提及别名 '$alias'")
+      fi
+    done
+  fi
+
+  if [ ${#contract_issues[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 契约不一致:"
+    for ci in "${contract_issues[@]}"; do printf '  - %s\n' "$ci"; done
+  else
+    printf '%s\n' "✓ 契约一致"
   fi
 
   return 0
@@ -464,6 +596,9 @@ print_dependency_report() {
 
   printf '\n%s\n' "路由覆盖："
   check_routing_coverage
+
+  printf '\n%s\n' "文档一致性："
+  check_document_consistency
 
   # Superpowers update check (keep existing git-based logic for git installs)
   if [ "$host" = "claude" ]; then

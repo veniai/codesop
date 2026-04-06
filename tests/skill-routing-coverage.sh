@@ -66,5 +66,57 @@ echo "Test 4: Dependency arrays are populated"
 
 echo "  PASS (${#CORE_PLUGINS[@]} core, ${#OPTIONAL_PLUGINS[@]} optional, ${#OPTIONAL_SKILLS[@]} skills)"
 
+# --- Test 5: check_document_consistency version alignment (real repo) ---
+echo "Test 5: check_document_consistency version alignment"
+
+result="$(ROOT_DIR="$ROOT_DIR" VERSION_FILE="$ROOT_DIR/VERSION" check_document_consistency)" || true
+printf '%s' "$result" | grep -q "版本" || fail "version alignment line missing"
+
+echo "  PASS"
+
+# --- Test 6: check_document_consistency detects version mismatch ---
+echo "Test 6: check_document_consistency detects version mismatch"
+
+_mismatch_dir="$(mktemp -d)"
+echo "1.0.0" > "$_mismatch_dir/VERSION"
+echo '{"version": "2.0.0"}' > "$_mismatch_dir/skill.json"
+mkdir -p "$_mismatch_dir/config"
+echo '# Current Version: 3.0.0' > "$_mismatch_dir/PRD.md"
+cp "$ROOT_DIR/config/codesop-router.md" "$_mismatch_dir/config/" 2>/dev/null || true
+result="$(ROOT_DIR="$_mismatch_dir" VERSION_FILE="$_mismatch_dir/VERSION" check_document_consistency)" || true
+printf '%s' "$result" | grep -q "版本不一致" || fail "should detect version mismatch"
+rm -rf "$_mismatch_dir"
+
+echo "  PASS"
+
+# --- Test 7: check_document_consistency detects stale references ---
+echo "Test 7: check_document_consistency detects stale references"
+
+_stale_dir="$(mktemp -d)"
+echo "2.0.0" > "$_stale_dir/VERSION"
+echo '{"version": "2.0.0"}' > "$_stale_dir/skill.json"
+echo '# Current Version: 2.0.0' > "$_stale_dir/PRD.md"
+mkdir -p "$_stale_dir/config" "$_stale_dir/templates/system" "$_stale_dir/commands"
+cp "$ROOT_DIR/config/codesop-router.md" "$_stale_dir/config/" 2>/dev/null || true
+echo "Use codesop-setup for setup" > "$_stale_dir/README.md"
+: > "$_stale_dir/SKILL.md"
+: > "$_stale_dir/templates/system/AGENTS.md"
+: > "$_stale_dir/commands/codesop-init.md"
+: > "$_stale_dir/commands/codesop-update.md"
+result="$(ROOT_DIR="$_stale_dir" VERSION_FILE="$_stale_dir/VERSION" check_document_consistency)" || true
+printf '%s' "$result" | grep -q "过时引用" || fail "should detect stale reference 'codesop-setup'"
+rm -rf "$_stale_dir"
+
+echo "  PASS"
+
+# --- Test 8: Document consistency arrays are populated ---
+echo "Test 8: Document consistency arrays are populated"
+
+[ ${#STALE_TERMS[@]} -gt 0 ] || fail "STALE_TERMS is empty"
+[ ${#DOC_SCAN_TARGETS[@]} -gt 0 ] || fail "DOC_SCAN_TARGETS is empty"
+[ ${#README_SKILL_ALIASES[@]} -gt 0 ] || fail "README_SKILL_ALIASES is empty"
+
+echo "  PASS (${#STALE_TERMS[@]} stale terms, ${#DOC_SCAN_TARGETS[@]} scan targets, ${#README_SKILL_ALIASES[@]} aliases)"
+
 echo ""
 echo "PASS"
