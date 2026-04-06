@@ -1,35 +1,56 @@
-## codesop 路由卡
+## codesop 路由卡 (v2)
 
 新任务必须先输出任务对齐块（理解 + 阶段 + Skill）。
 完整 pipeline 定义见 /codesop。
 
-### 必走路径（不可跳过）
-| 用户信号 | Pipeline 阶段 | 必走 Skill 序列 |
-|---------|--------------|----------------|
-| 做功能 / 加东西 / 重构 | 探索→计划→执行→验证→review | office-hours (direction unclear) or brainstorming (direction clear) → writing-plans → autoplan → using-git-worktrees → subagent-driven-development (or executing-plans / dispatching-parallel-agents) → test-driven-development → verification-before-completion → review |
-| 修 bug / 测试挂了 | 调试→验证→review | investigate (system-level) or systematic-debugging (single-file) → verification-before-completion → review |
-| 做完了 / 修好了 | 验证→review | verification-before-completion → qa(web) → review |
-| 发布 / ship | 发布→清理 | ship → setup-deploy (首次) → land-and-deploy → document-release |
+### 技能总表（按项目生命周期排序）
 
-### 可选路径
-| 用户信号 | Skill |
-|---------|-------|
-| 方向不明确 | office-hours |
-| 测一下 (web) | qa |
-| 只报 bug 不改代码 | qa-only |
-| 小心点 / 生产环境 | careful |
-| 最大安全模式 | guard (= careful + freeze) |
-| 只改这个目录 | freeze |
-| 看看学到了什么 | learn |
-| 回顾这周做了什么 | retro |
-| 查安全 | cso |
-| 测性能 | benchmark |
-| 做设计 | design-consultation / design-shotgun → design-review |
-| 写新 skill | writing-skills |
-| 收 code review | requesting-code-review |
-| 处理 code review 反馈 | receiving-code-review |
-| 对抗性 review / adversarial review | codex |
-| 更新文档 / sync docs | document-release |
+| 大类 | 优选 | 来源 | Skill | 什么时候用 |
+|------|------|------|-------|-----------|
+| **1. 需求分析与设计** | | | | |
+| | ★ | sp | brainstorming | 任何新功能/改动前：理解需求→澄清问题→出设计方案→写 spec→spec 自审→用户审阅 |
+| | ★ | plugin | frontend-design | 做前端 UI 时：强制设计思维阶段，拒绝通用 AI 审美，独特的排版/配色/动效 |
+| **2. 生成执行文档** | | | | |
+| | ★ | sp | writing-plans | spec 已批准，拆成可执行的分步任务 |
+| **3. 开发与执行** | | | | |
+| | ★ | sp | using-git-worktrees | 开发前创建隔离工作区 |
+| | ★ | sp | subagent-driven-development | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
+| | | sp | dispatching-parallel-agents | 2+ 个完全独立任务并行加速时 |
+| | | sp | executing-plans | 自己串行执行计划（不用子 agent） |
+| | | sp | requesting-code-review | 开发中完成一个功能后提前让 AI 审一遍 |
+| **4. 测试与验证** | | | | |
+| | ★ | sp | verification-before-completion | 声明完成前必须运行验证命令确认输出 |
+| | | plugin | code-simplifier | 功能验证通过后，自动优化代码可读性和结构 |
+| | | sp | test-driven-development | 单独使用 TDD 红绿重构（subagent-driven-development 已内置） |
+| **5. 提交 PR** | | | | |
+| | ★ | sp | finishing-a-development-branch | 测试通过后提交 PR 或合并 |
+| **6. 代码审查** | | | | |
+| | ★ | plugin | code-review | PR 提交后自动审查：5 agent 并行 + 置信度评分 + 自动发评论 |
+| | | plugin | codex:review | 需要 OpenAI 第二意见审查代码 diff 时（独立视角） |
+| | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 |
+| | | sp | receiving-code-review | 收到 code-review 评论后，先技术评估再执行 |
+| **7. 前端测试与自动化** | | | | |
+| | | plugin | playwright | 日常页面操作：导航/截图/填表/点击/JS 执行 |
+| | | skill | browser-use | 需要登录态/云浏览器/tunnel 时的补充 |
+| **8. 调试与调查** | | | | |
+| | ★ | sp | systematic-debugging | 遇到 bug/测试失败/异常行为时，假设驱动逐步排查（修 bug 必走） |
+| **9. 文档管理** | | | | |
+| | | plugin | claude-md-management | CLAUDE.md 质量审计：6 维度评分→出报告→定向修复 |
+| | | plugin | context7 | 查询第三方库/框架的最新文档和代码示例 |
+| **10. Skill 开发** | | | | |
+| | ★ | plugin | skill-creator | Skill 全生命周期：创建→测试→基准评估→盲测 A/B→描述优化 |
+| | | sp | writing-skills | 轻量备选：创建/编辑 skill 的流程指导 |
+| **11. 项目编排** | | | | |
+| | ★ | skill | codesop | 项目工作台：上下文恢复→路由推荐→fit 验证→完成关卡 |
+| **12. 通讯桥梁** | | | | |
+| | | skill | claude-to-im | Claude Code 桥接到 Telegram/Discord/飞书/QQ/微信 |
+| **13. 应急接管** | | | | |
+| | | plugin | codex:rescue | 线程卡住或需要换个智能体重新来过时，把任务交给 Codex 接管 |
+
+### 调试路径
+用户说"修 bug"、"测试挂了"、"为什么坏了"、"这个不工作了"时：
+→ systematic-debugging（假设驱动排查）→ verification-before-completion → finishing-a-development-branch
+跳过需求分析和执行文档阶段，直接进入调试。
 
 ### 铁律
 - 跳过必走 Skill = 先输出对齐块说明原因

@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.0.0] - 2026-04-03
+
+### Breaking Changes
+- Remove GStack dependency entirely (173 code references cleaned)
+- Rewrite routing table from pipeline model to lifecycle model
+- Plugin system replaces dual-engine architecture
+
+### Added
+- Single lifecycle routing table covering all 9 plugins + 3 skills
+- CORE_PLUGINS / OPTIONAL_PLUGINS / OPTIONAL_SKILLS dependency tiers
+- has_plugin() function for plugin detection
+- check_plugin_completeness() for dependency validation
+- check_plugin_versions() with superpowers GitHub tags comparison
+- check_routing_coverage() reading new router table format
+- print_dependency_report() as unified dependency output
+- Debugging lifecycle path (systematic-debugging → verification → finishing)
+
+### Changed
+- codesop-router.md: unified lifecycle table replaces pipeline routing
+- SKILL.md: 409→226 lines, section 6 (Workflow Mapping) removed
+- lib/updates.sh: 525→~477 lines, new dependency system
+- lib/detection.sh: removed gstack, added has_plugin()
+- lib/init-interview.sh: removed 31 gstack references
+- lib/commands.sh: simplified to print_dependency_report()
+- setup: core plugin check replaces gstack warning
+
+### Removed
+- All GStack/gstack references from runtime files
+- scan_installed_skills(), scan_routed_skills() (old format parsers)
+- check_skill_routing_coverage() (old sp/gstack coverage)
+- _resolve_tool_path() (gstack path resolution)
+- print_dependency_update_checks() (gstack+sp update checks)
+- print_install_suggestions() (gstack install/repair suggestions)
+
 ## [1.1.6] - 2026-04-02
 
 ### Added

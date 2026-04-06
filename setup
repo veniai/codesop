@@ -196,8 +196,13 @@ check_discipline_deps() {
     echo "  ⚠ superpowers plugin not found — router card needs it"
   fi
 
-  if [ ! -d "$HOME/.claude/skills/gstack" ]; then
-    echo "  ⚠ gstack skills not found — some routes won't work"
+  # Check core plugins
+  if [ -f "$HOME/.claude/plugins/installed_plugins.json" ] && command -v jq >/dev/null 2>&1; then
+    for plugin in "superpowers@claude-plugins-official" "code-review@claude-plugins-official"; do
+      if ! jq -e --arg id "$plugin" 'has($id)' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null | grep -q true; then
+        echo "  ⚠ 核心插件未安装: $plugin"
+      fi
+    done
   fi
 }
 

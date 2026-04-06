@@ -163,7 +163,6 @@ detect_project_shape_and_framework() {
   # 技能/生态系统注册表
   ECOSYSTEM_REGISTRY=(
     "superpowers:$HOME/.codex/superpowers,$HOME/.codex/skills/.system,$HOME/.claude/plugins/superpowers,$HOME/.claude/skills/superpowers,$HOME/.config/opencode/plugins/superpowers,$HOME/.agents/skills/superpowers"
-    "gstack:$HOME/.claude/skills/gstack,$HOME/.agents/skills/gstack,$HOME/.config/opencode/skills/gstack,$HOME/.codex/skills/gstack"
   )
 
   detect_tool_by_registry() {
@@ -210,19 +209,18 @@ detect_project_shape_and_framework() {
       fi
     fi
 
-    # gstack 特殊处理：检查命令和备用路径
-    if [ "$name" = "gstack" ]; then
-      if command -v gstack >/dev/null 2>&1; then
-        echo "ecosystem.$name=partial"
-        return
-      fi
-      if [ -e "$HOME/.gstack" ] || [ -e "$HOME/gstack" ]; then
-        echo "ecosystem.$name=partial"
-        return
-      fi
-    fi
-
     echo "ecosystem.$name=missing"
+  }
+
+  # Check if a specific plugin is installed via Claude Code plugin system
+  # Arguments:
+  #   $1 - plugin ID (e.g. "superpowers@claude-plugins-official")
+  # Returns: 0 if installed, 1 if not
+  has_plugin() {
+    local plugin_id="$1"
+    local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
+    [ -f "$plugins_file" ] || return 1
+    jq -e --arg id "$plugin_id" 'has($id)' "$plugins_file" 2>/dev/null | grep -q true
   }
 
   detect_all_tools() {

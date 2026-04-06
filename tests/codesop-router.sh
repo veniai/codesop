@@ -19,7 +19,7 @@ echo "  PASS"
 
 # Test 2: Mandatory skills consistency
 echo "Test 2: Mandatory skills consistency..."
-for skill in brainstorming writing-plans autoplan using-git-worktrees subagent-driven-development test-driven-development verification-before-completion review ship document-release; do
+for skill in brainstorming writing-plans subagent-driven-development verification-before-completion systematic-debugging finishing-a-development-branch code-review; do
   if ! grep -q "$skill" "$ROOT_DIR/config/codesop-router.md"; then
     fail "Mandatory skill '$skill' from pipeline missing in router card"
   fi
@@ -29,7 +29,7 @@ echo "  PASS"
 # Test 3: Router card length
 echo "Test 3: Router card length..."
 lines=$(wc -l < "$ROOT_DIR/config/codesop-router.md" | tr -d ' ')
-[ "$lines" -le 50 ] || fail "Router card is $lines lines (max 50 for dilution resistance)"
+[ "$lines" -le 70 ] || fail "Router card is $lines lines (max 70 for v2 lifecycle table)"
 echo "  PASS ($lines lines)"
 
 # Test 4: Setup has new functions
@@ -63,21 +63,13 @@ echo "Test 8: Iron Laws section..."
 grep -q "Iron Laws" "$ROOT_DIR/SKILL.md" || fail "Iron Laws section missing from SKILL.md"
 echo "  PASS"
 
-# Test 8.5: Routing consistency between SKILL.md section 7 and codesop-router.md
-echo "Test 8.5: Routing consistency between SKILL.md and router card..."
-router_card="$ROOT_DIR/config/codesop-router.md"
-missing=""
-while IFS= read -r skill; do
-  [ -z "$skill" ] && continue
-  if ! grep -q "$skill" "$router_card"; then
-    missing="${missing:+$missing, }$skill"
+# Test 8.5: Key skills from router table are referenced in SKILL.md
+echo "Test 8.5: Key skills referenced in SKILL.md..."
+for skill in brainstorming subagent-driven-development verification-before-completion; do
+  if ! grep -q "$skill" "$ROOT_DIR/SKILL.md"; then
+    fail "Key skill '$skill' from router table not referenced in SKILL.md"
   fi
-done < <(sed -n '/^## 7\. Routing Policy/,/^## 7\.1 Completion Gate/p' "$ROOT_DIR/SKILL.md" \
-  | grep -oE '→ `[a-zA-Z][a-zA-Z0-9-]+`' \
-  | sed 's/→ `//;s/`//')
-if [ -n "$missing" ]; then
-  fail "Skills in SKILL.md section 7 but NOT in router card: $missing"
-fi
+done
 echo "  PASS"
 
 echo ""

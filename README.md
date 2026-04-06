@@ -54,7 +54,7 @@ codesop update
 ## `/codesop init` 会做什么？
 
 1. 扫描项目：判断主语言、项目形态、框架
-2. 检测环境：Claude Code / Codex / OpenCode / superpowers / gstack
+2. 检测环境：Claude Code / Codex / OpenCode / superpowers
 3. 生成项目文件：
    - `AGENTS.md` → `@CLAUDE.md`（轻量引用）
    - `PRD.md` → 活文档（产品规范 + 进度 + 工作日志）
@@ -102,12 +102,10 @@ codesop update
 
 codesop 编排以下 skill 生态：
 
-- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev, verification-before-completion
-- **[gstack](https://github.com/garryslist/gstack)** — office-hours, autoplan, review, ship, qa, investigate, codex
+- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev, verification-before-completion, office-hours, review, dispatching-parallel-agents
 
 安装方式：
 - superpowers: `/plugin install superpowers` (Claude Code)
-- gstack: `git clone https://github.com/garryslist/gstack.git ~/.claude/skills/gstack`
 
 ## 架构 / Architecture
 
