@@ -22,19 +22,17 @@
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
 - **当前里程碑**: v2.0.0 已发布 (Superpowers-only backbone + curated plugins)
 - **完成度**: 100%
-- **下一步**: Skill 哲学对齐优化 + PRD/仓库精简
+- **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.0 合并完成，PRD 精简对齐
+- **最后更新原因**: Skill 哲学审查完成，结论为当前设计已有效
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- [ ] Skill 哲学审查优化（预测学/最小完备工具集/实证说明）
+- 无
 
 ### 2.2 Next Up
-- [ ] SKILL.md 铁律重写为输出要求
-- [ ] 输出模板合并（3→1）
-- [ ] 路由表分级（核心 vs 低频）
+- 无（按需驱动）
 
 ### 2.3 Blocked
 - 无
@@ -47,15 +45,22 @@
 - [x] check_routing_coverage() 替代旧 scan_routed_skills()
 - [x] AGENTS.md 增加约束冲突和失败处理
 - [x] Codex plugin_id double-suffix bug 修复
+- [x] 仓库精简: 删除 7 个过时文件，PRD 440→210 行
+- [x] has_plugin() JSON 路径 bug 修复（根对象→.plugins）
+- [x] AGENTS.md 模板 v1 残留修复（document-release→claude-md-management，移除"检查状态/检查更新"）
+- [x] README.md v1 残留修复（覆盖场景更新为 v2 skill）
+- [x] Skill 哲学审查：三条原则逐条审查，结论为当前设计已有效
 
 ## 3. 最近决策记录
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-04-06 | Skill 哲学审查：不调整铁律/模板/路由表 | 铁律对 AI 消费者直接有效；三套模板反映真实不同的决策结果；★ 标记已够分级 | §2.2 Next Up 清空，按需驱动 |
+| 2026-04-06 | has_plugin() 系列函数统一查 .plugins 路径 | installed_plugins.json 结构为 {version, plugins}，旧代码查根对象 | detection.sh + updates.sh 共 5 处修复 |
 | 2026-04-03 | v2.0 移除 GStack，Superpowers-only | 双引擎维护成本高，实际只用到 Superpowers | 依赖检测/版本检查/路由表全面重写 |
 | 2026-04-03 | 依赖分三层: CORE / OPTIONAL_PLUGIN / OPTIONAL_SKILL | 区分必须和可选，避免强耦合 | lib/updates.sh 重构 |
-| 2026-04-06 | 清理 docs/ 和 evals/ 目录 | 历史计划和 spec 已全部落地到代码，保留是噪音 | 文件数 43→33 |
-| 2026-04-06 | PRD 精简，移除历史工作日志 | git log 是权威来源，PRD 重复记录无价值 | PRD 440→~180 行 |
+| 2026-04-06 | 清理 docs/ 和 evals/ 目录 | 历史计划和 spec 已全部落地到代码，保留是噪音 | 文件数 43→35 |
+| 2026-04-06 | PRD 精简，移除历史工作日志 | git log 是权威来源，PRD 重复记录无价值 | PRD 440→210 行 |
 | 2026-03-30 | `VERSION` 保留为发布版本真相源 | runtime 与 update 流程都需要稳定版本号 | 元数据围绕 VERSION + Unreleased 对齐 |
 | 2026-03-30 | 文档纪律默认只判定 CLAUDE.md、PRD.md、README.md | CHANGELOG 更像发布文档，不应进入日常强制集合 | 收尾 gate 只围绕 3 个核心文档 |
 | 2026-03-30 | `/codesop` 统一以 SKILL.md 为唯一真相源 | 双份正文会持续漂移 | setup 从 SKILL.md 安装到运行时 |
@@ -130,9 +135,8 @@
 - `setup` 负责把 `SKILL.md` 同步到 `~/.claude/commands/codesop.md`
 
 ### 5.6 版本规划
-- **Now (v2.0.x)**: Skill 哲学对齐 + 认知结构精简
-- **Next (v2.1)**: 反馈回路设计 + 推荐效果追踪
-- **Later**: 可选 Python 模块验证 bash 是否足够
+- **Now (v2.0.x)**: 按需迭代，稳定维护
+- **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
 
