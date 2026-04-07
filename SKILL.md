@@ -145,8 +145,8 @@ Only two lines:
 
 ```md
 ## Skill 建议
-- 推荐使用: {skill-name} (信号: "{user signal}")
-- 备选使用: {backup-skill} (原因: {...})
+- 推荐：使用 {skill-name} skill {做什么事}
+- 备选：使用 {backup-skill} skill {做什么事}
 ```
 
 If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
