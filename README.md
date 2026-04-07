@@ -44,7 +44,7 @@ Then make sure `~/.local/bin` is on your `PATH`.
 /codesop
 ```
 
-`/codesop` 会在摘要和推荐之后，把真正的下一步动作放在最后一行，输出为一条自然语言工作流指令。它可以串 1 到 3 个 skill，尽量让 Claude Code 把它识别成输入框里的灰色默认建议，便于直接回车继续。好的输出重点不在“推荐一个 skill”，而在“把下一步工作流链组织清楚”。
+`/codesop` 会在摘要和推荐之后，把真正的下一步动作放在最后一行，输出为一条自然语言工作流指令。它可以串 1 到 3 个 skill，尽量让 Claude Code 把它识别成输入框里的灰色默认建议，便于直接回车继续。好的输出重点不在“推荐一个 skill”，而在“把下一步工作流链组织清楚”。前台默认应围绕当前项目，而不是 `codesop` 自己的仓库自检。
 
 **更新 codesop：**
 ```bash
@@ -75,6 +75,7 @@ codesop update
 - `AGENTS.md` 不进入默认判定集合，因为它应始终保持为 `@CLAUDE.md` 的薄包装
 - `CHANGELOG.md` 不属于默认强制集合
 - 但文档不应只在收尾时才想起。`/codesop` 应先做一次文档漂移判断，再决定是否把 `PRD.md/README.md/CLAUDE.md` 编进下一步工作流链
+- `/codesop` 前台展示的文档状态应来自当前项目；`codesop` 自身仓库的一致性检查只适合内部维护，不应抢占当前项目工作台
 
 ## 版本规则 / Versioning
 

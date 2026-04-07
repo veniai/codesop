@@ -83,10 +83,9 @@ When this skill triggers:
 2. Read `PRD.md`
 3. Decide whether fresh repo facts are needed and call `/codesop` if they are
 4. Decide whether `README.md` is needed
-5. Run dependency report:
+5. Run ecosystem report:
    ```bash
-   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_routing_coverage) || echo "依赖检查跳过: 模块不可用"
-   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_document_consistency) || echo "文档一致性检查跳过: 模块不可用"
+   (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_routing_coverage) || echo "生态检查跳过: 模块不可用"
    ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts:
@@ -103,6 +102,10 @@ When this skill triggers:
    - product state/progress/decisions/scope changed → `PRD.md`
    - user-visible usage/commands/config changed → `README.md`
    Use this scan to decide whether doc updates belong in the next workflow chain.
+   Run:
+   ```bash
+   (source ~/codesop/lib/updates.sh && PROJECT_ROOT="$(pwd)" check_project_document_drift) || echo "当前项目文档检查跳过: 模块不可用"
+   ```
 9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain instead of stopping at one skill name.
 10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
@@ -127,7 +130,7 @@ Output sections in this order:
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: ... **阻塞/风险**: ... **最近决策**: ...
+**当前分支**: ... **文档状态**: ... **阻塞/风险**: ... **最近决策**: ...
 ```
 
 注意：摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
@@ -140,11 +143,9 @@ Output sections in this order:
   - "路由覆盖完整"→ "✓ 路由覆盖完整"
   - 不完整 → 显示原文（含缺失条目列表）
   - 模块不可用 → "路由覆盖：模块不可用"
-- 文档一致性：（粘贴 check_document_consistency 输出）
-  - 全部 ✓ → 合并为一行 "✓ 文档一致"
-  - 含 ⚠️ → 显示原文
-  - 模块不可用 → "文档一致性：模块不可用"
 ```
+
+这个区块只反映 codesop 的 skill/runtime 生态，不用于判断当前项目文档是否健康。当前项目文档状态应放在 `## 工作台摘要` 中。
 
 ### 4.3 Next-Step Recommendation
 
@@ -196,11 +197,10 @@ Case A — Dirty worktree
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: main（无 open PR） **阻塞/风险**: 工作区仍有未暂存改动，需要先归拢边界 **最近决策**: ...
+**当前分支**: main（无 open PR） **文档状态**: 代码已变更但 PRD.md/README.md 未动，建议同步 **阻塞/风险**: 工作区仍有未暂存改动，需要先归拢边界 **最近决策**: ...
 
 ## Skill 生态
 - 路由覆盖：...
-- 文档一致性：...
 
 ## 下一步建议
 - 推荐链路：先收尾当前改动，再同步活文档，再进入下一阶段设计。理由：当前工作区未清，直接推进 roadmap-next 会混淆边界，且文档状态已落后于代码事实。
@@ -214,11 +214,10 @@ Case B — Clean worktree
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: feat/p1-graph-ui（无 open PR） **阻塞/风险**: 无 **最近决策**: ...
+**当前分支**: feat/p1-graph-ui（无 open PR） **文档状态**: 未见漂移信号 **阻塞/风险**: 无 **最近决策**: ...
 
 ## Skill 生态
 - 路由覆盖：...
-- 文档一致性：...
 
 ## 下一步建议
 - 推荐链路：直接进入当前阶段的设计工作流。理由：工作区干净，且当前目标已经明确。

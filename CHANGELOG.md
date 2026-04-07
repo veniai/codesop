@@ -9,6 +9,7 @@
 - `/codesop` now frames itself as a workflow-chain composer instead of a single-skill recommender
 - `/codesop` now performs a document drift scan so PRD/README/CLAUDE updates can be woven into the next workflow chain
 - `/codesop` now teaches output style through complete dirty/clean worktree examples instead of relying only on scattered formatting rules
+- `/codesop` now shows current-project document status in the workbench summary instead of surfacing codesop's own document-consistency self-check by default
 
 ## [2.0.0] - 2026-04-03
 

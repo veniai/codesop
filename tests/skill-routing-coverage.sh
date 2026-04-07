@@ -109,8 +109,44 @@ rm -rf "$_stale_dir"
 
 echo "  PASS"
 
-# --- Test 8: Document consistency arrays are populated ---
-echo "Test 8: Document consistency arrays are populated"
+# --- Test 8: check_project_document_drift flags code-only changes ---
+echo "Test 8: check_project_document_drift flags code-only changes"
+
+_project_dir="$(mktemp -d)"
+git -C "$_project_dir" init -q
+printf '@CLAUDE.md\n' > "$_project_dir/AGENTS.md"
+printf '# guide\n' > "$_project_dir/CLAUDE.md"
+printf '# Current Version: 1.0.0\n' > "$_project_dir/PRD.md"
+printf '# demo\n' > "$_project_dir/README.md"
+git -C "$_project_dir" add AGENTS.md CLAUDE.md PRD.md README.md
+git -C "$_project_dir" -c user.name='codesop' -c user.email='codesop@example.com' commit -qm "baseline"
+printf 'console.log(1)\n' > "$_project_dir/app.js"
+result="$(PROJECT_ROOT="$_project_dir" check_project_document_drift)" || true
+printf '%s' "$result" | grep -q "当前项目可能存在文档漂移" || fail "should warn when code changes exist without doc updates"
+rm -rf "$_project_dir"
+
+echo "  PASS"
+
+# --- Test 9: check_project_document_drift sees doc updates ---
+echo "Test 9: check_project_document_drift sees doc updates"
+
+_project_dir="$(mktemp -d)"
+git -C "$_project_dir" init -q
+printf '@CLAUDE.md\n' > "$_project_dir/AGENTS.md"
+printf '# guide\n' > "$_project_dir/CLAUDE.md"
+printf '# Current Version: 1.0.0\n' > "$_project_dir/PRD.md"
+printf '# demo\n' > "$_project_dir/README.md"
+git -C "$_project_dir" add AGENTS.md CLAUDE.md PRD.md README.md
+git -C "$_project_dir" -c user.name='codesop' -c user.email='codesop@example.com' commit -qm "baseline"
+printf 'notes\n' >> "$_project_dir/README.md"
+result="$(PROJECT_ROOT="$_project_dir" check_project_document_drift)" || true
+printf '%s' "$result" | grep -q "当前修改已包含文档更新" || fail "should recognize doc updates"
+rm -rf "$_project_dir"
+
+echo "  PASS"
+
+# --- Test 10: Document consistency arrays are populated ---
+echo "Test 10: Document consistency arrays are populated"
 
 [ ${#STALE_TERMS[@]} -gt 0 ] || fail "STALE_TERMS is empty"
 [ ${#DOC_SCAN_TARGETS[@]} -gt 0 ] || fail "DOC_SCAN_TARGETS is empty"

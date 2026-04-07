@@ -6,6 +6,8 @@
 # - Checking independent skill completeness
 # - Checking plugin versions
 # - Checking routing coverage against the router table
+# - Checking current-project document drift
+# - Checking codesop's own document consistency
 # - Printing a unified dependency report
 # - Checking git repository update status
 # - Getting current version
@@ -78,6 +80,12 @@ README_SKILL_ALIASES=(
   "subagent-dev:subagent-driven-development"
   "verification:verification-before-completion"
   "finishing:finishing-a-development-branch"
+)
+
+PROJECT_DOC_TARGETS=(
+  "AGENTS.md"
+  "PRD.md"
+  "README.md"
 )
 
 check_plugin_completeness() {
@@ -307,7 +315,72 @@ check_routing_coverage() {
   return 0
 }
 
-check_document_consistency() {
+check_project_document_drift() {
+  local project_root="${PROJECT_ROOT:-$(pwd)}"
+  local doc_path doc missing=() present=()
+
+  for doc in "${PROJECT_DOC_TARGETS[@]}"; do
+    doc_path="$project_root/$doc"
+    if [ -f "$doc_path" ]; then
+      present+=("$doc")
+    else
+      missing+=("$doc")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    printf '%s\n' "⚠️ 当前项目文档缺失: $(IFS=', '; echo "${missing[*]}")"
+  else
+    printf '%s\n' "✓ 当前项目核心文档存在: $(IFS=', '; echo "${present[*]}")"
+  fi
+
+  if [ -f "$project_root/AGENTS.md" ]; then
+    local ref_line ref_target
+    ref_line="$(sed -n '1p' "$project_root/AGENTS.md" 2>/dev/null || true)"
+    if [[ "$ref_line" =~ ^@(.+) ]]; then
+      ref_target="${BASH_REMATCH[1]}"
+      ref_target="${ref_target#./}"
+      if [ ! -f "$project_root/$ref_target" ]; then
+        printf '%s\n' "⚠️ AGENTS.md 引用了 $ref_target，但目标文件不存在"
+      fi
+    fi
+  fi
+
+  if [ ! -d "$project_root/.git" ]; then
+    printf '%s\n' "⚠️ 当前项目不是 git 仓库，无法判断文档漂移"
+    return 0
+  fi
+
+  local changed_doc_count=0 changed_non_doc_count=0
+  local changed_docs=()
+  local line path
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    path="$(printf '%s' "$line" | sed 's/^...//')"
+    [[ "$path" == *" -> "* ]] && path="${path##* -> }"
+    case "$path" in
+      AGENTS.md|CLAUDE.md|PRD.md|README.md)
+        changed_doc_count=$((changed_doc_count + 1))
+        changed_docs+=("$path")
+        ;;
+      *)
+        changed_non_doc_count=$((changed_non_doc_count + 1))
+        ;;
+    esac
+  done < <(git -C "$project_root" status --short 2>/dev/null || true)
+
+  if [ "$changed_non_doc_count" -gt 0 ] && [ "$changed_doc_count" -eq 0 ]; then
+    printf '%s\n' "⚠️ 当前项目可能存在文档漂移: ${changed_non_doc_count} 个非文档文件已变更，但核心文档未更新"
+  elif [ "$changed_doc_count" -gt 0 ]; then
+    printf '%s\n' "✓ 当前修改已包含文档更新: $(IFS=', '; echo "${changed_docs[*]}")"
+  else
+    printf '%s\n' "✓ 当前项目未见文档漂移信号"
+  fi
+
+  return 0
+}
+
+check_codesop_document_consistency() {
   local root="${ROOT_DIR:-$HOME/codesop}"
   local version_file="${VERSION_FILE:-$root/VERSION}"
 
@@ -412,6 +485,10 @@ check_document_consistency() {
   fi
 
   return 0
+}
+
+check_document_consistency() {
+  check_codesop_document_consistency "$@"
 }
 
 # Extract CHANGELOG entries between two versions
