@@ -109,7 +109,12 @@ Default to orientation and routing first. Do not jump into implementation unless
 
 ## 4. Default Output
 
-Output `## 工作台摘要` followed by `## Skill 建议` using one of these three templates, then `## Skill 生态`, then a **bare command on the last line**.
+Output sections in this order:
+
+1. `## 工作台摘要`
+2. `## Skill 生态`
+3. `## Skill 建议`（只有推荐 + 备选，两行）
+4. **最后一行**：`建议下一步: /superpowers:{skill-name}`
 
 ### 4.1 Workbench Summary
 
@@ -119,48 +124,13 @@ Output `## 工作台摘要` followed by `## Skill 建议` using one of these thr
 **阻塞/风险**: ... **最近决策**: ... **下一步**: ...
 ```
 
-### 4.2 Skill Recommendation Templates
-
-**Case A — ✅ Fit validated (suitable, consistent with routing table):**
-
-```md
-## Skill 建议
-- 推荐: → {skill-name} ✅ 适合 (信号: "{user signal}")
-- 备选: → {backup-skill} (原因: {...})
-- 暂不建议: ... (原因: {...})
-```
-
-**Case B — ⚠️/❌ Partial fit or mismatch:**
-
-```md
-## Skill 建议
-- 路由表: → {skill-name} (信号: "{user signal}")
-- 验证:   {⚠️/❌} {one-line assessment}
-           备选参考: {alternative} (原因: {...})
-- 暂不建议: ... (原因: {...})
-```
-
-**Case C — Validation skipped (no recommendation from step 8, or skill unreadable, or ❓ info insufficient):**
-
-```md
-## Skill 建议
-- 推荐: → {routing-table-skill} (信号: "{user signal}")
-         (验证跳过: {reason})
-- 备选: → {backup-skill} (原因: {...})
-- 暂不建议: ... (原因: {...})
-```
-
-In Case C, `{routing-table-skill}` comes from the routing table — do not invent a skill name. If the routing table also provides no match, fall back to section 7 (ask one focused question) and omit the recommendation lines entirely.
-
-Routing table is the final authority. Validation line is informational. User decides.
-
-### 4.3 Skill Ecosystem
+### 4.2 Skill Ecosystem (放在 Skill 建议之前)
 
 ```md
 ## Skill 生态
 - 路由覆盖：（粘贴 check_routing_coverage 输出）
   - "路由覆盖完整"→ "✓ 路由覆盖完整"
-  - 含缺失 → 显示原文
+  - 不完整 → "⚠️ 路由覆盖不完整 (N 个条目缺失)"
   - 模块不可用 → "路由覆盖：模块不可用"
 - 文档一致性：（粘贴 check_document_consistency 输出）
   - 全部 ✓ → 合并为一行 "✓ 文档一致"
@@ -168,17 +138,29 @@ Routing table is the final authority. Validation line is informational. User dec
   - 模块不可用 → "文档一致性：模块不可用"
 ```
 
-### 4.4 Last Line — Recommended Command
+### 4.3 Skill Recommendation
 
-The very last line of the output MUST be the recommended skill command, bare and alone:
+Only two lines, no third line:
+
+```md
+## Skill 建议
+- 推荐: → {skill-name} (信号: "{user signal}")
+- 备选: → {backup-skill} (原因: {...})
+```
+
+If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
+
+### 4.4 Last Line — Next Step Command
+
+The very last line of the output MUST be the recommended next step, formatted as:
 
 ```
-/superpowers:{skill-name}
+建议下一步: /superpowers:{skill-name}
 ```
 
-This is intentional: Claude Code's prompt suggestion engine may pick up this bare command and display it as gray text in the input box. The user can then press Enter to execute it directly.
+This is intentional: Claude Code's prompt suggestion engine is more likely to pick up a natural language + command combination and display it as gray text in the input box. The user can then press Enter to execute it directly.
 
-If no skill is recommended (no match from routing table), output nothing after `## Skill 生态`.
+If no skill is recommended, omit this line entirely.
 
 Compress for quick answers, but keep the same mental model.
 
