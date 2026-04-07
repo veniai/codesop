@@ -86,7 +86,6 @@ check_plugin_completeness() {
 
   if [ ! -f "$plugins_file" ]; then
     printf '%s\n' "❌ 插件配置文件不存在: $plugins_file"
-    printf '%s\n' "  安装: /plugin install <plugin-id>"
     return 1
   fi
 
@@ -101,8 +100,7 @@ check_plugin_completeness() {
   if [ "$sp_installed" = true ]; then
     printf '  ✓ superpowers: %s\n' "$sp_version"
   else
-    printf '  ❌ superpowers: 未安装\n'
-    printf '    安装: /plugin install %s\n' "$SUPERPOWERS_PLUGIN"
+    printf '  ❌ superpowers: 未安装 — 安装: /plugin install %s\n' "$SUPERPOWERS_PLUGIN"
   fi
 
   # --- Required curated plugins ---
@@ -116,16 +114,50 @@ check_plugin_completeness() {
     printf '  ✓ 必选插件: %d/%d 已安装\n' "${#REQUIRED_PLUGINS[@]}" "${#REQUIRED_PLUGINS[@]}"
   else
     local installed_count=$(( ${#REQUIRED_PLUGINS[@]} - ${#missing_required[@]} ))
-    printf '  ❌ 必选插件: %d/%d 已安装，缺失:\n' "$installed_count" "${#REQUIRED_PLUGINS[@]}"
-    for p in "${missing_required[@]}"; do printf '    - %s\n' "$p"; done
-    printf '%s\n' "  一键安装全部缺失插件:"
-    printf '    '
-    local first=true
+    printf '  ❌ 必选插件: %d/%d 已安装\n' "$installed_count" "${#REQUIRED_PLUGINS[@]}"
+
+    # Split into official vs third-party
+    local missing_official=() missing_thirdparty=()
     for p in "${missing_required[@]}"; do
-      if [ "$first" = true ]; then first=false; else printf ' && '; fi
-      printf '/plugin install %s' "$p"
+      if [[ "$p" == *@claude-plugins-official ]]; then
+        missing_official+=("$p")
+      else
+        missing_thirdparty+=("$p")
+      fi
     done
-    printf '\n'
+
+    # Official marketplace plugins
+    if [ ${#missing_official[@]} -gt 0 ]; then
+      printf '%s\n' "  官方仓库:"
+      for p in "${missing_official[@]}"; do
+        local short_name="${p%@claude-plugins-official}"
+        printf '    %-30s /plugin install %s\n' "$short_name" "$p"
+      done
+      printf '%s\n' "  一键安装官方插件:"
+      printf '    '
+      local first=true
+      for p in "${missing_official[@]}"; do
+        if [ "$first" = true ]; then first=false; else printf ' && '; fi
+        printf '/plugin install %s' "$p"
+      done
+      printf '\n'
+    fi
+
+    # Third-party plugins with repo URLs
+    if [ ${#missing_thirdparty[@]} -gt 0 ]; then
+      printf '%s\n' "  第三方仓库:"
+      for p in "${missing_thirdparty[@]}"; do
+        case "$p" in
+          codex@openai-codex)
+            printf '    %-20s https://github.com/openai/codex\n' "codex"
+            printf '    %-20s /plugin install %s\n' "安装:" "$p"
+            ;;
+          *)
+            printf '    %-20s /plugin install %s\n' "$p" "$p"
+            ;;
+        esac
+      done
+    fi
   fi
 
   [ "$sp_installed" = true ] && [ ${#missing_required[@]} -eq 0 ]
@@ -153,16 +185,27 @@ check_skill_completeness() {
 
   if [ ${#missing[@]} -gt 0 ]; then
     printf '%s\n' "⚠️ 独立 Skill 缺失:"
-    for s in "${missing[@]}"; do printf '  - %s\n' "$s"; done
-    printf '%s\n' "  安装:"
+    printf '%s\n' "  安装来源:"
     for s in "${missing[@]}"; do
       case "$s" in
-        codesop)        printf '    git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' ;;
-        browser-use)    printf '    git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' ;;
-        claude-to-im)   printf '    /plugin install claude-to-im@anthropics\n' ;;
-        *)              printf '    # 未知 skill: $s — 请手动安装到 ~/.claude/skills/%s/\n' "$s" ;;
+        codesop)
+          printf '    %-20s https://github.com/veniai/codesop\n' "codesop"
+          printf '    %-20s git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' "安装:"
+          ;;
+        browser-use)
+          printf '    %-20s https://github.com/anthropics/browser-use\n' "browser-use"
+          printf '    %-20s git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
+          ;;
+        claude-to-im)
+          printf '    %-20s https://github.com/anthropics/claude-to-im\n' "claude-to-im"
+          printf '    %-20s /plugin install claude-to-im@anthropics\n' "安装:"
+          ;;
+        *)
+          printf '    %-20s 请手动安装到 ~/.claude/skills/%s/\n' "$s" "$s"
+          ;;
       esac
     done
+    printf '%s\n' "  提示: 将以上命令发送给 AI 助手即可自动安装"
   else
     printf '%s\n' "✓ 所有独立 Skill 已安装"
   fi
@@ -238,25 +281,65 @@ check_routing_coverage() {
   if [ ${#missing[@]} -gt 0 ]; then
     printf '%s\n' "⚠️ 路由表引用但未安装:"
     for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
-    printf '%s\n' "  安装:"
+
+    # Split into official / third-party / skill
+    local routing_official=() routing_thirdparty=() routing_skills=()
     for m in "${missing[@]}"; do
-      if [[ "$m" == *"需要 superpowers)" ]]; then
-        printf '    /plugin install superpowers@claude-plugins-official\n'
-      elif [[ "$m" == *"@claude-plugins-official)" ]]; then
-        plugin_id="${m##*需要 }"; plugin_id="${plugin_id%\)}"
-        printf '    /plugin install %s\n' "$plugin_id"
+      if [[ "$m" == *"需要 superpowers)" ]] || [[ "$m" == *"@claude-plugins-official)" ]]; then
+        routing_official+=("$m")
       elif [[ "$m" == *"@openai-codex)" ]]; then
-        printf '    /plugin install codex@openai-codex\n'
+        routing_thirdparty+=("$m")
       elif [[ "$m" == *"独立 Skill)" ]]; then
-        skill="${m%% (*}"
-        case "$skill" in
-          codesop)      printf '    git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' ;;
-          browser-use)  printf '    git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' ;;
-          claude-to-im) printf '    /plugin install claude-to-im@anthropics\n' ;;
-          *)            printf '    # 请手动安装 %s 到 ~/.claude/skills/\n' "$skill" ;;
-        esac
+        routing_skills+=("$m")
       fi
     done
+
+    if [ ${#routing_official[@]} -gt 0 ]; then
+      printf '%s\n' "  官方仓库:"
+      for m in "${routing_official[@]}"; do
+        if [[ "$m" == *"需要 superpowers)" ]]; then
+          printf '    /plugin install superpowers@claude-plugins-official\n'
+        else
+          plugin_id="${m##*需要 }"; plugin_id="${plugin_id%\)}"
+          printf '    /plugin install %s\n' "$plugin_id"
+        fi
+      done
+    fi
+
+    if [ ${#routing_thirdparty[@]} -gt 0 ]; then
+      printf '%s\n' "  第三方仓库:"
+      for m in "${routing_thirdparty[@]}"; do
+        if [[ "$m" == *"@openai-codex)" ]]; then
+          printf '    %-20s https://github.com/openai/codex\n' "codex"
+          printf '    %-20s /plugin install codex@openai-codex\n' "安装:"
+        fi
+      done
+    fi
+
+    if [ ${#routing_skills[@]} -gt 0 ]; then
+      printf '%s\n' "  独立 Skill:"
+      for m in "${routing_skills[@]}"; do
+        skill="${m%% (*}"
+        case "$skill" in
+          codesop)
+            printf '    %-20s https://github.com/veniai/codesop\n' "codesop"
+            printf '    %-20s git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' "安装:"
+            ;;
+          browser-use)
+            printf '    %-20s https://github.com/anthropics/browser-use\n' "browser-use"
+            printf '    %-20s git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
+            ;;
+          claude-to-im)
+            printf '    %-20s /plugin install claude-to-im@anthropics\n' "claude-to-im"
+            ;;
+          *)
+            printf '    # 请手动安装 %s 到 ~/.claude/skills/\n' "$skill"
+            ;;
+        esac
+      done
+    fi
+
+    printf '%s\n' "  提示: 将以上命令发送给 AI 助手即可自动安装"
   else
     printf '%s\n' "✓ 路由覆盖完整"
   fi
