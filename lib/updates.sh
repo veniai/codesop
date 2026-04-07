@@ -197,8 +197,8 @@ check_skill_completeness() {
           printf '    %-20s git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' "安装:"
           ;;
         browser-use)
-          printf '    %-20s https://github.com/anthropics/browser-use\n' "browser-use"
-          printf '    %-20s git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
+          printf '    %-20s https://github.com/browser-use/browser-use\n' "browser-use"
+          printf '    %-20s git clone https://github.com/browser-use/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
           ;;
         claude-to-im)
           printf '    %-20s https://github.com/anthropics/claude-to-im\n' "claude-to-im"
