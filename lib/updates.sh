@@ -154,8 +154,8 @@ check_plugin_completeness() {
       for p in "${missing_thirdparty[@]}"; do
         case "$p" in
           codex@openai-codex)
-            printf '    codex              https://github.com/openai/codex\n'
-            printf '    安装               参考 README 安装 Claude Code 插件\n'
+            printf '    codex              https://github.com/openai/codex-plugin-cc\n'
+            printf '    安装               /plugin install https://github.com/openai/codex-plugin-cc\n'
             ;;
           *)
             printf '    %-20s 未知来源，请搜索官方仓库\n' "$p"
