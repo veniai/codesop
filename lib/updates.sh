@@ -278,67 +278,8 @@ check_routing_coverage() {
   done < <(grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' "$router_file" | grep -v '^|.*---')
 
   if [ ${#missing[@]} -gt 0 ]; then
-    printf '%s\n' "⚠️ 路由表引用但未安装:"
+    printf '%s\n' "⚠️ 路由表引用但未安装 (安装方法见上方对应分类):"
     for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
-
-    # Split into official / third-party / skill
-    local routing_official=() routing_thirdparty=() routing_skills=()
-    for m in "${missing[@]}"; do
-      if [[ "$m" == *"需要 superpowers)" ]] || [[ "$m" == *"@claude-plugins-official)" ]]; then
-        routing_official+=("$m")
-      elif [[ "$m" == *"@openai-codex)" ]]; then
-        routing_thirdparty+=("$m")
-      elif [[ "$m" == *"独立 Skill)" ]]; then
-        routing_skills+=("$m")
-      fi
-    done
-
-    if [ ${#routing_official[@]} -gt 0 ]; then
-      printf '%s\n' "  官方仓库:"
-      for m in "${routing_official[@]}"; do
-        if [[ "$m" == *"需要 superpowers)" ]]; then
-          printf '    /plugin install superpowers@claude-plugins-official\n'
-        else
-          plugin_id="${m##*需要 }"; plugin_id="${plugin_id%\)}"
-          printf '    /plugin install %s\n' "$plugin_id"
-        fi
-      done
-    fi
-
-    if [ ${#routing_thirdparty[@]} -gt 0 ]; then
-      printf '%s\n' "  第三方仓库:"
-      for m in "${routing_thirdparty[@]}"; do
-        if [[ "$m" == *"@openai-codex)" ]]; then
-          printf '    %-20s https://github.com/openai/codex\n' "codex"
-          printf '    %-20s /plugin install codex@openai-codex\n' "安装:"
-        fi
-      done
-    fi
-
-    if [ ${#routing_skills[@]} -gt 0 ]; then
-      printf '%s\n' "  独立 Skill:"
-      for m in "${routing_skills[@]}"; do
-        skill="${m%% (*}"
-        case "$skill" in
-          codesop)
-            printf '    %-20s https://github.com/veniai/codesop\n' "codesop"
-            printf '    %-20s git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' "安装:"
-            ;;
-          browser-use)
-            printf '    %-20s https://github.com/anthropics/browser-use\n' "browser-use"
-            printf '    %-20s git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
-            ;;
-          claude-to-im)
-            printf '    %-20s /plugin install claude-to-im@anthropics\n' "claude-to-im"
-            ;;
-          *)
-            printf '    # 请手动安装 %s 到 ~/.claude/skills/\n' "$skill"
-            ;;
-        esac
-      done
-    fi
-
-    printf '%s\n' "  提示: 将以上命令发送给 AI 助手即可自动安装"
   else
     printf '%s\n' "✓ 路由覆盖完整"
   fi
