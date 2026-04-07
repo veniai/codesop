@@ -84,6 +84,7 @@ check_plugin_completeness() {
 
   if [ ! -f "$plugins_file" ]; then
     printf '%s\n' "❌ 插件配置文件不存在: $plugins_file"
+    printf '%s\n' "  安装: /plugin install <plugin-id>"
     return 1
   fi
 
@@ -102,11 +103,15 @@ check_plugin_completeness() {
   if [ ${#missing_core[@]} -gt 0 ]; then
     printf '%s\n' "❌ 核心插件缺失:"
     for p in "${missing_core[@]}"; do printf '  - %s\n' "$p"; done
+    printf '%s\n' "  安装:"
+    for p in "${missing_core[@]}"; do printf '    /plugin install %s\n' "$p"; done
   fi
 
   if [ ${#missing_optional[@]} -gt 0 ]; then
     printf '%s\n' "⚠️ 可选插件缺失:"
     for p in "${missing_optional[@]}"; do printf '  - %s\n' "$p"; done
+    printf '%s\n' "  安装:"
+    for p in "${missing_optional[@]}"; do printf '    /plugin install %s\n' "$p"; done
   fi
 
   if [ ${#missing_core[@]} -eq 0 ] && [ ${#missing_optional[@]} -eq 0 ]; then
@@ -139,6 +144,15 @@ check_skill_completeness() {
   if [ ${#missing[@]} -gt 0 ]; then
     printf '%s\n' "⚠️ 独立 Skill 缺失:"
     for s in "${missing[@]}"; do printf '  - %s\n' "$s"; done
+    printf '%s\n' "  安装:"
+    for s in "${missing[@]}"; do
+      case "$s" in
+        codesop)        printf '    git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' ;;
+        browser-use)    printf '    git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' ;;
+        claude-to-im)   printf '    /plugin install claude-to-im@anthropics\n' ;;
+        *)              printf '    # 未知 skill: $s — 请手动安装到 ~/.claude/skills/%s/\n' "$s" ;;
+      esac
+    done
   else
     printf '%s\n' "✓ 所有独立 Skill 已安装"
   fi
@@ -150,19 +164,12 @@ check_plugin_versions() {
   local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
   [ -f "$plugins_file" ] || return 1
 
-  # Superpowers: GitHub tags version comparison
-  local sp_current
-  sp_current=$(jq -r '.plugins."superpowers@claude-plugins-official"[0].version // "unknown"' "$plugins_file" 2>/dev/null)
-  if [ "$sp_current" != "unknown" ]; then
-    local sp_latest
-    sp_latest=$(timeout 10 git ls-remote --tags --sort=-v:refname https://github.com/anthropics/claude-plugins-official.git 2>/dev/null \
-      | grep -oP 'refs/tags/superpowers/\K[0-9.]+' | head -1) || true
-    if [ -n "$sp_latest" ] && [ "$sp_current" != "$sp_latest" ]; then
-      printf '⬆ superpowers: %s → %s 可用\n' "$sp_current" "$sp_latest"
-    elif [ -n "$sp_latest" ]; then
-      printf '✓ superpowers: %s（最新）\n' "$sp_current"
-    fi
-  fi
+  # List installed plugin versions (informational)
+  local plugin_id version
+  while IFS=$'\t' read -r plugin_id version; do
+    [ -z "$plugin_id" ] && continue
+    printf '  %s: %s\n' "$plugin_id" "${version:-unknown}"
+  done < <(jq -r '.plugins | to_entries[] | "\(.key)\t\(.value[0].version // "")"' "$plugins_file" 2>/dev/null)
 
   return 0
 }
@@ -221,6 +228,25 @@ check_routing_coverage() {
   if [ ${#missing[@]} -gt 0 ]; then
     printf '%s\n' "⚠️ 路由表引用但未安装:"
     for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
+    printf '%s\n' "  安装:"
+    for m in "${missing[@]}"; do
+      if [[ "$m" == *"需要 superpowers)" ]]; then
+        printf '    /plugin install superpowers@claude-plugins-official\n'
+      elif [[ "$m" == *"@claude-plugins-official)" ]]; then
+        plugin_id="${m##*需要 }"; plugin_id="${plugin_id%\)}"
+        printf '    /plugin install %s\n' "$plugin_id"
+      elif [[ "$m" == *"@openai-codex)" ]]; then
+        printf '    /plugin install codex@openai-codex\n'
+      elif [[ "$m" == *"独立 Skill)" ]]; then
+        skill="${m%% (*}"
+        case "$skill" in
+          codesop)      printf '    git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' ;;
+          browser-use)  printf '    git clone https://github.com/anthropics/browser-use.git ~/.claude/skills/browser-use\n' ;;
+          claude-to-im) printf '    /plugin install claude-to-im@anthropics\n' ;;
+          *)            printf '    # 请手动安装 %s 到 ~/.claude/skills/\n' "$skill" ;;
+        esac
+      fi
+    done
   else
     printf '%s\n' "✓ 路由覆盖完整"
   fi
