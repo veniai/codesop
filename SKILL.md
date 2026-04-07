@@ -114,6 +114,7 @@ Output sections in this order:
 1. `## 工作台摘要`
 2. `## Skill 生态`
 3. `## Skill 建议`（只有推荐 + 备选，两行）
+4. **最后一行**：输出一条可直接执行的裸 slash command
 
 ### 4.1 Workbench Summary
 
@@ -150,6 +151,34 @@ Only two lines:
 ```
 
 If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
+
+### 4.4 Final Line — Direct Next Step Command
+
+The very last line of the output MUST be a single slash command the user can execute by pressing Enter.
+
+Use this shape:
+
+```text
+/brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准
+```
+
+Rules:
+
+- The final line must be the last non-empty line in the whole response
+- Output exactly one slash command on that line
+- Use a real slash command the host can execute directly
+- Include a short natural-language argument after the command when that helps the next step
+- Do not wrap the command in backticks
+- Do not add bullets, labels, or prefixes before it
+- Do not add `建议下一步:`
+- Do not add a trailing question after the final slash command
+- Do not output any text after the final slash command
+
+Intent:
+
+- Claude Code may use the last assistant line as a gray next-step suggestion in the input box
+- There is no guaranteed API for setting that suggestion directly
+- Therefore `/codesop` should maximize the chance by ending with one clean executable slash command
 
 Compress for quick answers, but keep the same mental model.
 

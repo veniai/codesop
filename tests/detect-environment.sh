@@ -33,16 +33,20 @@ assert_contains "$skill_header" 'Do not call `/codesop` for abstract workflow qu
 assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.'
 assert_contains "$skill_header" "## 1.1 CLI Command Bypass"
 assert_contains "$skill_header" 'Do not trigger when the user is explicitly invoking a mechanical subcommand'
-assert_contains "$skill_header" "## 工作台摘要"
-assert_contains "$skill_header" "**长期目标**:"
-assert_contains "$skill_header" "**当前阶段**:"
-assert_contains "$skill_header" "## Skill 建议"
+assert_contains "$skill_full" "## 工作台摘要"
+assert_contains "$skill_full" "**长期目标**:"
+assert_contains "$skill_full" "**当前阶段**:"
+assert_contains "$skill_full" "## Skill 建议"
+assert_contains "$skill_full" "4. **最后一行**：输出一条可直接执行的裸 slash command"
+assert_contains "$skill_full" 'Do not add `建议下一步:`'
+assert_contains "$skill_full" 'Do not add a trailing question after the final slash command'
 assert_contains "$skill_output" "Generate AGENTS.md"
 assert_contains "$skill_output" '`/codesop init [path]`'
 assert_contains "$skill_output" '`/codesop update`'
 assert_contains "$skill_full" "## 5. Completion Gate"
 assert_contains "$skill_full" "## 文档判定"
 assert_contains "$skill_full" "- CLAUDE.md: 已更新 / 未更新，原因：..."
+assert_contains "$skill_full" "/brainstorming 为"
 assert_contains "$skill_output" "Defaults to 中文"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"

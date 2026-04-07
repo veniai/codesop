@@ -55,6 +55,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-04-07 | `/codesop` 最后一行改为裸 slash command | Claude Code 没有公开 API 直接设置输入框灰色默认建议，只能通过输出形态提高命中概率 | `/codesop` 收尾不再使用 `建议下一步:` 前缀，也不再在最后追加追问 |
 | 2026-04-06 | Skill 哲学审查：不调整铁律/模板/路由表 | 铁律对 AI 消费者直接有效；三套模板反映真实不同的决策结果；★ 标记已够分级 | §2.2 Next Up 清空，按需驱动 |
 | 2026-04-06 | has_plugin() 系列函数统一查 .plugins 路径 | installed_plugins.json 结构为 {version, plugins}，旧代码查根对象 | detection.sh + updates.sh 共 5 处修复 |
 | 2026-04-03 | v2.0 移除 GStack，Superpowers-only | 双引擎维护成本高，实际只用到 Superpowers | 依赖检测/版本检查/路由表全面重写 |
@@ -119,6 +120,7 @@
 
 ### 5.4 核心功能
 - **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文推荐下一步 skill
+- **`/codesop` 收尾格式**: 推荐区之后，最后一行输出可直接执行的裸 slash command，提升 Claude Code 灰色默认建议命中概率
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`
 - **`codesop update`**: git pull + 自动重同步宿主集成

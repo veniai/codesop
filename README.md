@@ -44,6 +44,8 @@ Then make sure `~/.local/bin` is on your `PATH`.
 /codesop
 ```
 
+`/codesop` 会在摘要和推荐之后，把真正的下一步动作放在最后一行，输出为一条可直接执行的裸 slash command，尽量让 Claude Code 把它识别成输入框里的灰色默认建议，便于直接回车继续。
+
 **更新 codesop：**
 ```bash
 codesop update
@@ -86,6 +88,7 @@ codesop update
 - 机械命令只有两个：`codesop init`、`codesop update`
 - `status` / `diagnose` 已从产品合同中移除
 - 本仓库正在做架构收口，与上面合同无关的能力不会优先扩展
+- `/codesop` 收尾必须以一条可直接执行的裸 slash command 结束；不加 `建议下一步:` 前缀，不再在结尾追加追问
 
 ## 覆盖场景 / Workflow Scenarios
 

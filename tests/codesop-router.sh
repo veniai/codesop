@@ -50,6 +50,8 @@ echo "Test 6: SKILL.md has workbench format..."
 grep -q "Workflow Router" "$ROOT_DIR/SKILL.md" || fail "Workflow Router title missing from SKILL.md"
 grep -q "工作台摘要" "$ROOT_DIR/SKILL.md" || fail "Workbench summary template missing from SKILL.md"
 grep -q "Skill 建议" "$ROOT_DIR/SKILL.md" || fail "Skill recommendation template missing from SKILL.md"
+grep -q "最后一行" "$ROOT_DIR/SKILL.md" || fail "Final slash command rule missing from SKILL.md"
+grep -q "Do not add \`建议下一步:\`" "$ROOT_DIR/SKILL.md" || fail "Missing prohibition on 建议下一步 prefix"
 echo "  PASS"
 
 # Test 7: Hook schema is correct
