@@ -61,10 +61,10 @@ echo "  PASS"
 echo "Test 4: Dependency arrays are populated"
 
 [ ${#CORE_PLUGINS[@]} -gt 0 ] || fail "CORE_PLUGINS is empty"
-[ ${#OPTIONAL_PLUGINS[@]} -gt 0 ] || fail "OPTIONAL_PLUGINS is empty"
+[ ${#REQUIRED_PLUGINS[@]} -gt 0 ] || fail "REQUIRED_PLUGINS is empty"
 [ ${#OPTIONAL_SKILLS[@]} -gt 0 ] || fail "OPTIONAL_SKILLS is empty"
 
-echo "  PASS (${#CORE_PLUGINS[@]} core, ${#OPTIONAL_PLUGINS[@]} optional, ${#OPTIONAL_SKILLS[@]} skills)"
+echo "  PASS (${#REQUIRED_PLUGINS[@]} required, ${#OPTIONAL_SKILLS[@]} skills)"
 
 # --- Test 5: check_document_consistency version alignment (real repo) ---
 echo "Test 5: check_document_consistency version alignment"

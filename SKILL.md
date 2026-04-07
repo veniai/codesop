@@ -109,7 +109,7 @@ Default to orientation and routing first. Do not jump into implementation unless
 
 ## 4. Default Output
 
-Output `## 工作台摘要` followed by `## Skill 建议` using one of these three templates, then `## Skill 生态`.
+Output `## 工作台摘要` followed by `## Skill 建议` using one of these three templates, then `## Skill 生态`, then a **bare command on the last line**.
 
 ### 4.1 Workbench Summary
 
@@ -167,6 +167,18 @@ Routing table is the final authority. Validation line is informational. User dec
   - 含 ⚠️ → 显示原文
   - 模块不可用 → "文档一致性：模块不可用"
 ```
+
+### 4.4 Last Line — Recommended Command
+
+The very last line of the output MUST be the recommended skill command, bare and alone:
+
+```
+/superpowers:{skill-name}
+```
+
+This is intentional: Claude Code's prompt suggestion engine may pick up this bare command and display it as gray text in the input box. The user can then press Enter to execute it directly.
+
+If no skill is recommended (no match from routing table), output nothing after `## Skill 生态`.
 
 Compress for quick answers, but keep the same mental model.
 

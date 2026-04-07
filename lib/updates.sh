@@ -24,14 +24,12 @@ current_version() {
   cat "$VERSION_FILE" 2>/dev/null || echo "unknown"
 }
 
-# Core plugins — missing = error
-CORE_PLUGINS=(
-  "superpowers@claude-plugins-official"
-  "code-review@claude-plugins-official"
-)
+# Superpowers — backbone plugin, displayed separately with version
+SUPERPOWERS_PLUGIN="superpowers@claude-plugins-official"
 
-# Optional plugins — missing = warning
-OPTIONAL_PLUGINS=(
+# Required plugins — all curated, missing = warning + install command
+REQUIRED_PLUGINS=(
+  "code-review@claude-plugins-official"
   "skill-creator@claude-plugins-official"
   "frontend-design@claude-plugins-official"
   "context7@claude-plugins-official"
@@ -40,6 +38,10 @@ OPTIONAL_PLUGINS=(
   "claude-md-management@claude-plugins-official"
   "codex@openai-codex"
 )
+
+# Legacy aliases for backward compatibility
+CORE_PLUGINS=("$SUPERPOWERS_PLUGIN" "${REQUIRED_PLUGINS[@]}")
+OPTIONAL_PLUGINS=()
 
 # Independent skills — missing = warning
 OPTIONAL_SKILLS=(
@@ -80,7 +82,7 @@ README_SKILL_ALIASES=(
 
 check_plugin_completeness() {
   local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
-  local missing_core=() missing_optional=()
+  local missing_required=()
 
   if [ ! -f "$plugins_file" ]; then
     printf '%s\n' "❌ 插件配置文件不存在: $plugins_file"
@@ -88,37 +90,45 @@ check_plugin_completeness() {
     return 1
   fi
 
-  for plugin in "${CORE_PLUGINS[@]}"; do
+  # --- Superpowers (backbone, displayed separately) ---
+  local sp_installed=false
+  local sp_version=""
+  if jq -e --arg id "$SUPERPOWERS_PLUGIN" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+    sp_installed=true
+    sp_version=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].version // "unknown"' "$plugins_file" 2>/dev/null) || sp_version="unknown"
+  fi
+
+  if [ "$sp_installed" = true ]; then
+    printf '  ✓ superpowers: %s\n' "$sp_version"
+  else
+    printf '  ❌ superpowers: 未安装\n'
+    printf '    安装: /plugin install %s\n' "$SUPERPOWERS_PLUGIN"
+  fi
+
+  # --- Required curated plugins ---
+  for plugin in "${REQUIRED_PLUGINS[@]}"; do
     if ! jq -e --arg id "$plugin" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
-      missing_core+=("$plugin")
+      missing_required+=("$plugin")
     fi
   done
 
-  for plugin in "${OPTIONAL_PLUGINS[@]}"; do
-    if ! jq -e --arg id "$plugin" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
-      missing_optional+=("$plugin")
-    fi
-  done
-
-  if [ ${#missing_core[@]} -gt 0 ]; then
-    printf '%s\n' "❌ 核心插件缺失:"
-    for p in "${missing_core[@]}"; do printf '  - %s\n' "$p"; done
-    printf '%s\n' "  安装:"
-    for p in "${missing_core[@]}"; do printf '    /plugin install %s\n' "$p"; done
+  if [ ${#missing_required[@]} -eq 0 ]; then
+    printf '  ✓ 必选插件: %d/%d 已安装\n' "${#REQUIRED_PLUGINS[@]}" "${#REQUIRED_PLUGINS[@]}"
+  else
+    local installed_count=$(( ${#REQUIRED_PLUGINS[@]} - ${#missing_required[@]} ))
+    printf '  ❌ 必选插件: %d/%d 已安装，缺失:\n' "$installed_count" "${#REQUIRED_PLUGINS[@]}"
+    for p in "${missing_required[@]}"; do printf '    - %s\n' "$p"; done
+    printf '%s\n' "  一键安装全部缺失插件:"
+    printf '    '
+    local first=true
+    for p in "${missing_required[@]}"; do
+      if [ "$first" = true ]; then first=false; else printf ' && '; fi
+      printf '/plugin install %s' "$p"
+    done
+    printf '\n'
   fi
 
-  if [ ${#missing_optional[@]} -gt 0 ]; then
-    printf '%s\n' "⚠️ 可选插件缺失:"
-    for p in "${missing_optional[@]}"; do printf '  - %s\n' "$p"; done
-    printf '%s\n' "  安装:"
-    for p in "${missing_optional[@]}"; do printf '    /plugin install %s\n' "$p"; done
-  fi
-
-  if [ ${#missing_core[@]} -eq 0 ] && [ ${#missing_optional[@]} -eq 0 ]; then
-    printf '%s\n' "✓ 所有插件已安装"
-  fi
-
-  [ ${#missing_core[@]} -eq 0 ]
+  [ "$sp_installed" = true ] && [ ${#missing_required[@]} -eq 0 ]
 }
 
 check_skill_completeness() {
@@ -617,16 +627,13 @@ print_dependency_report() {
   printf '\n%s\n' "独立 Skill："
   check_skill_completeness
 
-  printf '\n%s\n' "版本检查："
-  check_plugin_versions
-
   printf '\n%s\n' "路由覆盖："
   check_routing_coverage
 
   printf '\n%s\n' "文档一致性："
   check_document_consistency
 
-  # Superpowers update check (keep existing git-based logic for git installs)
+  # Superpowers update check
   if [ "$host" = "claude" ]; then
     printf '\n%s\n' "更新建议："
     local sp_path
@@ -637,7 +644,5 @@ print_dependency_report() {
       plugin_update_check "superpowers"
       printf '%s\n' "  更新命令：/plugin update superpowers"
     fi
-  else
-    printf '%s\n' "  插件检查仅支持 Claude Code 宿主"
   fi
 }
