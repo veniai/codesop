@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 2.1.5
+# Current Version: 2.1.6
 # Last Updated: 2026-04-07
 # Status: active
 
@@ -55,7 +55,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
-| 2026-04-07 | `/codesop` 最后一行改为自然语言工作流指令 | Claude Code 没有公开 API 直接设置输入框灰色默认建议，工作流链路比单一命令更贴近真实下一步 | `/codesop` 收尾允许串联 1 到 3 个 skill，并在工作树未清时优先推荐 cleanup-first workflow |
+| 2026-04-07 | `/codesop` 从“推荐 skill”转为“组织下一步工作流链” | 大模型更擅长模仿完整范例而不是遵守零碎规则，工作流链也比单一命令更贴近真实下一步 | `/codesop` 收尾允许串联 1 到 3 个 skill，并在工作树未清或文档漂移时优先推荐 cleanup-first / doc-sync workflow |
 | 2026-04-06 | Skill 哲学审查：不调整铁律/模板/路由表 | 铁律对 AI 消费者直接有效；三套模板反映真实不同的决策结果；★ 标记已够分级 | §2.2 Next Up 清空，按需驱动 |
 | 2026-04-06 | has_plugin() 系列函数统一查 .plugins 路径 | installed_plugins.json 结构为 {version, plugins}，旧代码查根对象 | detection.sh + updates.sh 共 5 处修复 |
 | 2026-04-03 | v2.0 移除 GStack，Superpowers-only | 双引擎维护成本高，实际只用到 Superpowers | 依赖检测/版本检查/路由表全面重写 |
@@ -119,8 +119,9 @@
 - 非 Claude Code / Codex / OpenCode 的宿主支持
 
 ### 5.4 核心功能
-- **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文推荐下一步 skill
+- **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文并组织下一步工作流链
 - **`/codesop` 收尾格式**: 推荐区之后，最后一行输出自然语言工作流指令，可串联 1 到 3 个 skill，提升 Claude Code 灰色默认建议命中概率
+- **文档漂移扫描**: 在路由前先判断 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`
 - **`codesop update`**: git pull + 自动重同步宿主集成

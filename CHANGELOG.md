@@ -6,6 +6,9 @@
 - `/codesop` final line now uses a natural-language workflow instruction instead of a single slash command
 - `/codesop` recommendations now emphasize workflow reasoning over repeating the same action
 - Dirty worktrees now bias `/codesop` toward cleanup-first workflows before roadmap-next work
+- `/codesop` now frames itself as a workflow-chain composer instead of a single-skill recommender
+- `/codesop` now performs a document drift scan so PRD/README/CLAUDE updates can be woven into the next workflow chain
+- `/codesop` now teaches output style through complete dirty/clean worktree examples instead of relying only on scattered formatting rules
 
 ## [2.0.0] - 2026-04-03
 

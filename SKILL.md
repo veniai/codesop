@@ -2,7 +2,7 @@
 name: codesop
 description: |
   Project workbench and workflow router for AI-assisted coding.
-  Restores context from AGENTS.md and PRD.md, summarizes current state, recommends the next skill, and validates fit.
+  Restores context from AGENTS.md and PRD.md, summarizes current state, composes the next workflow chain, and validates fit.
   Proactively invoke this skill (do NOT answer directly) when the user:
   - asks what to do next, what skill to use, or wants a status/progress summary
   - says "continue", returns to a project after a gap, or looks confused about what step comes next
@@ -28,7 +28,7 @@ Use this skill to:
 
 - restore project orientation
 - summarize current state
-- recommend the next workflow
+- compose the next move
 - route into specialized downstream skills
 
 Do not use this skill as a replacement for specialist execution skills.
@@ -48,7 +48,7 @@ For these requests:
 - summarize the command output faithfully
 - keep interpretation minimal and local to the command result
 - do not output `## 工作台摘要`
-- do not output `## Skill 建议`
+- do not output `## 下一步建议`
 - do not recommend downstream workflow skills unless the user separately asks what to do next
 
 ## 2. Read Order
@@ -98,8 +98,13 @@ When this skill triggers:
    ```
    Use the results to disambiguate the user's intent. The principle is: **when the signal could mean multiple things, observed git state breaks the tie.**
    When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow before recommending roadmap-next work.
-8. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Recommend the matching skill.
-9. If step 8 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
+8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
+   - workflow/tooling/constraints changed → `CLAUDE.md`
+   - product state/progress/decisions/scope changed → `PRD.md`
+   - user-visible usage/commands/config changed → `README.md`
+   Use this scan to decide whether doc updates belong in the next workflow chain.
+9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain instead of stopping at one skill name.
+10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
    - ❌ 不适合 — skill mismatch; another skill would be significantly better
@@ -184,6 +189,44 @@ Rules:
 - Do not add a trailing question after the final workflow instruction
 - Do not output any text after the final workflow instruction
 
+Examples:
+
+Case A — Dirty worktree
+
+```md
+## 工作台摘要
+**长期目标**: ... **当前阶段**: ... **当前进度**: ...
+**当前分支**: main（无 open PR） **阻塞/风险**: 工作区仍有未暂存改动，需要先归拢边界 **最近决策**: ...
+
+## Skill 生态
+- 路由覆盖：...
+- 文档一致性：...
+
+## 下一步建议
+- 推荐链路：先收尾当前改动，再同步活文档，再进入下一阶段设计。理由：当前工作区未清，直接推进 roadmap-next 会混淆边界，且文档状态已落后于代码事实。
+- 备选链路：直接进入 brainstorming。理由：只有当这些改动已确认可以延后处理时才成立。
+
+先用 finishing-a-development-branch 处理当前未提交改动；如果这次改动影响 PRD.md/README.md，就顺手更新活文档；完成后用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计。
+```
+
+Case B — Clean worktree
+
+```md
+## 工作台摘要
+**长期目标**: ... **当前阶段**: ... **当前进度**: ...
+**当前分支**: feat/p1-graph-ui（无 open PR） **阻塞/风险**: 无 **最近决策**: ...
+
+## Skill 生态
+- 路由覆盖：...
+- 文档一致性：...
+
+## 下一步建议
+- 推荐链路：直接进入当前阶段的设计工作流。理由：工作区干净，且当前目标已经明确。
+- 备选链路：先写计划再实施。理由：如果 scope 已经稳定，可以直接把设计拆成执行任务。
+
+用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准。
+```
+
 Intent:
 
 - Claude Code may use the last assistant line as a gray next-step suggestion in the input box
@@ -231,8 +274,9 @@ When no scenario matches:
 
 1. Produce the workbench summary anyway
 2. Scan all skill descriptions if available
-3. Rank the top 3 workflow options
-4. Recommend the least-risk next step
+3. Check whether document drift should be part of the next move
+4. Rank the top 3 workflow options
+5. Recommend the least-risk next step
 5. If still unclear, ask one focused question
 
 ## 8. Sub-commands

@@ -1,8 +1,8 @@
 {
   "name": "codesop",
   "displayName": "codesop",
-  "version": "2.1.5",
-  "description": "Project workbench and workflow router. Proactively invoke when user asks what to do next, wants status, needs workflow guidance, or describes a feature/bug/refactor without specifying a workflow. (codesop)",
+  "version": "2.1.6",
+  "description": "Project workbench and workflow-chain router. Proactively invoke when user asks what to do next, wants status, needs workflow guidance, or describes a feature/bug/refactor without specifying a workflow. (codesop)",
   "author": "veniai",
   "repository": "https://github.com/veniai/codesop",
   "license": "MIT",

@@ -51,8 +51,11 @@ grep -q "Workflow Router" "$ROOT_DIR/SKILL.md" || fail "Workflow Router title mi
 grep -q "工作台摘要" "$ROOT_DIR/SKILL.md" || fail "Workbench summary template missing from SKILL.md"
 grep -q "下一步建议" "$ROOT_DIR/SKILL.md" || fail "Next-step recommendation template missing from SKILL.md"
 grep -q "自然语言工作流指令" "$ROOT_DIR/SKILL.md" || fail "Final workflow-instruction rule missing from SKILL.md"
+grep -q "document drift scan" "$ROOT_DIR/SKILL.md" || fail "Missing document drift scan guidance"
 grep -q "1 to 3 skills in sequence" "$ROOT_DIR/SKILL.md" || fail "Missing multi-skill workflow instruction rule"
 grep -q "cleanup-first workflow" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree priority rule"
+grep -q "Case A — Dirty worktree" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree example"
+grep -q "Case B — Clean worktree" "$ROOT_DIR/SKILL.md" || fail "Missing clean-worktree example"
 echo "  PASS"
 
 # Test 7: Hook schema is correct
