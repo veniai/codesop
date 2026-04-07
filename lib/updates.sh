@@ -150,10 +150,9 @@ check_plugin_completeness() {
         case "$p" in
           codex@openai-codex)
             printf '    %-20s https://github.com/openai/codex\n' "codex"
-            printf '    %-20s /plugin install %s\n' "安装:" "$p"
             ;;
           *)
-            printf '    %-20s /plugin install %s\n' "$p" "$p"
+            printf '    %-20s 未知来源，请搜索官方仓库\n' "$p"
             ;;
         esac
       done
