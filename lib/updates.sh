@@ -154,7 +154,8 @@ check_plugin_completeness() {
       for p in "${missing_thirdparty[@]}"; do
         case "$p" in
           codex@openai-codex)
-            printf '    %-20s https://github.com/openai/codex\n' "codex"
+            printf '    codex              https://github.com/openai/codex\n'
+            printf '    安装               参考 README 安装 Claude Code 插件\n'
             ;;
           *)
             printf '    %-20s 未知来源，请搜索官方仓库\n' "$p"
@@ -198,11 +199,10 @@ check_skill_completeness() {
           ;;
         browser-use)
           printf '    %-20s https://github.com/browser-use/browser-use\n' "browser-use"
-          printf '    %-20s git clone https://github.com/browser-use/browser-use.git ~/.claude/skills/browser-use\n' "安装:"
+          printf '    %-20s 参考 README 安装为 Claude Code skill\n' "安装:"
           ;;
         claude-to-im)
-          printf '    %-20s https://github.com/anthropics/claude-to-im\n' "claude-to-im"
-          printf '    %-20s /plugin install claude-to-im@anthropics\n' "安装:"
+          printf '    %-20s 搜索 claude-to-im 获取最新安装方式\n' "claude-to-im"
           ;;
         *)
           printf '    %-20s 请手动安装到 ~/.claude/skills/%s/\n' "$s" "$s"
