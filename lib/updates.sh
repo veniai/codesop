@@ -89,12 +89,17 @@ check_plugin_completeness() {
     return 1
   fi
 
+  if ! command -v jq >/dev/null 2>&1; then
+    printf '%s\n' "⚠️ jq 未安装，无法检查插件状态"
+    return 1
+  fi
+
   # --- Superpowers (backbone, displayed separately) ---
   local sp_installed=false
   local sp_version=""
   if jq -e --arg id "$SUPERPOWERS_PLUGIN" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
     sp_installed=true
-    sp_version=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].version // "unknown"' "$plugins_file" 2>/dev/null) || sp_version="unknown"
+    sp_version=$(jq -r --arg id "$SUPERPOWERS_PLUGIN" '.plugins[$id][0].version // "unknown"' "$plugins_file" 2>/dev/null) || sp_version="unknown"
   fi
 
   if [ "$sp_installed" = true ]; then
@@ -235,6 +240,12 @@ check_routing_coverage() {
 
   local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
   local missing=()
+  local plugins_checkable=true
+
+  # If plugins file is missing, we can only check skills, not plugins
+  if [ ! -f "$plugins_file" ]; then
+    plugins_checkable=false
+  fi
 
   # Extract skill names from the table's 4th column (Skill)
   # Table format: | 大类 | 优选 | 来源 | Skill | 什么时候用 |
@@ -255,7 +266,9 @@ check_routing_coverage() {
 
     if [ "$source" = "sp" ]; then
       # Superpowers skills — check superpowers plugin
-      if [ -f "$plugins_file" ] && ! jq -e --arg id "superpowers@claude-plugins-official" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      if [ "$plugins_checkable" = false ]; then
+        missing+=("$skill_name (无法检查: 插件文件缺失)")
+      elif ! jq -e --arg id "$SUPERPOWERS_PLUGIN" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
         missing+=("$skill_name (需要 superpowers)")
       fi
     elif [ "$source" = "plugin" ]; then
@@ -266,7 +279,9 @@ check_routing_coverage() {
       else
         plugin_id="${lookup_name}@claude-plugins-official"
       fi
-      if [ -f "$plugins_file" ] && ! jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
+      if [ "$plugins_checkable" = false ]; then
+        missing+=("$skill_name (无法检查: 插件文件缺失)")
+      elif ! jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true; then
         missing+=("$skill_name (需要 $plugin_id)")
       fi
     elif [ "$source" = "skill" ]; then
@@ -298,8 +313,13 @@ check_document_consistency() {
     ver_file="$(tr -d '[:space:]' < "$version_file")" || true
   fi
 
-  if [ -f "$root/skill.json" ] && command -v jq >/dev/null 2>&1; then
-    ver_json="$(jq -r '.version // ""' "$root/skill.json" 2>/dev/null)" || ver_json=""
+  if [ -f "$root/skill.json" ]; then
+    if command -v jq >/dev/null 2>&1; then
+      ver_json="$(jq -r '.version // ""' "$root/skill.json" 2>/dev/null)" || ver_json=""
+    else
+      # Fallback: parse version with grep when jq unavailable
+      ver_json="$(grep -m1 '"version"' "$root/skill.json" 2>/dev/null | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' | tr -d '[:space:]')" || ver_json=""
+    fi
   fi
 
   if [ -f "$root/PRD.md" ]; then
