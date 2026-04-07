@@ -296,7 +296,10 @@ check_routing_coverage() {
   done < <(grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' "$router_file" | grep -v '^|.*---')
 
   if [ ${#missing[@]} -gt 0 ]; then
-    printf '%s\n' "⚠️ 路由覆盖不完整 (${#missing[@]} 个条目缺失，安装方法见上方)"
+    printf '%s\n' "⚠️ 路由覆盖不完整 (${#missing[@]} 个条目缺失):"
+    for m in "${missing[@]}"; do
+      printf '  - %s\n' "$m"
+    done
   else
     printf '%s\n' "✓ 路由覆盖完整"
   fi

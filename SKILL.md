@@ -114,15 +114,16 @@ Output sections in this order:
 1. `## 工作台摘要`
 2. `## Skill 生态`
 3. `## Skill 建议`（只有推荐 + 备选，两行）
-4. **最后一行**：`建议下一步: /superpowers:{skill-name}`
 
 ### 4.1 Workbench Summary
 
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**阻塞/风险**: ... **最近决策**: ... **下一步**: ...
+**当前分支**: ... **阻塞/风险**: ... **最近决策**: ... **下一步**: ...
 ```
+
+注意：摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
 
 ### 4.2 Skill Ecosystem (放在 Skill 建议之前)
 
@@ -130,7 +131,7 @@ Output sections in this order:
 ## Skill 生态
 - 路由覆盖：（粘贴 check_routing_coverage 输出）
   - "路由覆盖完整"→ "✓ 路由覆盖完整"
-  - 不完整 → "⚠️ 路由覆盖不完整 (N 个条目缺失)"
+  - 不完整 → 显示原文（含缺失条目列表）
   - 模块不可用 → "路由覆盖：模块不可用"
 - 文档一致性：（粘贴 check_document_consistency 输出）
   - 全部 ✓ → 合并为一行 "✓ 文档一致"
@@ -140,27 +141,15 @@ Output sections in this order:
 
 ### 4.3 Skill Recommendation
 
-Only two lines, no third line:
+Only two lines:
 
 ```md
 ## Skill 建议
-- 推荐: → {skill-name} (信号: "{user signal}")
-- 备选: → {backup-skill} (原因: {...})
+- 推荐使用: {skill-name} (信号: "{user signal}")
+- 备选使用: {backup-skill} (原因: {...})
 ```
 
 If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
-
-### 4.4 Last Line — Next Step Command
-
-The very last line of the output MUST be the recommended next step, formatted as:
-
-```
-建议下一步: /superpowers:{skill-name}
-```
-
-This is intentional: Claude Code's prompt suggestion engine is more likely to pick up a natural language + command combination and display it as gray text in the input box. The user can then press Enter to execute it directly.
-
-If no skill is recommended, omit this line entirely.
 
 Compress for quick answers, but keep the same mental model.
 
