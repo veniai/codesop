@@ -49,9 +49,10 @@ echo "  PASS"
 echo "Test 6: SKILL.md has workbench format..."
 grep -q "Workflow Router" "$ROOT_DIR/SKILL.md" || fail "Workflow Router title missing from SKILL.md"
 grep -q "工作台摘要" "$ROOT_DIR/SKILL.md" || fail "Workbench summary template missing from SKILL.md"
-grep -q "Skill 建议" "$ROOT_DIR/SKILL.md" || fail "Skill recommendation template missing from SKILL.md"
-grep -q "最后一行" "$ROOT_DIR/SKILL.md" || fail "Final slash command rule missing from SKILL.md"
-grep -q "Do not add \`建议下一步:\`" "$ROOT_DIR/SKILL.md" || fail "Missing prohibition on 建议下一步 prefix"
+grep -q "下一步建议" "$ROOT_DIR/SKILL.md" || fail "Next-step recommendation template missing from SKILL.md"
+grep -q "自然语言工作流指令" "$ROOT_DIR/SKILL.md" || fail "Final workflow-instruction rule missing from SKILL.md"
+grep -q "1 to 3 skills in sequence" "$ROOT_DIR/SKILL.md" || fail "Missing multi-skill workflow instruction rule"
+grep -q "cleanup-first workflow" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree priority rule"
 echo "  PASS"
 
 # Test 7: Hook schema is correct

@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- `/codesop` final line now uses a natural-language workflow instruction instead of a single slash command
+- `/codesop` recommendations now emphasize workflow reasoning over repeating the same action
+- Dirty worktrees now bias `/codesop` toward cleanup-first workflows before roadmap-next work
+
 ## [2.0.0] - 2026-04-03
 
 ### Breaking Changes

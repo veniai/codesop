@@ -97,6 +97,7 @@ When this skill triggers:
    git status --short 2>/dev/null | head -10
    ```
    Use the results to disambiguate the user's intent. The principle is: **when the signal could mean multiple things, observed git state breaks the tie.**
+   When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow before recommending roadmap-next work.
 8. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Recommend the matching skill.
 9. If step 8 produced a skill recommendation → read the recommended skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
@@ -113,15 +114,15 @@ Output sections in this order:
 
 1. `## 工作台摘要`
 2. `## Skill 生态`
-3. `## Skill 建议`（只有推荐 + 备选，两行）
-4. **最后一行**：输出一条可直接执行的裸 slash command
+3. `## 下一步建议`（只有推荐链路 + 备选链路，两行，重点写理由）
+4. **最后一行**：输出一条自然语言工作流指令
 
 ### 4.1 Workbench Summary
 
 ```md
 ## 工作台摘要
 **长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: ... **阻塞/风险**: ... **最近决策**: ... **下一步**: ...
+**当前分支**: ... **阻塞/风险**: ... **最近决策**: ...
 ```
 
 注意：摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
@@ -140,45 +141,55 @@ Output sections in this order:
   - 模块不可用 → "文档一致性：模块不可用"
 ```
 
-### 4.3 Skill Recommendation
+### 4.3 Next-Step Recommendation
 
 Only two lines:
 
 ```md
-## Skill 建议
-- 推荐：使用 {skill-name} skill {做什么事}
-- 备选：使用 {backup-skill} skill {做什么事}
+## 下一步建议
+- 推荐链路：{workflow}. 理由：{why this should happen first}
+- 备选链路：{workflow}. 理由：{why this is secondary}
 ```
 
 If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
 
-### 4.4 Final Line — Direct Next Step Command
+The recommendation block should explain judgment, not repeat the final action verbatim.
 
-The very last line of the output MUST be a single slash command the user can execute by pressing Enter.
+### 4.4 Final Line — Natural-Language Workflow Instruction
 
-Use this shape:
+The very last line of the output MUST be a single natural-language workflow instruction the user can send by pressing Enter.
+
+Use this shape when the next step is a chain:
 
 ```text
-/brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准
+先用 finishing-a-development-branch 处理当前未提交改动；如果这次改动影响文档，就同步更新文档；完成后用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计。
+```
+
+Use this shape when the next step is simple:
+
+```text
+用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准。
 ```
 
 Rules:
 
 - The final line must be the last non-empty line in the whole response
-- Output exactly one slash command on that line
-- Use a real slash command the host can execute directly
-- Include a short natural-language argument after the command when that helps the next step
-- Do not wrap the command in backticks
+- Output exactly one workflow instruction on that line
+- The final line may mention 1 to 3 skills in sequence when the work naturally chains
+- Use natural language; slash commands are optional, not required
+- Keep the line short enough to work as a gray next-step suggestion
+- Mention concrete skill names so the model can route itself correctly
+- Do not wrap the final line in backticks
 - Do not add bullets, labels, or prefixes before it
-- Do not add `建议下一步:`
-- Do not add a trailing question after the final slash command
-- Do not output any text after the final slash command
+- Do not add a trailing question after the final workflow instruction
+- Do not output any text after the final workflow instruction
 
 Intent:
 
 - Claude Code may use the last assistant line as a gray next-step suggestion in the input box
 - There is no guaranteed API for setting that suggestion directly
-- Therefore `/codesop` should maximize the chance by ending with one clean executable slash command
+- Therefore `/codesop` should maximize the chance by ending with one clean natural-language workflow instruction
+- When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow on the final line
 
 Compress for quick answers, but keep the same mental model.
 

@@ -18,6 +18,15 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local haystack="$1"
+  local needle="$2"
+
+  if [[ "$haystack" == *"$needle"* ]]; then
+    fail "expected output to not contain: $needle"
+  fi
+}
+
 skill_output="$(sed -n '/^## 8\. Sub-commands/,/^## 9\./p' "$ROOT_DIR/SKILL.md")"
 skill_header="$(sed -n '1,120p' "$ROOT_DIR/SKILL.md")"
 skill_full="$(cat "$ROOT_DIR/SKILL.md")"
@@ -36,17 +45,19 @@ assert_contains "$skill_header" 'Do not trigger when the user is explicitly invo
 assert_contains "$skill_full" "## 工作台摘要"
 assert_contains "$skill_full" "**长期目标**:"
 assert_contains "$skill_full" "**当前阶段**:"
-assert_contains "$skill_full" "## Skill 建议"
-assert_contains "$skill_full" "4. **最后一行**：输出一条可直接执行的裸 slash command"
-assert_contains "$skill_full" 'Do not add `建议下一步:`'
-assert_contains "$skill_full" 'Do not add a trailing question after the final slash command'
+assert_contains "$skill_full" "## 下一步建议"
+assert_contains "$skill_full" "4. **最后一行**：输出一条自然语言工作流指令"
+assert_contains "$skill_full" "The final line may mention 1 to 3 skills in sequence"
+assert_contains "$skill_full" "Use natural language; slash commands are optional, not required"
+assert_contains "$skill_full" "When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow"
+assert_not_contains "$skill_full" "**当前分支**: ... **阻塞/风险**: ... **最近决策**: ... **下一步**: ..."
 assert_contains "$skill_output" "Generate AGENTS.md"
 assert_contains "$skill_output" '`/codesop init [path]`'
 assert_contains "$skill_output" '`/codesop update`'
 assert_contains "$skill_full" "## 5. Completion Gate"
 assert_contains "$skill_full" "## 文档判定"
 assert_contains "$skill_full" "- CLAUDE.md: 已更新 / 未更新，原因：..."
-assert_contains "$skill_full" "/brainstorming 为"
+assert_contains "$skill_full" "先用 finishing-a-development-branch 处理当前未提交改动"
 assert_contains "$skill_output" "Defaults to 中文"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
@@ -57,6 +68,8 @@ assert_contains "$readme_output" 'CLAUDE.md'
 assert_contains "$readme_output" "codesop update"
 assert_contains "$readme_output" "/codesop init"
 assert_contains "$readme_output" '`VERSION` 是发布版本的唯一真相源'
+assert_contains "$readme_output" "最后一行"
+assert_contains "$readme_output" "自然语言工作流指令"
 
 version_value="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 skill_version="$(sed -n 's/.*"version": "\(.*\)".*/\1/p' "$ROOT_DIR/skill.json" | head -1)"
