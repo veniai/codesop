@@ -155,7 +155,9 @@ check_plugin_completeness() {
         case "$p" in
           codex@openai-codex)
             printf '    codex              https://github.com/openai/codex-plugin-cc\n'
-            printf '    安装               /plugin install https://github.com/openai/codex-plugin-cc\n'
+            printf '    安装               /plugin marketplace add openai/codex-plugin-cc\n'
+            printf '                       /plugin install codex@openai-codex\n'
+            printf '    注意               安装后如有重复 MCP server（如 codex），检查 ~/.claude/settings.json 移除重复项\n'
             ;;
           *)
             printf '    %-20s 未知来源，请搜索官方仓库\n' "$p"
@@ -199,7 +201,8 @@ check_skill_completeness() {
           ;;
         browser-use)
           printf '    %-20s https://github.com/browser-use/browser-use\n' "browser-use"
-          printf '    %-20s 参考 README 安装为 Claude Code skill\n' "安装:"
+          printf '    %-20s pip install browser-use && browser-use doctor\n' "安装:"
+          printf '    %-20s 安装后如有重复 MCP server，检查 ~/.claude/settings.json 移除重复项\n' "注意:"
           ;;
         claude-to-im)
           printf '    %-20s 搜索 claude-to-im 获取最新安装方式\n' "claude-to-im"
@@ -293,8 +296,7 @@ check_routing_coverage() {
   done < <(grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' "$router_file" | grep -v '^|.*---')
 
   if [ ${#missing[@]} -gt 0 ]; then
-    printf '%s\n' "⚠️ 路由表引用但未安装 (安装方法见上方对应分类):"
-    for m in "${missing[@]}"; do printf '  - %s\n' "$m"; done
+    printf '%s\n' "⚠️ 路由覆盖不完整 (${#missing[@]} 个条目缺失，安装方法见上方)"
   else
     printf '%s\n' "✓ 路由覆盖完整"
   fi
