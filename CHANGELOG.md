@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1] - 2026-04-08
+
+### Fixed
+- `check_routing_coverage()` now strips `plugin:skill` prefix before looking up `installed_plugins.json` — fixes false "missing" reports when routing table uses fully qualified names
+
+### Changed
+- Cleaned up 6 stale local branches and 6 stale remote branches
+
 ## [2.2.0] - 2026-04-08
 
 ### Fixed
