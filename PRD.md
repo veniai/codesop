@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 2.1.8
+# Current Version: 2.2.0
 # Last Updated: 2026-04-08
 # Status: active
 
