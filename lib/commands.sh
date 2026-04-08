@@ -3,9 +3,13 @@
 
 # Resync host integration and run skill routing coverage check.
 # Called after every update branch in run_update.
+# Re-sources updates.sh so git-pulled code changes take effect immediately.
 _resync_and_check() {
   printf '%s\n' "重新同步本机宿主集成..."
   bash "$ROOT_DIR/setup" --host auto
+
+  # Re-source updates.sh so git-pulled changes take effect in this shell
+  source "${ROOT_DIR}/lib/updates.sh"
 
   # Check plugin dependencies
   local host="unknown"
