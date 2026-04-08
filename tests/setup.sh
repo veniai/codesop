@@ -55,7 +55,6 @@ HOME="$home_auto" bash "$SETUP" --host auto >/tmp/codesop-setup-auto.out 2>/tmp/
 assert_symlink "$home_auto/.claude/CLAUDE.md"
 assert_file_contains "$home_auto/.claude/CLAUDE.md" "AI 编码契约"
 assert_exists "$home_auto/.claude/skills/codesop/SKILL.md"
-assert_exists "$home_auto/.claude/commands/codesop.md"
 assert_exists "$home_auto/.claude/commands/codesop-init.md"
 assert_exists "$home_auto/.claude/commands/codesop-update.md"
 [ ! -e "$home_auto/.claude/skills/codesop/agents" ] || fail "expected Claude runtime to avoid repo-local agents residue"

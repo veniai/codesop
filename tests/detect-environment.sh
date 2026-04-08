@@ -37,11 +37,8 @@ assert_contains "$skill_header" "Read project context in this order:"
 assert_contains "$skill_header" '1. `AGENTS.md`'
 assert_contains "$skill_header" '2. `PRD.md`'
 assert_contains "$skill_header" '3. `README.md` only if needed'
-assert_contains "$skill_header" 'The `/codesop` CLI is an optional but preferred mechanical context source.'
-assert_contains "$skill_header" 'Call `/codesop` when you need fresh project-state facts from the repo.'
-assert_contains "$skill_header" 'Do not call `/codesop` for abstract workflow questions that do not depend on repo state.'
-assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.'
-assert_contains "$skill_header" "## 1.1 CLI Command Bypass"
+assert_contains "$skill_header" 'Never invoke `/codesop` from within this skill'
+assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and direct git/file commands for mechanical facts.'
 assert_contains "$skill_header" 'Do not trigger when the user is explicitly invoking a mechanical subcommand'
 assert_not_contains "$skill_full" "recommends the next skill"
 assert_contains "$skill_full" "## 工作台摘要"

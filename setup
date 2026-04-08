@@ -215,8 +215,7 @@ install_claude() {
   ensure_symlink "$SYSTEM_AGENTS_TEMPLATE" "$HOME/.claude/CLAUDE.md"
   write_skill_runtime "$HOME/.claude/skills/codesop"
   prepare_runtime_dir "$HOME/.claude/commands"
-  rm -f "$HOME/.claude/commands/codesop"*.md
-  copy_file "$SOURCE_DIR/SKILL.md" "$HOME/.claude/commands/codesop.md"
+  rm -f "$HOME/.claude/commands/codesop.md"
   copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"

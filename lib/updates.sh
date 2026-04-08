@@ -355,7 +355,7 @@ check_project_document_drift() {
     fi
   fi
 
-  if [ ! -d "$project_root/.git" ]; then
+  if ! git -C "$project_root" rev-parse --git-dir >/dev/null 2>&1; then
     printf '%s\n' "⚠️ 当前项目不是 git 仓库，无法判断文档漂移"
     return 0
   fi
@@ -624,7 +624,7 @@ git_update_check() {
   local ahead="0"
   local behind="0"
 
-  if [ ! -d "$repo_dir/.git" ]; then
+  if ! git -C "$repo_dir" rev-parse --git-dir >/dev/null 2>&1; then
     printf '%s\n' "无法检查（非 git 安装）"
     return
   fi
@@ -772,7 +772,7 @@ print_dependency_report() {
     printf '\n%s\n' "更新建议："
     local sp_path
     sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
-    if [ -n "$sp_path" ] && [ -d "$sp_path/.git" ]; then
+    if [ -n "$sp_path" ] && git -C "$sp_path" rev-parse --git-dir >/dev/null 2>&1; then
       git_update_check "$sp_path" "superpowers" "/plugin update superpowers"
     else
       plugin_update_check "superpowers"
