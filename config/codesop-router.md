@@ -26,8 +26,6 @@
 | | ★ | sp | finishing-a-development-branch | 测试通过后提交 PR 或合并 |
 | **6. 代码审查** | | | | |
 | | ★ | plugin | code-review | PR 提交后自动审查：5 agent 并行 + 置信度评分 + 自动发评论 |
-| | | plugin | codex:review | 需要 OpenAI 第二意见审查代码 diff 时（独立视角） |
-| | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 |
 | | | sp | receiving-code-review | 收到 code-review 评论后，先技术评估再执行 |
 | **7. 前端测试与自动化** | | | | |
 | | | plugin | playwright | 日常页面操作：导航/截图/填表/点击/JS 执行 |
@@ -45,12 +43,19 @@
 | **12. 通讯桥梁** | | | | |
 | | | skill | claude-to-im | Claude Code 桥接到 Telegram/Discord/飞书/QQ/微信 |
 | **13. 应急接管** | | | | |
-| | | plugin | codex:rescue | 线程卡住或需要换个智能体重新来过时，把任务交给 Codex 接管 |
+| | | plugin | codex:rescue | 用户说"让 codex 看看/交给 codex/第二意见"、线程卡住、需要换个智能体时——AI 可自动调用的唯一 codex 执行命令 |
+| | | plugin | codex:review | 需要 OpenAI 第二意见审查代码 diff 时（独立视角）⚠️ 需用户手动输入 |
+| | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |
 
 ### 调试路径
 用户说"修 bug"、"测试挂了"、"为什么坏了"、"这个不工作了"时：
 → systematic-debugging（假设驱动排查）→ verification-before-completion → finishing-a-development-branch
 跳过需求分析和执行文档阶段，直接进入调试。
+
+### Codex 路由
+用户提到 codex（"让 codex 看看"、"交给 codex"、"codex 审查"、"第二意见"）时：
+→ codex:rescue（AI 唯一可自动调用的 codex 执行命令，万能任务转发）
+codex:review 和 codex:adversarial-review 需用户手动输入，AI 不可自动调用。需要审查功能时，用 rescue 并在 prompt 中指定审查意图。
 
 ### 铁律
 - 跳过必走 Skill = 先输出对齐块说明原因

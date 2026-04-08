@@ -1,11 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.8] - 2026-04-08
 
 ### Changed
 - `/codesop` output format constraints tightened: exactly 4 sections, no dividers, no title changes, no nested bullets in summary, exactly 2 recommendation lines (never a second 备选)
 - Skill detection now falls back to MCP server registration in `settings.json` — fixes browser-use false positive when installed via pip into a separate venv
-- `/codesop` final line now uses a natural-language workflow instruction instead of a single slash command
+- Router card: codex commands consolidated into section 13 with auto-invoke markers; review/adversarial-review marked ⚠️ 需用户手动输入
+- Router card: new "Codex 路由" rule — user mentions codex → AI auto-invokes rescue (the only auto-invocable codex command)
+
+## [2.1.7] - 2026-04-07
+
+### Changed
 - `/codesop` recommendations now emphasize workflow reasoning over repeating the same action
 - Dirty worktrees now bias `/codesop` toward cleanup-first workflows before roadmap-next work
 - `/codesop` now frames itself as a workflow-chain composer instead of a single-skill recommender
