@@ -193,6 +193,10 @@ check_skill_completeness() {
         break
       fi
     done
+    # Fallback: some skills (e.g. browser-use) register as MCP servers, not skill directories
+    if [ "$found" = false ] && type has_mcp_server >/dev/null 2>&1; then
+      has_mcp_server "$skill" && found=true
+    fi
     if [ "$found" = false ]; then
       missing+=("$skill")
     fi
@@ -296,8 +300,13 @@ check_routing_coverage() {
         missing+=("$skill_name (需要 $plugin_id)")
       fi
     elif [ "$source" = "skill" ]; then
-      # Independent skill — check directory
-      if [ ! -d "$HOME/.claude/skills/$skill_name" ] && [ ! -d "$HOME/.agents/skills/$skill_name" ]; then
+      # Independent skill — check directory first, then MCP server fallback
+      local skill_found=false
+      [ -d "$HOME/.claude/skills/$skill_name" ] || [ -d "$HOME/.agents/skills/$skill_name" ] && skill_found=true
+      if [ "$skill_found" = false ] && type has_mcp_server >/dev/null 2>&1; then
+        has_mcp_server "$skill_name" && skill_found=true
+      fi
+      if [ "$skill_found" = false ]; then
         missing+=("$skill_name (独立 Skill)")
       fi
     fi

@@ -51,7 +51,7 @@ grep -q "Workflow Router" "$ROOT_DIR/SKILL.md" || fail "Workflow Router title mi
 grep -q "工作台摘要" "$ROOT_DIR/SKILL.md" || fail "Workbench summary template missing from SKILL.md"
 grep -q "文档状态" "$ROOT_DIR/SKILL.md" || fail "Project document status missing from SKILL.md"
 grep -q "下一步建议" "$ROOT_DIR/SKILL.md" || fail "Next-step recommendation template missing from SKILL.md"
-grep -q "自然语言工作流指令" "$ROOT_DIR/SKILL.md" || fail "Final workflow-instruction rule missing from SKILL.md"
+grep -q "workflow instruction" "$ROOT_DIR/SKILL.md" || fail "Final workflow-instruction rule missing from SKILL.md"
 grep -q "document drift scan" "$ROOT_DIR/SKILL.md" || fail "Missing document drift scan guidance"
 grep -q "check_project_document_drift" "$ROOT_DIR/SKILL.md" || fail "Missing current-project doc drift function reference"
 grep -q "1 to 3 skills in sequence" "$ROOT_DIR/SKILL.md" || fail "Missing multi-skill workflow instruction rule"

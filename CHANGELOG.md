@@ -4,6 +4,7 @@
 
 ### Changed
 - `/codesop` output format constraints tightened: exactly 4 sections, no dividers, no title changes, no nested bullets in summary, exactly 2 recommendation lines (never a second 备选)
+- Skill detection now falls back to MCP server registration in `settings.json` — fixes browser-use false positive when installed via pip into a separate venv
 - `/codesop` final line now uses a natural-language workflow instruction instead of a single slash command
 - `/codesop` recommendations now emphasize workflow reasoning over repeating the same action
 - Dirty worktrees now bias `/codesop` toward cleanup-first workflows before roadmap-next work

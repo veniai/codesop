@@ -223,6 +223,21 @@ detect_project_shape_and_framework() {
     jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true
   }
 
+  # Check if a specific MCP server is configured in Claude Code settings
+  # Arguments:
+  #   $1 - MCP server name (e.g. "browser-use")
+  # Returns: 0 if configured, 1 if not
+  has_mcp_server() {
+    local server_name="$1"
+    local settings_file="$HOME/.claude/settings.json"
+    [ -f "$settings_file" ] || return 1
+    # Check exact name and common hyphen/underscore variation
+    local name_alt="${server_name//-/_}"
+    jq -e --arg name "$server_name" --arg alt "$name_alt" \
+      '.mcpServers | if . then (has($name) or has($alt)) else false end' \
+      "$settings_file" 2>/dev/null | grep -q true
+  }
+
   detect_all_tools() {
     for entry in "${AI_TOOLS[@]}"; do
       detect_tool_by_registry "$entry"
