@@ -95,10 +95,10 @@ echo "Test 9: Router card installed..."
 diff -q "$ROOT_DIR/config/codesop-router.md" "$test_home/.claude/codesop-router.md" >/dev/null 2>&1 || fail "Installed router card differs from source"
 echo "  PASS"
 
-# Test 9.5: /codesop command installed from SKILL.md
-echo "Test 9.5: /codesop command installed from SKILL.md..."
-[ -f "$test_home/.claude/commands/codesop.md" ] || fail "~/.claude/commands/codesop.md not installed"
-diff -q "$ROOT_DIR/SKILL.md" "$test_home/.claude/commands/codesop.md" >/dev/null 2>&1 || fail "Installed /codesop command differs from SKILL.md"
+# Test 9.5: /codesop skill registered from SKILL.md
+echo "Test 9.5: /codesop skill registered from SKILL.md..."
+[ -f "$test_home/.claude/skills/codesop/SKILL.md" ] || fail "~/.claude/skills/codesop/SKILL.md not installed"
+diff -q "$ROOT_DIR/SKILL.md" "$test_home/.claude/skills/codesop/SKILL.md" >/dev/null 2>&1 || fail "Installed codesop skill differs from SKILL.md"
 echo "  PASS"
 
 # Test 10: Settings.json has correct hook

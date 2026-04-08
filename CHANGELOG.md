@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.2.0] - 2026-04-08
+
+### Fixed
+- Git repo detection uses `git rev-parse` instead of `[ -d ".git" ]` — fixes false "not a git repo" in worktrees and submodules (affected `check_project_document_drift`, `git_update_check`, superpowers plugin detection)
+- Routing table skill names now use fully qualified names (e.g. `code-review:code-review`, `superpowers:brainstorming`) — fixes "Unknown skill" errors when AI tries to invoke skills
+- SKILL.md router authority rules unified: routing table defines candidate set, validation only ranks within that set, no self-invented chains
+- Document gate aligned with README: any document update triggers `claude-md-management`, not just CLAUDE.md
+
+### Changed
+- Removed recursive `/codesop` invocation risk: skill no longer suggests calling itself for mechanical facts; uses direct git/file commands instead
+- Removed duplicate bypass logic: §1.1 "CLI Command Bypass" section deleted (front matter already covers this)
+- Removed duplicate skill registration: `~/.claude/commands/codesop.md` no longer installed; skill registered only via `~/.claude/skills/codesop/` — eliminates duplicate context loading (saves ~216 tokens per session)
+- Fallback section simplified: scans routing table instead of all skills, no longer invents chains outside the table
+- Sub-command paths in SKILL.md use `codesop` (via PATH) instead of hardcoded `~/codesop/codesop`
+- PRD template: added generic "并行开发记录" section with worktree-safe editing rules
+
+### Added
+- Conflict resolution: "Open PR vs PRD 下一步" rule — open PR workflow takes priority over roadmap-next suggestions
+- SKILL.md completion gate: worktree PRD editing restricted to current branch's subsection
+
 ## [2.1.8] - 2026-04-08
 
 ### Changed

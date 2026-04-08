@@ -33,24 +33,6 @@ Use this skill to:
 
 Do not use this skill as a replacement for specialist execution skills.
 
-## 1.1 CLI Command Bypass
-
-If the user is explicitly asking to run a mechanical `codesop` subcommand, do not switch into workbench-summary mode.
-
-Treat these as command execution requests first:
-
-- `/codesop init`
-- `/codesop update`
-
-For these requests:
-
-- run the command
-- summarize the command output faithfully
-- keep interpretation minimal and local to the command result
-- do not output `## 工作台摘要`
-- do not output `## 下一步建议`
-- do not recommend downstream workflow skills unless the user separately asks what to do next
-
 ## 2. Read Order
 
 Read project context in this order:
@@ -67,13 +49,9 @@ Why:
 
 If `AGENTS.md` or `PRD.md` is missing, say so explicitly and continue with the best available context.
 
-The `/codesop` CLI is an optional but preferred mechanical context source.
+When fresh mechanical facts are needed (version, plugin status, document drift), run CLI subcommands directly via Bash — e.g. `~/.local/bin/codesop update`, or source individual `lib/*.sh` modules. **Never invoke `/codesop` from within this skill** — that would recurse into itself.
 
-Call `/codesop` when you need fresh project-state facts from the repo.
-
-Do not call `/codesop` for abstract workflow questions that do not depend on repo state.
-
-Use `PRD.md` for long-term orientation and `/codesop` for fresh mechanical facts.
+Use `PRD.md` for long-term orientation and direct git/file commands for mechanical facts.
 
 ## 3. Default Behavior
 
@@ -81,7 +59,7 @@ When this skill triggers:
 
 1. Read `AGENTS.md`
 2. Read `PRD.md`
-3. Decide whether fresh repo facts are needed and call `/codesop` if they are
+3. Decide whether fresh repo facts are needed and gather them via direct git/file commands
 4. Decide whether `README.md` is needed
 5. Run ecosystem report:
    ```bash
@@ -112,7 +90,7 @@ When this skill triggers:
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
    - ❌ 不适合 — skill mismatch; another skill would be significantly better
    - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
-   The routing table is the sole authority. Validation is informational and can never override it.
+   The routing table defines the candidate set. Validation may only rank or reorder within that set. If no candidate fits, ask the user one focused question — do not invent chains outside the routing table.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
@@ -161,7 +139,7 @@ Exactly 2 lines. No more, no less. NEVER output a second 备选 — pick the str
 - 备选链路：{workflow}. 理由：{why this is secondary}
 ```
 
-If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
+If validation reveals a mismatch, adjust only the ordering within the routing table's candidate set. Routing table is the final authority.
 The recommendation block should explain judgment, not repeat the final action verbatim.
 
 ### 4.4 Final Line — Natural-Language Workflow Instruction
@@ -243,9 +221,8 @@ Compress for quick answers, but keep the same mental model.
 Before the final answer on any routed implementation task:
 
 1. decide whether `CLAUDE.md`, `PRD.md`, and `README.md` need updates
-2. if `CLAUDE.md` needs updates, invoke `claude-md-management` skill to audit and revise
-3. manually check whether `PRD.md` and `README.md` need updates based on the changes made
-4. include this exact block in the final answer:
+2. if any document needs updates, invoke `claude-md-management` skill to audit and revise
+3. include this exact block in the final answer:
 
 ```md
 ## 文档判定
@@ -260,14 +237,16 @@ Notes:
 - do not list `AGENTS.md` as a separate document decision target; project `AGENTS.md` should stay a thin wrapper to `CLAUDE.md`
 - `CHANGELOG.md` is not part of the default document gate
 - for pure refactors, test-only changes, or formatting-only changes, it is valid to mark all three as "未更新" with a concrete reason
+- in a worktree, PRD edits are restricted to the current branch's subsection under "并行开发记录"; global PRD changes require switching to main
 
 ## 6. Conflict Resolution
 
 | Conflict | Rule |
 |----------|------|
-| requesting-code-review vs code-review | Task-level → requesting-code-review; PR-level → code-review |
-| 处理 PR vs 发 PR | 处理已有 PR → 先查 git log 确认上下文 → finishing-a-development-branch; 发新 PR → finishing-a-development-branch |
-| subagent-driven-development vs executing-plans | Independent tasks → subagent (parallel); serial → executing-plans |
+| superpowers:requesting-code-review vs code-review:code-review | Task-level → superpowers:requesting-code-review; PR-level → code-review:code-review |
+| 处理 PR vs 发 PR | 处理已有 PR → 先查 git log 确认上下文 → superpowers:finishing-a-development-branch; 发新 PR → superpowers:finishing-a-development-branch |
+| Open PR vs PRD 下一步 | Open PR 存在时，PR 审查/合并是推荐链路；PRD 下一步是备选。未完成的工作优先于未来规划 |
+| superpowers:subagent-driven-development vs superpowers:executing-plans | Independent tasks → subagent (parallel); serial → superpowers:executing-plans |
 | User says "just fix it" vs skill workflow | User instruction wins, but still obey verification and delivery rules from `AGENTS.md` |
 
 ## 7. Fallback
@@ -275,18 +254,17 @@ Notes:
 When no scenario matches:
 
 1. Produce the workbench summary anyway
-2. Scan all skill descriptions if available
+2. Scan routing table entries for the closest match
 3. Check whether document drift should be part of the next move
-4. Rank the top 3 workflow options
-5. Recommend the least-risk next step
+4. Recommend the least-risk next step
 5. If still unclear, ask one focused question
 
 ## 8. Sub-commands
 
 | Command | Run | What it does |
 |---------|-----|-------------|
-| `/codesop init [path]` | `bash ~/codesop/codesop init <dir>` | Generate AGENTS.md (`@CLAUDE.md`), PRD.md (活文档), README.md (if missing). Defaults to 中文. |
-| `/codesop update` | `bash ~/codesop/codesop update` | Check plugin versions → show status → resync host integration. |
+| `/codesop init [path]` | `codesop init <dir>` | Generate AGENTS.md (`@CLAUDE.md`), PRD.md (活文档), README.md (if missing). Defaults to 中文. |
+| `/codesop update` | `codesop update` | Check plugin versions → show status → resync host integration. |
 
 ## 9. Iron Laws
 

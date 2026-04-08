@@ -44,7 +44,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks, plugin dependency system (CORE_PLUGINS/OPTIONAL_PLUGINS)
 │   ├── commands.sh         # Subcommands; target contract keeps init/update only; uses print_dependency_report()
 │   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, plugin checks
-├── commands/               # Slash command files synced to ~/.claude/commands/
+├── commands/               # Sub-command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
 │   └── codesop-update.md   # /codesop-update
 ├── config/
@@ -86,7 +86,7 @@ The `setup` script handles host-specific installations:
 
 | Host | Config Target | Commands | Hook |
 |------|--------------|----------|------|
-| Claude Code | `~/.claude/CLAUDE.md` → symlink → `templates/system/AGENTS.md` | `~/.claude/commands/` | SessionStart hook in settings.json |
+| Claude Code | `~/.claude/CLAUDE.md` → symlink → `templates/system/AGENTS.md` | `~/.claude/skills/codesop/` + `~/.claude/commands/` (sub-commands only) | SessionStart hook in settings.json |
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/commands/` | — |
 | OpenCode | `~/.config/opencode/AGENTS.md` | — | — |
 
@@ -100,7 +100,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `wc -l` output has leading whitespace. Pipe through `tr -d ' '` before arithmetic
 - setup's `configure_hooks()` uses jq with nested schema: `{ "matcher": "", "hooks": [{ "type": "command", ... }] }`
 - Product contract is already narrower than the original implementation. Keep cleaning toward the contract instead of reintroducing legacy surfaces
-- `SKILL.md` is the single source of truth for `/codesop`. `setup` installs it into `~/.claude/commands/codesop.md`
+- `SKILL.md` is the single source of truth for `/codesop`. `setup` installs it into `~/.claude/skills/codesop/SKILL.md`
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `CORE_PLUGINS` / `OPTIONAL_PLUGINS` / `OPTIONAL_SKILLS` arrays in `lib/updates.sh` define the plugin dependency tiers; `has_plugin()` in `lib/detection.sh` is the central detection helper
