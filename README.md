@@ -97,20 +97,26 @@ codesop update
 
 | 场景 | Pipeline |
 |------|----------|
-| 新功能 | brainstorming → writing-plans → worktree → subagent-dev → verification → finishing |
-| Bug 修复 | systematic-debugging → verification → finishing |
-| 小改动 | subagent-dev → verification → finishing (if multi-file) |
-| 重构 | brainstorming → writing-plans → worktree → subagent-dev → verification → finishing |
+| 新功能 | brainstorming → codex:rescue(设计审查) → writing-plans → worktree → subagent-dev → code-simplifier → verification → claude-md-management(文档检查) → finishing → code-review → codex:rescue(代码审查) → receiving-code-review |
+| Bug 修复 | systematic-debugging → verification → claude-md-management(文档检查) → finishing |
+| 小改动 | subagent-dev → code-simplifier → verification → finishing (if multi-file) |
+| 重构 | brainstorming → codex:rescue(设计审查) → writing-plans → worktree → subagent-dev → code-simplifier → verification → claude-md-management(文档检查) → finishing → code-review → codex:rescue(代码审查) → receiving-code-review |
 | Code Review 反馈 | receiving-code-review → fix → verification → reply |
 
 ## 依赖 / Dependencies
 
 codesop 编排以下 skill 生态：
 
-- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev, verification-before-completion, office-hours, review, dispatching-parallel-agents
+- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev, verification-before-completion, receiving-code-review
+- **code-review** — PR 审查：5 agent 并行 + 置信度评分
+- **codex** — codex:rescue 双 AI 审查（设计阶段 + 代码审查阶段必走）
+- **claude-md-management** — 文档漂移检查（验证后、提交前必走）
+- **code-simplifier** — 代码润色（开发后、验证前）
 
 安装方式：
 - superpowers: `/plugin install superpowers` (Claude Code)
+- code-review: `/plugin install code-review`
+- codex: `/plugin marketplace add openai/codex-plugin-cc`
 
 ## 架构 / Architecture
 

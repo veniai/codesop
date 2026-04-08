@@ -5,8 +5,12 @@
 ### Changed
 - `/codesop` output format constraints tightened: exactly 4 sections, no dividers, no title changes, no nested bullets in summary, exactly 2 recommendation lines (never a second 备选)
 - Skill detection now falls back to MCP server registration in `settings.json` — fixes browser-use false positive when installed via pip into a separate venv
-- Router card: codex commands consolidated into section 13 with auto-invoke markers; review/adversarial-review marked ⚠️ 需用户手动输入
+- Router card: codex:rescue mandatory in design phase (dual-AI design review) and code review phase (dual-AI code review)
 - Router card: new "Codex 路由" rule — user mentions codex → AI auto-invokes rescue (the only auto-invocable codex command)
+- Router card: code-simplifier moved to dev→simplifier→verification chain
+- Router card: claude-md-management added as mandatory document drift check between verification and submission
+- Router card: dispatching-parallel-agents demoted (only after plan decomposition)
+- CLAUDE.md: added has_mcp_server() documentation in architecture and gotchas
 
 ## [2.1.7] - 2026-04-07
 

@@ -39,7 +39,7 @@ bash setup --host claude
 codesop                     # CLI entrypoint, sources lib modules in order
 ├── lib/
 │   ├── output.sh           # Formatting: tech stack rendering, tool state display
-│   ├── detection.sh        # Project detection for init/setup, has_plugin() helper
+│   ├── detection.sh        # Project detection for init/setup, has_plugin() + has_mcp_server() helpers
 │   ├── templates.sh        # AGENTS.md template generation
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks, plugin dependency system (CORE_PLUGINS/OPTIONAL_PLUGINS)
 │   ├── commands.sh         # Subcommands; target contract keeps init/update only; uses print_dependency_report()
@@ -104,6 +104,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `CORE_PLUGINS` / `OPTIONAL_PLUGINS` / `OPTIONAL_SKILLS` arrays in `lib/updates.sh` define the plugin dependency tiers; `has_plugin()` in `lib/detection.sh` is the central detection helper
+- `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback (e.g. browser-use installed via pip, not as skill directory)
 
 ## File References
 
