@@ -118,12 +118,14 @@ Default to orientation and routing first. Do not jump into implementation unless
 
 ## 4. Default Output
 
-Output sections in this order:
+Output MUST contain exactly these 4 sections in this order, nothing else:
 
-1. `## 工作台摘要`
-2. `## Skill 生态`
-3. `## 下一步建议`（只有推荐链路 + 备选链路，两行，重点写理由）
-4. **最后一行**：输出一条自然语言工作流指令
+1. `## 工作台摘要` — two-line inline format (no nested bullets)
+2. `## Skill 生态` — routing coverage only
+3. `## 下一步建议` — exactly 2 lines (推荐链路 + 备选链路)
+4. **末行** — one natural-language workflow instruction
+
+NEVER add `---` dividers between sections. NEVER add extra headings. NEVER change section titles.
 
 ### 4.1 Workbench Summary
 
@@ -133,7 +135,9 @@ Output sections in this order:
 **当前分支**: ... **文档状态**: ... **阻塞/风险**: ... **最近决策**: ...
 ```
 
-注意：摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
+MUST use this exact two-line inline format — bold keys with inline values, space-separated. NEVER expand into nested bullet lists, indented items, or multi-line field values.
+
+摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
 
 ### 4.2 Skill Ecosystem (放在 Skill 建议之前)
 
@@ -149,7 +153,7 @@ Output sections in this order:
 
 ### 4.3 Next-Step Recommendation
 
-Only two lines:
+Exactly 2 lines. No more, no less. NEVER output a second 备选 — pick the strongest alternative.
 
 ```md
 ## 下一步建议
@@ -158,7 +162,6 @@ Only two lines:
 ```
 
 If validation reveals a mismatch, adjust the recommended skill. Routing table is the final authority.
-
 The recommendation block should explain judgment, not repeat the final action verbatim.
 
 ### 4.4 Final Line — Natural-Language Workflow Instruction
