@@ -26,6 +26,7 @@
 | | ★ | sp | finishing-a-development-branch | 测试通过后提交 PR 或合并 |
 | **6. 代码审查** | | | | |
 | | ★ | plugin | code-review | PR 提交后自动审查：5 agent 并行 + 置信度评分 + 自动发评论 |
+| | ★ | plugin | codex:rescue | code-review 之后的独立第二意见（双 AI 审查，必走） |
 | | | sp | receiving-code-review | 收到 code-review 评论后，先技术评估再执行 |
 | **7. 前端测试与自动化** | | | | |
 | | | plugin | playwright | 日常页面操作：导航/截图/填表/点击/JS 执行 |
