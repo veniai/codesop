@@ -17,11 +17,12 @@
 | | ★ | sp | using-git-worktrees | 开发前创建隔离工作区 |
 | | ★ | sp | subagent-driven-development | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
 | | | plugin | code-simplifier | 开发完成后、验证前：自动检查最近修改的代码，优化可读性和结构（dev → simplifier → verification 链路） |
-| | | sp | dispatching-parallel-agents | 2+ 个完全独立任务并行加速时 |
+| | | sp | dispatching-parallel-agents | 2+ 个完全独立任务并行加速时（仅 plan 已拆出独立任务后触发） |
 | | | sp | executing-plans | 自己串行执行计划（不用子 agent） |
 | | | sp | requesting-code-review | 开发中完成一个功能后提前让 AI 审一遍 |
 | **4. 测试与验证** | | | | |
 | | ★ | sp | verification-before-completion | 声明完成前必须运行验证命令确认输出 |
+| | ★ | plugin | claude-md-management | 验证通过后、提交前：审计 CLAUDE.md/PRD.md/README.md 是否需要更新（防止文档落后于代码） |
 | | | sp | test-driven-development | 单独使用 TDD 红绿重构（subagent-driven-development 已内置） |
 | **5. 提交 PR** | | | | |
 | | ★ | sp | finishing-a-development-branch | 测试通过后提交 PR 或合并 |
