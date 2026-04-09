@@ -74,12 +74,12 @@ DOC_SCAN_TARGETS=(
 
 # README workflow shorthand → routing table full skill name
 README_SKILL_ALIASES=(
-  "brainstorming:brainstorming"
-  "writing-plans:writing-plans"
-  "worktree:using-git-worktrees"
-  "subagent-dev:subagent-driven-development"
-  "verification:verification-before-completion"
-  "finishing:finishing-a-development-branch"
+  "brainstorming:superpowers:brainstorming"
+  "writing-plans:superpowers:writing-plans"
+  "worktree:superpowers:using-git-worktrees"
+  "subagent-dev:superpowers:subagent-driven-development"
+  "verification:superpowers:verification-before-completion"
+  "finishing:superpowers:finishing-a-development-branch"
 )
 
 PROJECT_DOC_TARGETS=(
