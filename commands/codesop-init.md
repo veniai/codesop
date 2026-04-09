@@ -103,20 +103,20 @@ Do NOT generate CLAUDE.md yourself. Claude Code's official `/init` handles this 
 
 The project already has all three core files. Do NOT overwrite them. Instead:
 
-**1. Read template files** (from codesop repository):
-- `templates/project/PRD.md`
-- `templates/project/README.md`
-- `templates/system/AGENTS.md`
+**1. Read template files** (from codesop install path, use `CODESOP_SOURCE` from Step 0):
+- `$CODESOP_SOURCE/templates/project/PRD.md`
+- `$CODESOP_SOURCE/templates/project/README.md`
+- `$CODESOP_SOURCE/templates/system/AGENTS.md`
 
 **2. Read project files** (current project directory):
 - `PRD.md`
 - `README.md`
-- `CLAUDE.md`
+- `CLAUDE.md` (if exists)
 
 **3. Compare and generate suggestion list**:
 - PRD.md: compare project file with template, list new sections or structural changes
 - README.md: compare project file with template, list missing sections
-- CLAUDE.md: compare with system-level AGENTS.md template, find duplicated content, suggest cleanup
+- CLAUDE.md: only if project `CLAUDE.md` exists — compare with `$CODESOP_SOURCE/templates/system/AGENTS.md`, find duplicated content, suggest cleanup
 
 **4. User confirms each item**:
 - Show each suggestion, user chooses to adopt or skip
