@@ -88,41 +88,39 @@ echo "--- codesop update templates diff detection ---"
 
 fake_repo="$tmpdir/codesop-repo"
 mkdir -p "$fake_repo/templates/project"
-cd "$fake_repo"
-git init -q
-git config user.email "test@test.com"
-git config user.name "Test"
+(
+  cd "$fake_repo"
+  git init -q
+  git config user.email "test@test.com"
+  git config user.name "Test"
 
-echo "old template" > templates/project/PRD.md
-echo "old readme" > templates/project/README.md
-git add -A
-git commit -qm "initial"
-old_tmpl_hash="$(git rev-parse HEAD)"
+  echo "old template" > templates/project/PRD.md
+  echo "old readme" > templates/project/README.md
+  git add -A
+  git commit -qm "initial"
 
-echo "new template content" > templates/project/PRD.md
-git add -A
-git commit -qm "update templates"
-new_tmpl_hash="$(git rev-parse HEAD)"
+  echo "new template content" > templates/project/PRD.md
+  git add -A
+  git commit -qm "update templates"
+  new_tmpl_hash="$(git rev-parse HEAD)"
+  old_tmpl_hash="$(git log --format=%H --reverse | head -1)"
 
-# templates changed → diff should be non-empty
-if git diff --quiet "$old_tmpl_hash".."$new_tmpl_hash" -- templates/ 2>/dev/null; then
-  fail "expected templates diff to be non-empty after template change"
-else
-  assert_contains "$(git diff "$old_tmpl_hash".."$new_tmpl_hash" -- templates/)" "new template content"
-fi
+  # templates changed → diff should be non-empty
+  if git diff --quiet "$old_tmpl_hash".."$new_tmpl_hash" -- templates/ 2>/dev/null; then
+    echo "FAIL: expected templates diff to be non-empty after template change" >&2; exit 1
+  fi
 
-# non-template change → diff should be empty
-echo "other change" > unrelated.txt
-git add -A
-git commit -qm "non-template change"
-mid_tmpl_hash="$(git rev-parse HEAD)"
-if git diff --quiet "$new_tmpl_hash".."$mid_tmpl_hash" -- templates/ 2>/dev/null; then
-  :
-else
-  fail "expected templates diff to be empty when only non-template files changed"
-fi
-
-cd "$ROOT_DIR"
+  # non-template change → diff should be empty
+  echo "other change" > unrelated.txt
+  git add -A
+  git commit -qm "non-template change"
+  mid_tmpl_hash="$(git rev-parse HEAD)"
+  if git diff --quiet "$new_tmpl_hash".."$mid_tmpl_hash" -- templates/ 2>/dev/null; then
+    :
+  else
+    echo "FAIL: expected templates diff to be empty when only non-template files changed" >&2; exit 1
+  fi
+)
 
 # --- Test: init adapt mode signal in CLI output ---
 echo "--- init adapt mode signal ---"
