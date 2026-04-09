@@ -89,11 +89,44 @@ This handles:
 
 ## Step 5: Prompt user to run /init
 
-After the CLI completes, tell the user:
+After the CLI completes, check the output for `ADAPT_MODE:YES`.
 
-> 初始化完成。请在当前会话中运行 `/init` 生成项目级 CLAUDE.md。
+### New-mode (no ADAPT_MODE signal)
+
+Tell the user:
+
+> 初始化完成。请在当前会话中运行 `/init` 生成项目级 CLAUDE.md。参考系统级 CLAUDE.md 中对项目文档的要求。
 
 Do NOT generate CLAUDE.md yourself. Claude Code's official `/init` handles this better.
+
+### Adapt-mode (ADAPT_MODE:YES detected)
+
+The project already has all three core files. Do NOT overwrite them. Instead:
+
+**1. Read template files** (from codesop install path, use `CODESOP_SOURCE` from Step 0):
+- `$CODESOP_SOURCE/templates/project/PRD.md`
+- `$CODESOP_SOURCE/templates/project/README.md`
+- `$CODESOP_SOURCE/templates/system/AGENTS.md`
+
+**2. Read project files** (current project directory):
+- `PRD.md`
+- `README.md`
+- `CLAUDE.md` (if exists)
+
+**3. Compare and generate suggestion list**:
+- PRD.md: compare project file with template, list new sections or structural changes
+- README.md: compare project file with template, list missing sections
+- CLAUDE.md: only if project `CLAUDE.md` exists — compare with `$CODESOP_SOURCE/templates/system/AGENTS.md`, find duplicated content, suggest cleanup
+
+**4. User confirms each item**:
+- Show each suggestion, user chooses to adopt or skip
+- Only execute changes the user confirms
+
+**Principle: AI suggests, user confirms, user decides what to change.**
+
+After adaptation is complete (or skipped), tell the user:
+
+> 适配完成。参考系统级 CLAUDE.md 中对项目文档的要求检查项目级文件。
 
 ## After running:
 

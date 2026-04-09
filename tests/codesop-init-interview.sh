@@ -427,6 +427,73 @@ test_check_user_preferences() {
 }
 
 # ============================================================================
+# Test 23: generate_project_files() outputs ADAPT_MODE:YES when all files exist
+# ============================================================================
+test_generate_project_files_adapt_signal() {
+  local tmpdir
+  tmpdir=$(mktemp -d)
+
+  # Create a project with all three core files
+  echo "@CLAUDE.md" > "$tmpdir/AGENTS.md"
+  echo "## 当前快照" > "$tmpdir/PRD.md"
+  echo "# test-project" > "$tmpdir/README.md"
+
+  local output
+  output=$(generate_project_files "$tmpdir" 2>&1)
+
+  if echo "$output" | grep -q "ADAPT_MODE:YES"; then
+    pass "generate_project_files adapt mode - outputs ADAPT_MODE:YES when all files exist"
+  else
+    fail "generate_project_files adapt mode - should output ADAPT_MODE:YES, got: $output"
+  fi
+
+  rm -rf "$tmpdir"
+}
+
+# ============================================================================
+# Test 24: generate_project_files() does NOT output ADAPT_MODE:YES for new project
+# ============================================================================
+test_generate_project_files_new_mode() {
+  local tmpdir
+  tmpdir=$(mktemp -d)
+
+  # Empty project - no core files
+  local output
+  output=$(generate_project_files "$tmpdir" 2>&1)
+
+  if echo "$output" | grep -q "ADAPT_MODE:YES"; then
+    fail "generate_project_files new mode - should NOT output ADAPT_MODE:YES for new project"
+  else
+    pass "generate_project_files new mode - correctly omits ADAPT_MODE:YES"
+  fi
+
+  rm -rf "$tmpdir"
+}
+
+# ============================================================================
+# Test 25: generate_project_files() ADAPT_MODE only when all 3 files exist
+# ============================================================================
+test_generate_project_files_partial_files() {
+  local tmpdir
+  tmpdir=$(mktemp -d)
+
+  # Only AGENTS.md and PRD.md, missing README.md
+  echo "@CLAUDE.md" > "$tmpdir/AGENTS.md"
+  echo "## 当前快照" > "$tmpdir/PRD.md"
+
+  local output
+  output=$(generate_project_files "$tmpdir" 2>&1)
+
+  if echo "$output" | grep -q "ADAPT_MODE:YES"; then
+    fail "generate_project_files partial - should NOT output ADAPT_MODE:YES when README.md missing"
+  else
+    pass "generate_project_files partial - correctly omits ADAPT_MODE:YES when files incomplete"
+  fi
+
+  rm -rf "$tmpdir"
+}
+
+# ============================================================================
 # Run all tests
 # ============================================================================
 run_tests() {
@@ -481,6 +548,13 @@ run_tests() {
   # check_user_preferences tests
   echo "--- check_user_preferences() tests ---"
   test_check_user_preferences
+  echo ""
+
+  # Adapt mode signal tests
+  echo "--- Adapt mode signal tests ---"
+  test_generate_project_files_adapt_signal
+  test_generate_project_files_new_mode
+  test_generate_project_files_partial_files
   echo ""
 
   # Summary

@@ -142,33 +142,33 @@ Exactly 2 lines. No more, no less. NEVER output a second 备选 — pick the str
 If validation reveals a mismatch, adjust only the ordering within the routing table's candidate set. Routing table is the final authority.
 The recommendation block should explain judgment, not repeat the final action verbatim.
 
-### 4.4 Final Line — Natural-Language Workflow Instruction
+### 4.4 Final Line — Question-Style Workflow Instruction
 
-The very last line of the output MUST be a single natural-language workflow instruction the user can send by pressing Enter.
+The very last line of the output MUST be a single question-style workflow instruction ending with "吗？". The user presses Enter to confirm.
 
 Use this shape when the next step is a chain:
 
 ```text
-先用 finishing-a-development-branch 处理当前未提交改动；如果这次改动影响文档，就同步更新文档；完成后用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计。
+要我先用 finishing-a-development-branch 处理未提交改动，再同步更新文档，然后用 brainstorming 做 Data 页面知识图谱 UI 的需求澄清吗？
 ```
 
 Use this shape when the next step is simple:
 
 ```text
-用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准。
+要用 brainstorming 做 Data 页面知识图谱 UI 的需求澄清和设计吗？
 ```
 
 Rules:
 
 - The final line must be the last non-empty line in the whole response
-- Output exactly one workflow instruction on that line
+- Output exactly one question on that line, ending with "吗？"
 - The final line may mention 1 to 3 skills in sequence when the work naturally chains
 - Use natural language; slash commands are optional, not required
+- Start with "要" or "要我" — direct, conversational tone
 - Keep the line short enough to work as a gray next-step suggestion
 - Mention concrete skill names so the model can route itself correctly
 - Do not wrap the final line in backticks
 - Do not add bullets, labels, or prefixes before it
-- Do not add a trailing question after the final workflow instruction
 - Do not output any text after the final workflow instruction
 
 Examples:

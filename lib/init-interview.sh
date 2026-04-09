@@ -664,6 +664,12 @@ generate_project_files() {
     return 1
   }
 
+  # Detect adapt mode: all three core files already exist
+  local adapt_mode=false
+  if [ -f ./AGENTS.md ] && [ -f ./PRD.md ] && [ -f ./README.md ]; then
+    adapt_mode=true
+  fi
+
   # 1. AGENTS.md - should be a simple reference to CLAUDE.md
   if [ -f ./AGENTS.md ]; then
     if ! is_simple_reference ./AGENTS.md; then
@@ -718,6 +724,11 @@ generate_project_files() {
   fi
 
   # CLAUDE.md 由 Claude Code /init 生成，此处不处理
+
+  # Output adapt mode signal for skill layer
+  if [ "$adapt_mode" = true ]; then
+    echo "ADAPT_MODE:YES"
+  fi
 
   # Return to original directory
   cd "$original_dir" || return 1
