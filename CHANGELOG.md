@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.3.0] - 2026-04-09
+
+### Added
+- Init adaptation mode: when all three core files (AGENTS.md, PRD.md, README.md) already exist, CLI outputs `ADAPT_MODE:YES` signal. Skill layer compares templates vs project files and suggests changes for user confirmation instead of overwriting
+- `run_update()` checks templates/ diff between versions and prints hint when templates changed
+- SKILL.md §4.4: final line changed to question format ("要我用 X 做 Y 吗？")
+- Design spec and implementation plan for adaptation mode under `docs/superpowers/`
+
+### Changed
+- CLAUDE.md and PRD.md architecture trees: added `docs/` directory
+- CLAUDE.md Init Flow table: added Phase 4a (adaptation) and Phase 5
+- PRD.md §5.4: init command description updated with adaptation mode
+- PRD.md §5.4: completion format description updated to question-style
+- Template paths in adapt mode instructions use `$CODESOP_SOURCE` prefix
+- CLAUDE.md comparison in adapt mode conditional on file existence
+
 ## [2.2.1] - 2026-04-08
 
 ### Fixed

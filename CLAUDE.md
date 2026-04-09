@@ -53,6 +53,10 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   ├── system/             # System-level AGENTS.md template
 │   ├── project/            # Project-level templates (PRD.md, README.md)
 │   └── init/               # Init prompt templates
+├── docs/                   # Design specs and implementation plans
+│   └── superpowers/
+│       ├── specs/          # Approved design documents
+│       └── plans/          # Implementation plans
 ├── setup                   # Host-aware installation script (router card + hook config)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)

@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.2.1
-# Last Updated: 2026-04-08
+# Current Version: 2.3.0
+# Last Updated: 2026-04-09
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: Skill 哲学审查完成，结论为当前设计已有效
+- **最后更新原因**: v2.3.0 发布 — init 适配模式 + 疑问句式工作流指令
 
 ## 2. 当前进度
 
@@ -55,6 +55,9 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-04-09 | init 适配模式：三文件存在时走适配而非覆盖 | 模板更新后已有项目无法同步变更 | CLI 输出 ADAPT_MODE:YES 信号，skill 层做对比建议 |
+| 2026-04-09 | SKILL.md 末行改为疑问句式（"要我用 X 做 Y 吗？"） | 用户按 Enter 即可确认，提升灰色建议命中 | SKILL.md §4.4 格式变更 |
+| 2026-04-09 | update 命令检测模板变更并提示 | 用户不知道模板已更新，遗漏同步 | run_update() 追加 templates/ diff 检查 |
 | 2026-04-08 | 路由卡加入 codex 双 AI 审查（设计+代码审查阶段）和文档漂移检查步骤 | 双 AI 互补盲区；文档经常落后于代码 | 路由卡 13→6 类重组，codex:rescue 从应急改为必走 |
 | 2026-04-08 | SKILL.md 输出格式收紧（MUST/NEVER 约束） | AI 输出偏离规范（3 行备选、错误标题、嵌套 bullets） | SKILL.md 4.1/4.3 增加 NEVER 约束 |
 | 2026-04-08 | has_mcp_server() 检测 fallback | browser-use 通过 pip 安装注册为 MCP server，不在 skills 目录，导致误报 | detection.sh + updates.sh 增加 MCP server 检测路径 |
@@ -71,6 +74,22 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.3.0 - 2026-04-09 - (Init Adaptation Mode)**
+- **目标**: 已有项目可同步模板更新，不全量覆盖
+- **变更摘要**:
+  - init 适配模式: CLI 输出 ADAPT_MODE:YES 信号，skill 层对比模板与项目文件
+  - update 模板变更检测: 拉取新版本后检查 templates/ diff，提示用户重新运行 init
+  - SKILL.md 末行疑问句式: "要我用 X 做 Y 吗？" 提升灰色建议命中率
+  - 新增 spec + plan 文档: docs/superpowers/specs/ + plans/
+  - 测试: 新增 5 个测试（3 个信号测试 + 2 个 CLI 集成测试）
+
+### **V2.2.0 - 2026-04-08 - (Routing Authority + Worktree Fix)**
+- 路由权威修正、worktree git 检测修复、skill 全名解析、重复注册清理
+- update 后 re-source updates.sh、routing coverage 插件名查找修复
+
+### **V2.2.1 - 2026-04-08 - (Plugin Lookup Fix)**
+- has_plugin() 插件名前缀剥离、版本号同步修复
 
 ### **V2.0.0 - 2026-04-03 - (Superpowers-only Backbone)**
 - **目标**: 移除 GStack 双引擎，Superpowers + curated plugins 单栈
@@ -126,7 +145,7 @@
 - **`/codesop` 收尾格式**: 推荐区之后，最后一行输出疑问句式工作流指令（"要我用 X 做 Y 吗？"），可串联 1 到 3 个 skill，用户按 Enter 即可确认执行
 - **文档漂移扫描**: 在路由前先判断当前项目的 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
-- **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`
+- **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`；已有项目自动进入适配模式，对比模板差异由用户确认
 - **`codesop update`**: git pull + 自动重同步宿主集成
 
 ### 5.5 产品合同
@@ -166,6 +185,10 @@ setup                       # 宿主安装与同步
 │   ├── system/             # 系统级模板
 │   ├── project/            # 项目级模板
 │   └── init/               # Init prompt 模板
+├── docs/                   # 设计 spec + 实施计划
+│   └── superpowers/
+│       ├── specs/          # 已批准的设计文档
+│       └── plans/          # 实施计划
 └── tests/                  # 内核合同测试
 ```
 
