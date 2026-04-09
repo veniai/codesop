@@ -83,4 +83,71 @@ readme_content="$(sed -n '1,120p' "$project_dir/README.md")"
 assert_contains "$readme_content" "# project"
 assert_contains "$readme_content" "## 快速开始"
 
+# --- Test: update command templates diff detection ---
+echo "--- codesop update templates diff detection ---"
+
+fake_repo="$tmpdir/codesop-repo"
+mkdir -p "$fake_repo/templates/project"
+cd "$fake_repo"
+git init -q
+git config user.email "test@test.com"
+git config user.name "Test"
+
+echo "old template" > templates/project/PRD.md
+echo "old readme" > templates/project/README.md
+git add -A
+git commit -qm "initial"
+old_tmpl_hash="$(git rev-parse HEAD)"
+
+echo "new template content" > templates/project/PRD.md
+git add -A
+git commit -qm "update templates"
+new_tmpl_hash="$(git rev-parse HEAD)"
+
+# templates changed → diff should be non-empty
+if git diff --quiet "$old_tmpl_hash".."$new_tmpl_hash" -- templates/ 2>/dev/null; then
+  fail "expected templates diff to be non-empty after template change"
+else
+  assert_contains "$(git diff "$old_tmpl_hash".."$new_tmpl_hash" -- templates/)" "new template content"
+fi
+
+# non-template change → diff should be empty
+echo "other change" > unrelated.txt
+git add -A
+git commit -qm "non-template change"
+mid_tmpl_hash="$(git rev-parse HEAD)"
+if git diff --quiet "$new_tmpl_hash".."$mid_tmpl_hash" -- templates/ 2>/dev/null; then
+  :
+else
+  fail "expected templates diff to be empty when only non-template files changed"
+fi
+
+cd "$ROOT_DIR"
+
+# --- Test: init adapt mode signal in CLI output ---
+echo "--- init adapt mode signal ---"
+
+adapt_project="$tmpdir/adapt-project"
+mkdir -p "$adapt_project"
+echo "@CLAUDE.md" > "$adapt_project/AGENTS.md"
+echo "## 当前快照" > "$adapt_project/PRD.md"
+echo "# adapt-project" > "$adapt_project/README.md"
+cat >"$adapt_project/package.json" <<'PKGEOF'
+{
+  "name": "adapt-web",
+  "dependencies": { "next": "15.0.0" }
+}
+PKGEOF
+
+adapt_output="$(HOME="$claude_home" bash "$CLI" init "$adapt_project" 2>&1)"
+
+assert_contains "$adapt_output" "ADAPT_MODE:YES"
+assert_contains "$adapt_output" "AGENTS.md 已是简单引用格式"
+assert_contains "$adapt_output" "PRD.md 已是活文档格式"
+assert_contains "$adapt_output" "README.md 已存在"
+
+# Verify files were NOT overwritten in adapt mode
+agents_check="$(cat "$adapt_project/AGENTS.md")"
+[ "$agents_check" = "@CLAUDE.md" ] || fail "AGENTS.md should not be overwritten in adapt mode"
+
 echo "PASS"

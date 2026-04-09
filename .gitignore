@@ -4,3 +4,4 @@
 codesop-workspace/
 codex-review-output.txt
 .codex
+.claude/scheduled_tasks.lock

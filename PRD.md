@@ -123,7 +123,7 @@
 
 ### 5.4 核心功能
 - **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文并组织下一步工作流链
-- **`/codesop` 收尾格式**: 推荐区之后，最后一行输出自然语言工作流指令，可串联 1 到 3 个 skill，提升 Claude Code 灰色默认建议命中概率
+- **`/codesop` 收尾格式**: 推荐区之后，最后一行输出疑问句式工作流指令（"要我用 X 做 Y 吗？"），可串联 1 到 3 个 skill，用户按 Enter 即可确认执行
 - **文档漂移扫描**: 在路由前先判断当前项目的 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`

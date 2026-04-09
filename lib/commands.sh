@@ -140,5 +140,12 @@ run_update() {
     printf '\n%s\n' "最近变更："
     printf '%s\n' "$changes"
   fi
+
+  # Check if templates changed — hint user to re-run init for adaptation
+  if [ -n "$old_hash" ] && [ -n "$new_hash" ] && [ "$old_hash" != "$new_hash" ]; then
+    if ! git diff --quiet "$old_hash".."$new_hash" -- templates/ 2>/dev/null; then
+      printf '\n%s\n' "模板已更新，建议对已有项目运行 /codesop-init"
+    fi
+  fi
 }
 
