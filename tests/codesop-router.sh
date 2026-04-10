@@ -71,8 +71,15 @@ echo "Test 8: Iron Laws section..."
 grep -q "Iron Laws" "$ROOT_DIR/SKILL.md" || fail "Iron Laws section missing from SKILL.md"
 echo "  PASS"
 
-# Test 8.5: Key skills from router table are referenced in SKILL.md
-echo "Test 8.5: Key skills referenced in SKILL.md..."
+# Test 8.5: Chain assembly rules exist in routing table
+echo "Test 8.5: Chain assembly rules in routing table..."
+grep -q "链路组装" "$ROOT_DIR/config/codesop-router.md" || fail "链路组装 section missing from routing table"
+grep -q "code-simplifier" "$ROOT_DIR/config/codesop-router.md" || fail "code-simplifier insertion rule missing"
+grep -q "claude-md-management" "$ROOT_DIR/config/codesop-router.md" || fail "claude-md-management insertion rule missing"
+echo "  PASS"
+
+# Test 8.6: Key skills from router table are referenced in SKILL.md
+echo "Test 8.6: Key skills referenced in SKILL.md..."
 for skill in brainstorming subagent-driven-development verification-before-completion; do
   if ! grep -q "$skill" "$ROOT_DIR/SKILL.md"; then
     fail "Key skill '$skill' from router table not referenced in SKILL.md"

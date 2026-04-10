@@ -50,10 +50,10 @@
 | | | plugin | codex:review | 需要 OpenAI 第二意见审查代码 diff 时（独立视角）⚠️ 需用户手动输入 |
 | | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |
 
-### 调试路径
-用户说"修 bug"、"测试挂了"、"为什么坏了"、"这个不工作了"时：
-→ superpowers:systematic-debugging（假设驱动排查）→ superpowers:verification-before-completion → superpowers:finishing-a-development-branch
-跳过需求分析和执行文档阶段，直接进入调试。
+### 链路组装（路由表是链路唯一真相源）
+所有链路必须应用以下插入规则（☆=有插件时走）：
+开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue
+调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → superpowers:finishing-a-development-branch
 
 ### Codex 路由
 用户提到 codex（"让 codex 看看"、"交给 codex"、"codex 审查"、"第二意见"）时：

@@ -84,7 +84,7 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/updates.sh && PROJECT_ROOT="$(pwd)" check_project_document_drift) || echo "当前项目文档检查跳过: 模块不可用"
    ```
-9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain instead of stopping at one skill name.
+9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name.
 10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
@@ -170,6 +170,7 @@ Rules:
 - Do not wrap the final line in backticks
 - Do not add bullets, labels, or prefixes before it
 - Do not output any text after the final workflow instruction
+- **Chain composition**: When composing a multi-skill chain, apply the routing table's 链路组装 rules — insert code-simplifier after development, claude-md-management after verification, codex:rescue after design. Do not copy skill sequences from the examples below; they demonstrate output format only
 
 Examples:
 
@@ -187,7 +188,7 @@ Case A — Dirty worktree
 - 推荐链路：先收尾当前改动，再同步活文档，再进入下一阶段设计。理由：当前工作区未清，直接推进 roadmap-next 会混淆边界，且文档状态已落后于代码事实。
 - 备选链路：直接进入 brainstorming。理由：只有当这些改动已确认可以延后处理时才成立。
 
-先用 finishing-a-development-branch 处理当前未提交改动；如果这次改动影响 PRD.md/README.md，就顺手更新活文档；完成后用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计。
+要我先收尾当前未提交改动，顺手更新活文档，再做 Data 页面 P1 知识图谱 UI 的需求澄清和设计吗？
 ```
 
 Case B — Clean worktree
@@ -204,7 +205,7 @@ Case B — Clean worktree
 - 推荐链路：直接进入当前阶段的设计工作流。理由：工作区干净，且当前目标已经明确。
 - 备选链路：先写计划再实施。理由：如果 scope 已经稳定，可以直接把设计拆成执行任务。
 
-用 brainstorming 为 Data 页面 P1 知识图谱 UI 做需求澄清和设计，确认范围、边界和成功标准。
+要做 Data 页面 P1 知识图谱 UI 的需求澄清和设计吗？
 ```
 
 Intent:

@@ -63,7 +63,7 @@ assert_contains "$skill_full" "## 文档判定"
 assert_contains "$skill_full" "- CLAUDE.md: 已更新 / 未更新，原因：..."
 assert_contains "$skill_full" "Case A — Dirty worktree"
 assert_contains "$skill_full" "Case B — Clean worktree"
-assert_contains "$skill_full" "先用 finishing-a-development-branch 处理当前未提交改动；如果这次改动影响 PRD.md/README.md"
+assert_contains "$skill_full" "收尾当前未提交改动"
 assert_contains "$skill_output" "Defaults to 中文"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"

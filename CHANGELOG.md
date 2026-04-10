@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.1] - 2026-04-10
+
+### Changed
+- Routing table: replaced "调试路径" with "链路组装" section defining chain insertion rules (code-simplifier after dev, claude-md-management after verification, codex:rescue after design)
+- SKILL.md §4.4: added chain composition rule referencing routing table's 链路组装 section
+- SKILL.md Case A/B examples: final lines changed from hardcoded skill chains to natural-language format templates
+- SKILL.md §3 step 9: now references 链路组装 rules for chain composition
+- Test added for chain assembly rules existence in routing table
+
 ## [2.3.0] - 2026-04-09
 
 ### Added
