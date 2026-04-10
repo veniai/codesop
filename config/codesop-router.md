@@ -18,7 +18,6 @@
 | | ★ | sp | superpowers:subagent-driven-development | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
 | | | plugin | code-simplifier:code-simplifier | 开发完成后、验证前：自动检查最近修改的代码，优化可读性和结构（dev → simplifier → verification 链路） |
 | | | sp | superpowers:dispatching-parallel-agents | 2+ 个完全独立任务并行加速时（仅 plan 已拆出独立任务后触发） |
-| | | sp | superpowers:executing-plans | 自己串行执行计划（不用子 agent） |
 | | | sp | superpowers:requesting-code-review | 开发中完成一个功能后提前让 AI 审一遍 |
 | **4. 测试与验证** | | | | |
 | | ★ | sp | superpowers:verification-before-completion | 声明完成前必须运行验证命令确认输出 |
