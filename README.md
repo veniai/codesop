@@ -95,13 +95,16 @@ codesop update
 
 ## 覆盖场景 / Workflow Scenarios
 
-| 场景 | Pipeline |
+链路的唯一真相源是路由表（`config/codesop-router.md`）的 **链路组装** 规则。以下为典型场景的链路示意（非穷举）：
+
+| 场景 | 链路示意 |
 |------|----------|
-| 新功能 | brainstorming → codex:rescue(设计审查) → writing-plans → worktree → subagent-dev → code-simplifier → verification → claude-md-management(文档检查) → finishing → code-review → codex:rescue(代码审查) → receiving-code-review |
-| Bug 修复 | systematic-debugging → verification → claude-md-management(文档检查) → finishing |
-| 小改动 | subagent-dev → code-simplifier → verification → finishing (if multi-file) |
-| 重构 | brainstorming → codex:rescue(设计审查) → writing-plans → worktree → subagent-dev → code-simplifier → verification → claude-md-management(文档检查) → finishing → code-review → codex:rescue(代码审查) → receiving-code-review |
+| 新功能 | brainstorming → codex:rescue → writing-plans → worktree → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
+| Bug 修复 | systematic-debugging → ☆simplifier → verification → ☆claude-md → finishing |
+| 小改动 | subagent-dev → ☆simplifier → verification → finishing |
 | Code Review 反馈 | receiving-code-review → fix → verification → reply |
+
+☆ = 有插件时走。完整插入规则见路由表链路组装段。
 
 ## 依赖 / Dependencies
 

@@ -1,6 +1,6 @@
 # Product: codesop
 # Current Version: 2.3.1
-# Last Updated: 2026-04-09
+# Last Updated: 2026-04-10
 # Status: active
 
 ---
@@ -161,7 +161,7 @@
 
 #### 真相源策略
 - `/codesop` 内容只保留一个真相源：`SKILL.md`
-- `setup` 负责把 `SKILL.md` 同步到 `~/.claude/commands/codesop.md`
+- `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
 - **Now (v2.0.x)**: 按需迭代，稳定维护
