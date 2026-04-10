@@ -84,7 +84,7 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/updates.sh && PROJECT_ROOT="$(pwd)" check_project_document_drift) || echo "当前项目文档检查跳过: 模块不可用"
    ```
-9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name.
+9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name. **When multiple skills match, prefer ★-marked skills from the 优选 column.** Do not demote a ★ skill to backup in favor of a non-★ skill.
 10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
@@ -141,6 +141,11 @@ Exactly 2 lines. No more, no less. NEVER output a second 备选 — pick the str
 
 If validation reveals a mismatch, adjust only the ordering within the routing table's candidate set. Routing table is the final authority.
 The recommendation block should explain judgment, not repeat the final action verbatim.
+
+**Key skill distinctions** (do not conflate):
+- `subagent-driven-development`: 串行执行，一个 task 派一个 subagent，两阶段 review 后再进下一个。"independent tasks" 指 task 自包含可独立理解，**不是可以并行**。Red Flag 明确禁止并行派发
+- `dispatching-parallel-agents`: 真正并行——仅限 2+ 个无数据依赖的独立 task 同时跑
+- `executing-plans`: 串行执行（无 subagent），非 ★ 选项。适用于不同会话/工作区场景
 
 ### 4.4 Final Line — Question-Style Workflow Instruction
 
