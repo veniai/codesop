@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.3.1
-# Last Updated: 2026-04-10
+# Current Version: 2.4.0
+# Last Updated: 2026-04-12
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.3.1 发布 — 路由表链路组装规则 + SKILL.md 示例去硬编码
+- **最后更新原因**: v2.4.0 发布 — pipeline-to-todo 链路可视化 + 失效检测 + re-entry 指令
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.4.0: Pipeline-to-todo 链路可视化（SKILL.md step 10.5 + pipeline dashboard + re-entry rule）
 - [x] v2.0: Superpowers-only backbone，移除 GStack 双引擎 (PR #9)
 - [x] 新依赖系统: CORE_PLUGINS / OPTIONAL_PLUGINS / OPTIONAL_SKILLS
 - [x] 路由表重写: 13 类 27 skill 生命周期表
@@ -56,6 +57,7 @@
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
 | 2026-04-09 | 路由表链路组装规则替换调试路径 | AI 照抄 SKILL.md 示例链路，跳过 code-simplifier/claude-md-management | 路由表加链路组装段，SKILL.md 示例去硬编码 |
+| 2026-04-12 | pipeline-to-todo: 链路转 TaskCreate 可视化 | AI 频繁遗忘链路中间步骤（simplifier/claude-md） | SKILL.md 加 step 10.5 + pipeline dashboard + re-entry rule |
 | 2026-04-09 | init 适配模式：三文件存在时走适配而非覆盖 | 模板更新后已有项目无法同步变更 | CLI 输出 ADAPT_MODE:YES 信号，skill 层做对比建议 |
 | 2026-04-09 | SKILL.md 末行改为疑问句式（"要我用 X 做 Y 吗？"） | 用户按 Enter 即可确认，提升灰色建议命中 | SKILL.md §4.4 格式变更 |
 | 2026-04-09 | update 命令检测模板变更并提示 | 用户不知道模板已更新，遗漏同步 | run_update() 追加 templates/ diff 检查 |
@@ -75,6 +77,14 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.4.0 - 2026-04-12 - (Pipeline-to-Todo)**
+- SKILL.md step 10.5: 检查 TaskList，检测失效 pipeline（分支/git/意图变化），单次确认创建或继续
+- §4.3 pipeline dashboard 替换"推荐/备选链路"，☐/☑ 可视化进度
+- §4.4 三种单次确认末行 shape（新 pipeline/继续/检测失效）
+- Re-entry rule: 每个 skill 完成后回看 TaskList 提示下一步
+- §4.1 工作台摘要改为一行一字段
+- 新增 Case C 示例（re-entering /codesop with existing pipeline）
 
 ### **V2.3.1 - 2026-04-10 - (Chain Assembly Rules)**
 - 路由表链路组装规则替换调试路径，SKILL.md 示例去硬编码
@@ -146,7 +156,8 @@
 
 ### 5.4 核心功能
 - **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文并组织下一步工作流链
-- **`/codesop` 收尾格式**: 推荐区之后，最后一行输出疑问句式工作流指令（"要我用 X 做 Y 吗？"），可串联 1 到 3 个 skill，用户按 Enter 即可确认执行
+- **`/codesop` 收尾格式**: pipeline dashboard 展示链路进度（☐/☑），最后一行输出疑问句式工作流指令（"要创建这个 pipeline 并从 X 开始吗？"），用户按 Enter 即可确认创建 task list 并执行
+- **Pipeline-to-todo**: 链路组装结果转 TaskCreate 任务列表，失效检测（分支/git/意图变化时自动重新路由），re-entry rule（每个 skill 完成后回看 TaskList 提示下一步）
 - **文档漂移扫描**: 在路由前先判断当前项目的 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`；已有项目自动进入适配模式，对比模板差异由用户确认

@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.4.0] - 2026-04-12
+
+### Added
+- Pipeline-to-todo: chain assembly results converted to TaskCreate task items with ☐/☑ visual progress markers
+- SKILL.md §3 step 10.5: TaskList check, stale pipeline detection (branch switch, git state change, intent shift), single confirmation to create or continue
+- SKILL.md §3 re-entry rule: after each downstream skill completes, check TaskList and prompt next pending step
+- SKILL.md §4.3 pipeline dashboard replacing "推荐链路/备选链路" two-line format
+- SKILL.md §4.4 three single-confirmation final line shapes (new pipeline / continue / stale detected)
+- Case C example (re-entering /codesop with existing pipeline)
+
+### Changed
+- SKILL.md §4.1 workbench summary: one field per line instead of two-line inline format
+- Test assertion updated for new Case A text
+
 ## [2.3.1] - 2026-04-10
 
 ### Changed

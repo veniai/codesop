@@ -109,6 +109,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - setup's `configure_hooks()` uses jq with nested schema: `{ "matcher": "", "hooks": [{ "type": "command", ... }] }`
 - Product contract is already narrower than the original implementation. Keep cleaning toward the contract instead of reintroducing legacy surfaces
 - `SKILL.md` is the single source of truth for `/codesop`. `setup` installs it into `~/.claude/skills/codesop/SKILL.md`
+- SKILL.md §3 step 10.5 manages pipeline-to-todo: TaskList check → stale detection → single confirmation → TaskCreate. Re-entry rule after each downstream skill completion
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `CORE_PLUGINS` / `OPTIONAL_PLUGINS` / `OPTIONAL_SKILLS` arrays in `lib/updates.sh` define the plugin dependency tiers; `has_plugin()` in `lib/detection.sh` is the central detection helper
