@@ -93,23 +93,23 @@ When this skill triggers:
    The routing table defines the candidate set. Validation may only rank or reorder within that set. If no candidate fits, ask the user one focused question — do not invent chains outside the routing table.
 
 10.5. **Check TaskList and manage pipeline.**
-   - Call TaskList() to check for existing tasks
+   - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
    - Detect stale pipeline: branch switched, worktree dirty/clean flipped, new open PR appeared, or user intent shifted since pipeline was created
-   - If stale detected → mark old tasks deleted, re-run step 9, propose new pipeline
-   - If tasks exist with pending/in_progress items (and not stale):
+   - If stale detected → mark old pipeline tasks deleted, re-run step 9, propose new pipeline
+   - If pipeline tasks exist with pending/in_progress items (and not stale):
      - Mark skills that have been executed as ☑ (advisory, based on conversation history)
      - Output pipeline status view
-     - Single confirmation: "继续当前 pipeline，从 X 开始做 Y 吗？"
+     - Single confirmation: "要继续当前 pipeline，从 X 开始做 Y 吗？"
      - If continue → skip TaskCreate, proceed to execute next skill
      - If adjust → re-run step 9 with new intent, propose updated pipeline
-   - If no tasks or all completed:
+   - If no pipeline tasks or all completed:
      - Propose new pipeline based on step 9's chain
      - Single confirmation: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
-     - If confirmed → call TaskCreate for each skill, then immediately execute first skill
+     - If confirmed → call TaskCreate for each skill with metadata `{source: "codesop-pipeline"}`, then immediately execute first skill
      - If rejected → adjust and re-propose
 
 **Pipeline Re-entry**: After any routed skill completes execution:
-1. Call TaskList() to check current pipeline state
+1. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
 2. Mark the just-completed skill as ☑ (advisory)
 3. Identify the next pending skill in the pipeline
 4. Ask the user: "Pipeline 中下一步是 {next-skill}，要继续吗？"
@@ -199,7 +199,7 @@ The very last line of the output MUST be a single question-style workflow instru
 Single confirmation shapes (create pipeline + start execution in one step):
 
 1. **Proposing new pipeline**: `要创建这个 pipeline 并从 {first-skill} 开始做 {intent} 吗？`
-2. **Continuing existing pipeline**: `继续当前 pipeline，从 {next-skill} 开始做 {intent} 吗？`
+2. **Continuing existing pipeline**: `要继续当前 pipeline，从 {next-skill} 开始做 {intent} 吗？`
 3. **Stale pipeline detected**: `检测到上下文变化（{reason}），建议新 pipeline。要创建并从 {first-skill} 开始做 {intent} 吗？`
 
 Rules:
@@ -282,7 +282,7 @@ Case C — Re-entering /codesop with existing pipeline
 ☐ claude-md-management(☆) — 文档审计
 ☐ finishing — 提交 PR
 
-继续当前 pipeline，从 writing-plans 开始拆分执行计划吗？
+要继续当前 pipeline，从 writing-plans 开始拆分执行计划吗？
 ```
 
 Intent:

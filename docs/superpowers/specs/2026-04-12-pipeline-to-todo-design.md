@@ -47,26 +47,26 @@ Convert the recommended skill chain into Claude Code's TaskCreate task items. Th
 ### Step 10.5 Logic
 
 ```
-tasks = TaskList()
+tasks = TaskList().filter(metadata.source == "codesop-pipeline")
 if tasks has pending or in_progress items:
     # Stale pipeline detection
     git_changed = (branch switched OR worktree dirty/clean flipped OR new open PR)
     intent_changed = (user's current message implies different task than pipeline's goal)
     if git_changed OR intent_changed:
         # Default: re-route instead of continue
-        mark old tasks as deleted
+        mark old pipeline tasks as deleted
         propose new pipeline from step 9
         final line: "检测到上下文变化，建议新 pipeline：要创建并从 X 开始吗？"
-        if user confirms → TaskCreate for new chain
+        if user confirms → TaskCreate with metadata {source: "codesop-pipeline"} for new chain
     else:
         output pipeline status with ☐/☑ markers
-        final line: "继续当前 pipeline，从 X 开始做 Y 吗？"
+        final line: "要继续当前 pipeline，从 X 开始做 Y 吗？"
         if user confirms → skip TaskCreate, proceed to execute
         if user says adjust → re-run step 9, propose updated pipeline
 else:
     output proposed pipeline
     final line: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
-    if user confirms → TaskCreate for each skill + immediately start first skill
+    if user confirms → TaskCreate with metadata {source: "codesop-pipeline"} for each skill + immediately start first skill
     if user rejects → adjust and re-propose
 ```
 
