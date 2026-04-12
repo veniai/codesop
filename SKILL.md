@@ -92,6 +92,29 @@ When this skill triggers:
    - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
    The routing table defines the candidate set. Validation may only rank or reorder within that set. If no candidate fits, ask the user one focused question — do not invent chains outside the routing table.
 
+10.5. **Check TaskList and manage pipeline.**
+   - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
+   - Detect stale pipeline: branch switched, worktree dirty/clean flipped, new open PR appeared, or user intent shifted since pipeline was created
+   - If stale detected → mark old pipeline tasks deleted, re-run step 9, propose new pipeline
+   - If pipeline tasks exist with pending/in_progress items (and not stale):
+     - Mark skills that have been executed as ☑ (advisory, based on conversation history)
+     - Output pipeline status view
+     - Single confirmation: "要继续当前 pipeline，从 X 开始做 Y 吗？"
+     - If continue → skip TaskCreate, proceed to execute next skill
+     - If adjust → re-run step 9 with new intent, propose updated pipeline
+   - If no pipeline tasks or all completed:
+     - Propose new pipeline based on step 9's chain
+     - Single confirmation: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
+     - If confirmed → call TaskCreate for each skill with metadata `{source: "codesop-pipeline"}`, then immediately execute first skill
+     - If rejected → adjust and re-propose
+
+**Pipeline Re-entry**: After any routed skill completes execution:
+1. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
+2. Mark the just-completed skill as ☑ (advisory)
+3. Identify the next pending skill in the pipeline
+4. Ask the user: "Pipeline 中下一步是 {next-skill}，要继续吗？"
+This is a soft reminder, not a hard gate.
+
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
 ## 4. Default Output
@@ -100,7 +123,7 @@ Output MUST contain exactly these 4 sections in this order, nothing else:
 
 1. `## 工作台摘要` — two-line inline format (no nested bullets)
 2. `## Skill 生态` — routing coverage only
-3. `## 下一步建议` — exactly 2 lines (推荐链路 + 备选链路)
+3. `## 下一步建议` — pipeline dashboard (proposed chain or current pipeline status)
 4. **末行** — one natural-language workflow instruction
 
 NEVER add `---` dividers between sections. NEVER add extra headings. NEVER change section titles.
@@ -109,11 +132,16 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 
 ```md
 ## 工作台摘要
-**长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: ... **文档状态**: ... **阻塞/风险**: ... **最近决策**: ...
+**长期目标**: ...
+**当前阶段**: ...
+**当前进度**: ...
+**当前分支**: ...
+**文档状态**: ...
+**阻塞/风险**: ...
+**最近决策**: ...
 ```
 
-MUST use this exact two-line inline format — bold keys with inline values, space-separated. NEVER expand into nested bullet lists, indented items, or multi-line field values.
+Each field on its own line — bold key with inline value. NEVER expand into nested bullet lists, indented items, or multi-line field values. NEVER cram multiple fields onto one line.
 
 摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
 
@@ -129,34 +157,50 @@ MUST use this exact two-line inline format — bold keys with inline values, spa
 
 这个区块只反映 codesop 的 skill/runtime 生态，不用于判断当前项目文档是否健康。当前项目文档状态应放在 `## 工作台摘要` 中。
 
-### 4.3 Next-Step Recommendation
+### 4.3 Pipeline Dashboard
 
-Exactly 2 lines. No more, no less. NEVER output a second 备选 — pick the strongest alternative.
+Show the recommended chain as a pipeline with progress markers. Format depends on whether tasks already exist:
+
+**Proposing new pipeline** (no old tasks or all completed):
 
 ```md
 ## 下一步建议
-- 推荐链路：{workflow}. 理由：{why this should happen first}
-- 备选链路：{workflow}. 理由：{why this is secondary}
+提议 Pipeline：
+brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
 ```
 
-If validation reveals a mismatch, adjust only the ordering within the routing table's candidate set. Routing table is the final authority.
-The recommendation block should explain judgment, not repeat the final action verbatim.
+**Continuing existing pipeline** (has pending tasks):
+
+```md
+## 下一步建议
+当前 Pipeline：
+☑ brainstorming — 需求澄清和设计
+☑ codex:rescue — 设计审查
+☐ writing-plans — 拆分执行计划
+☐ subagent-driven-development — 开发实施
+☐ code-simplifier(☆) — 代码润色
+☐ verification — 验证
+☐ claude-md-management(☆) — 文档审计
+☐ finishing — 提交 PR
+```
+
+**Format rules**:
+- **(☆)**: Skill only runs when the plugin is installed (from routing table chain assembly)
+- **(★)**: Skill always runs (★ from routing table)
+- **☑/☐**: Visual progress indicator — mark completed skills ☑ based on conversation history (advisory)
+- One pipeline per output — if user rejects, adjust and re-propose a single pipeline
+- Each line: `skill-name — one-line description`
+- If stale pipeline detected (branch switch, git state change, open PR appeared, intent shift): show new proposed pipeline instead of continuing old one
 
 ### 4.4 Final Line — Question-Style Workflow Instruction
 
 The very last line of the output MUST be a single question-style workflow instruction ending with "吗？". The user presses Enter to confirm.
 
-Use this shape when the next step is a chain:
+Single confirmation shapes (create pipeline + start execution in one step):
 
-```text
-要我先用 finishing-a-development-branch 处理未提交改动，再同步更新文档，然后用 brainstorming 做 Data 页面知识图谱 UI 的需求澄清吗？
-```
-
-Use this shape when the next step is simple:
-
-```text
-要用 brainstorming 做 Data 页面知识图谱 UI 的需求澄清和设计吗？
-```
+1. **Proposing new pipeline**: `要创建这个 pipeline 并从 {first-skill} 开始做 {intent} 吗？`
+2. **Continuing existing pipeline**: `要继续当前 pipeline，从 {next-skill} 开始做 {intent} 吗？`
+3. **Stale pipeline detected**: `检测到上下文变化（{reason}），建议新 pipeline。要创建并从 {first-skill} 开始做 {intent} 吗？`
 
 Rules:
 
@@ -174,38 +218,71 @@ Rules:
 
 Examples:
 
-Case A — Dirty worktree
+Case A — Dirty worktree, no existing pipeline
 
 ```md
 ## 工作台摘要
-**长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: main（无 open PR） **文档状态**: 代码已变更但 PRD.md/README.md 未动，建议同步 **阻塞/风险**: 工作区仍有未暂存改动，需要先归拢边界 **最近决策**: ...
+**长期目标**: ...
+**当前阶段**: ...
+**当前进度**: ...
+**当前分支**: main（无 open PR）
+**文档状态**: 代码已变更但 PRD.md/README.md 未动，建议同步
+**阻塞/风险**: 工作区仍有未暂存改动，需要先归拢边界
+**最近决策**: ...
 
 ## Skill 生态
 - 路由覆盖：...
 
 ## 下一步建议
-- 推荐链路：先收尾当前改动，再同步活文档，再进入下一阶段设计。理由：当前工作区未清，直接推进 roadmap-next 会混淆边界，且文档状态已落后于代码事实。
-- 备选链路：直接进入 brainstorming。理由：只有当这些改动已确认可以延后处理时才成立。
+提议 Pipeline：
+finishing-a-development-branch → claude-md-management(☆) → brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
 
-要我先收尾当前未提交改动，顺手更新活文档，再做 Data 页面 P1 知识图谱 UI 的需求澄清和设计吗？
+要创建这个 pipeline 并从 finishing-a-development-branch 处理未提交改动开始吗？
 ```
 
-Case B — Clean worktree
+Case B — Clean worktree, no existing pipeline
 
 ```md
 ## 工作台摘要
-**长期目标**: ... **当前阶段**: ... **当前进度**: ...
-**当前分支**: feat/p1-graph-ui（无 open PR） **文档状态**: 未见漂移信号 **阻塞/风险**: 无 **最近决策**: ...
+**长期目标**: ...
+**当前阶段**: ...
+**当前进度**: ...
+**当前分支**: feat/p1-graph-ui（无 open PR）
+**文档状态**: 未见漂移信号
+**阻塞/风险**: 无
+**最近决策**: ...
 
 ## Skill 生态
 - 路由覆盖：...
 
 ## 下一步建议
-- 推荐链路：直接进入当前阶段的设计工作流。理由：工作区干净，且当前目标已经明确。
-- 备选链路：先写计划再实施。理由：如果 scope 已经稳定，可以直接把设计拆成执行任务。
+提议 Pipeline：
+brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
 
-要做 Data 页面 P1 知识图谱 UI 的需求澄清和设计吗？
+要创建这个 pipeline 并从 brainstorming 做 Data 页面知识图谱 UI 的需求澄清开始吗？
+```
+
+Case C — Re-entering /codesop with existing pipeline
+
+```md
+## 工作台摘要
+...
+
+## Skill 生态
+- 路由覆盖：...
+
+## 下一步建议
+当前 Pipeline：
+☑ brainstorming — 需求澄清和设计
+☑ codex:rescue — 设计审查
+☐ writing-plans — 拆分执行计划
+☐ subagent-driven-development — 开发实施
+☐ code-simplifier(☆) — 代码润色
+☐ verification — 验证
+☐ claude-md-management(☆) — 文档审计
+☐ finishing — 提交 PR
+
+要继续当前 pipeline，从 writing-plans 开始拆分执行计划吗？
 ```
 
 Intent:
