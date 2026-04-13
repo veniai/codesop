@@ -92,6 +92,7 @@ codesop update
 - 机械命令只有两个：`codesop init`、`codesop update`
 - `status` / `diagnose` 已从产品合同中移除
 - 本仓库正在做架构收口，与上面合同无关的能力不会优先扩展
+- 主要围绕 Claude Code 设计和测试，Codex/OpenCode 可部分适配
 - `/codesop` 收尾必须以一条自然语言工作流指令结束；允许串联多个 skill，不再强制 slash command 形式
 - `/codesop` 的核心职责是组织“下一步工作流链”，不是停在“推荐一个 skill”
 
