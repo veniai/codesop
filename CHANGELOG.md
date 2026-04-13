@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.1] - 2026-04-13
+
+### Added
+- Chain completeness principle in routing table: check for logical gaps between adjacent skills after assembly
+- Task hygiene iron law: completed→completed, obsolete→deleted, no buildup (SKILL.md §9 + AGENTS.md + router card)
+- SKILL.md step 9: chain completeness reference added
+- README: multi-host adaptation note (primarily designed for Claude Code)
+
+### Fixed
+- Debug path gap: added ☆claude-md-management to debug path in routing table
+- README Bug 修复 scenario aligned with routing table's debug path
+- Chain completeness examples made precise (code-review → receiving-code-review)
+
 ## [2.4.0] - 2026-04-12
 
 ### Added

@@ -103,7 +103,7 @@ codesop update
 | 场景 | 链路示意 |
 |------|----------|
 | 新功能 | brainstorming → codex:rescue → writing-plans → worktree → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
-| Bug 修复 | systematic-debugging → ☆simplifier → verification → ☆claude-md → finishing |
+| Bug 修复 | systematic-debugging → verification → ☆claude-md → finishing |
 | 小改动 | subagent-dev → ☆simplifier → verification → finishing |
 | Code Review 反馈 | receiving-code-review → fix → verification → reply |
 

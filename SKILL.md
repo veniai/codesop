@@ -84,7 +84,7 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/updates.sh && PROJECT_ROOT="$(pwd)" check_project_document_drift) || echo "当前项目文档检查跳过: 模块不可用"
    ```
-9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name. When multiple skills match, prefer ★-marked skills (e.g. subagent-driven-development over executing-plans).
+9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name. When multiple skills match, prefer ★-marked skills (e.g. subagent-driven-development over executing-plans). After assembling the chain, apply the **链路完整性** principle: check for logical gaps between adjacent skills (e.g. code-review without receiving-code-review, feedback without fix-and-verify), and fill them before outputting.
 10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
@@ -351,5 +351,6 @@ When no scenario matches:
 | No production code without failing test first | TDD |
 | No fix without root cause investigation | systematic-debugging |
 | No completion claim without verification evidence | verification-before-completion |
+| Task hygiene: completed→completed, obsolete→deleted, no buildup | codesop |
 | Load skill if 1% chance it applies | using-superpowers |
 | User instruction > project rules > default behavior | instruction priority |

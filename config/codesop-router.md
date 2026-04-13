@@ -53,7 +53,7 @@
 所有链路必须应用以下插入规则（☆=有插件时走）：
 开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue
 
-链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如评审后未评估、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
+链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
 调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch
 
