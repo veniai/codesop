@@ -94,15 +94,14 @@ When this skill triggers:
 
 10.5. **Check TaskList and manage pipeline.**
    - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
-   - Detect stale pipeline: branch switched, worktree dirty/clean flipped, new open PR appeared, or user intent shifted since pipeline was created
-   - If stale detected → mark old pipeline tasks deleted, re-run step 9, propose new pipeline
-   - If pipeline tasks exist with pending/in_progress items (and not stale):
+   - **Judge pipeline relevance**: compare existing pipeline tasks against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old pipeline tasks and re-route from scratch
+   - If pipeline is still relevant and has pending/in_progress items:
      - Mark skills that have been executed as ☑ (advisory, based on conversation history)
      - Output pipeline status view
      - Single confirmation: "要继续当前 pipeline，从 X 开始做 Y 吗？"
      - If continue → skip TaskCreate, proceed to execute next skill
      - If adjust → re-run step 9 with new intent, propose updated pipeline
-   - If no pipeline tasks or all completed:
+   - If no pipeline tasks exist:
      - Propose new pipeline based on step 9's chain
      - Single confirmation: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
      - If confirmed → call TaskCreate for each skill with metadata `{source: "codesop-pipeline"}`, then immediately execute first skill
@@ -121,7 +120,7 @@ Default to orientation and routing first. Do not jump into implementation unless
 
 Output MUST contain exactly these 4 sections in this order, nothing else:
 
-1. `## 工作台摘要` — two-line inline format (no nested bullets)
+1. `## 工作台摘要` — one field per line (no nested bullets)
 2. `## Skill 生态` — routing coverage only
 3. `## 下一步建议` — pipeline dashboard (proposed chain or current pipeline status)
 4. **末行** — one natural-language workflow instruction

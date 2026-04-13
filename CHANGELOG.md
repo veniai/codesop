@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.4.2] - 2026-04-13
+
+### Changed
+- SKILL.md step 10.5 pipeline stale detection: replaced enumerated stale signals with a general "judge pipeline relevance" principle — compare existing tasks against current context, delete all and re-route if they no longer align
+- Removed redundant "all completed" branch in pipeline state machine (relevance check covers it)
+- PRD §2.4: added v2.4.1 Done Recently entry
+- PRD §5.6: updated version reference from v2.0.x to v2.4.x
+- SKILL.md §4 header: fixed "two-line inline format" → "one field per line"
+
 ## [2.4.1] - 2026-04-13
 
 ### Added

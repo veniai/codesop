@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 2.4.1
+# Current Version: 2.4.2
 # Last Updated: 2026-04-13
 # Status: active
 
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.4.1 发布 — 链路完整性原则 + 任务卫生铁律 + 调试路径修正
+- **最后更新原因**: v2.4.2 发布 — pipeline relevance 判断原则替代枚举式 stale 检测
 
 ## 2. 当前进度
 
@@ -38,6 +38,8 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.4.2: pipeline relevance 判断原则替代枚举式 stale 检测 + PRD 审计遗留修复
+- [x] v2.4.1: 链路完整性原则 + 任务卫生铁律 + 调试路径修正（三层同步：路由卡 + AGENTS.md + SKILL.md）
 - [x] v2.4.0: Pipeline-to-todo 链路可视化（SKILL.md step 10.5 + pipeline dashboard + re-entry rule）
 - [x] v2.0: Superpowers-only backbone，移除 GStack 双引擎 (PR #9)
 - [x] 新依赖系统: CORE_PLUGINS / OPTIONAL_PLUGINS / OPTIONAL_SKILLS
@@ -59,6 +61,7 @@
 | 2026-04-09 | 路由表链路组装规则替换调试路径 | AI 照抄 SKILL.md 示例链路，跳过 code-simplifier/claude-md-management | 路由表加链路组装段，SKILL.md 示例去硬编码 |
 | 2026-04-12 | pipeline-to-todo: 链路转 TaskCreate 可视化 | AI 频繁遗忘链路中间步骤（simplifier/claude-md） | SKILL.md 加 step 10.5 + pipeline dashboard + re-entry rule |
 | 2026-04-13 | 链路完整性原则 + 任务卫生铁律 | AI 盲走链路不检查 gap；task 不清理堆积 | 路由卡加链路完整性原则 + 调试路径补 claude-md；AGENTS.md 加铁律第 6 条 |
+| 2026-04-13 | pipeline relevance 判断原则 | 枚举式 stale 检测漏掉"项目阶段已变"信号；旧阶段 task 堆积 | step 10.5 改为通用判断原则，不再枚举具体信号 |
 | 2026-04-09 | init 适配模式：三文件存在时走适配而非覆盖 | 模板更新后已有项目无法同步变更 | CLI 输出 ADAPT_MODE:YES 信号，skill 层做对比建议 |
 | 2026-04-09 | SKILL.md 末行改为疑问句式（"要我用 X 做 Y 吗？"） | 用户按 Enter 即可确认，提升灰色建议命中 | SKILL.md §4.4 格式变更 |
 | 2026-04-09 | update 命令检测模板变更并提示 | 用户不知道模板已更新，遗漏同步 | run_update() 追加 templates/ diff 检查 |
@@ -78,6 +81,11 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.4.2 - 2026-04-13 - (Pipeline Relevance)**
+- SKILL.md step 10.5: stale 枚举改为通用判断原则，比较 pipeline 任务与当前上下文，不对就全清重建
+- PRD 审计遗留修复：补 v2.4.1 Done Recently + §5.6 版本号
+- §4 header 修复：two-line inline → one field per line
 
 ### **V2.4.1 - 2026-04-13 - (Chain Completeness + Task Hygiene)**
 - 链路完整性原则：组装链路后检查相邻 skill 之间逻辑断层，自动补充
@@ -183,7 +191,7 @@
 - `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
-- **Now (v2.0.x)**: 按需迭代，稳定维护
+- **Now (v2.4.x)**: 按需迭代，稳定维护
 - **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
