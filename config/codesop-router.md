@@ -29,9 +29,10 @@
 | | ★ | plugin | code-review:code-review | PR 提交后自动审查：5 agent 并行 + 置信度评分 + 自动发评论 |
 | | ★ | plugin | codex:rescue | code-review 之后的独立第二意见（双 AI 审查，必走） |
 | | | sp | superpowers:receiving-code-review | 收到 code-review 评论后，先技术评估再执行 |
-| **7. 前端测试与自动化** | | | | |
-| | | plugin | playwright | 日常页面操作：导航/截图/填表/点击/JS 执行 |
-| | | skill | browser-use | 需要登录态/云浏览器/tunnel 时的补充 |
+| **7. 浏览器工具** | | | | |
+| | | plugin | playwright | 页面交互与自动化测试：导航/截图/填表/点击/E2E 流程 |
+| | | plugin | chrome-devtools-mcp | 浏览器诊断：性能分析(LCP)/a11y 审计/CDP 调试/渲染排查 |
+| | | skill | browser-use | 需要 cloud browser/tunnel/登录态时的补充 |
 | **8. 调试与调查** | | | | |
 | | ★ | sp | superpowers:systematic-debugging | 遇到 bug/测试失败/异常行为时，假设驱动逐步排查（修 bug 必走） |
 | **9. 文档管理** | | | | |

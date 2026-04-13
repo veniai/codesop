@@ -39,6 +39,7 @@ REQUIRED_PLUGINS=(
   "playwright@claude-plugins-official"
   "claude-md-management@claude-plugins-official"
   "codex@openai-codex"
+  "chrome-devtools-mcp@claude-plugins-official"
 )
 
 # Legacy aliases for backward compatibility

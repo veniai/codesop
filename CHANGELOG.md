@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.3] - 2026-04-13
+
+### Added
+- Chrome DevTools MCP added to routing table (category 7) and REQUIRED_PLUGINS dependency list
+- Category 7 renamed from "前端测试与自动化" to "浏览器工具"
+- Playwright description updated to reflect its primary role as interaction and automation testing tool
+
 ## [2.4.2] - 2026-04-13
 
 ### Changed
