@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.5.2
-# Last Updated: 2026-04-13
+# Current Version: 2.5.3
+# Last Updated: 2026-04-14
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.5.2 发布 — §4 输出格式精简（Case A/B/C 合并、衔接任务一致化）
+- **最后更新原因**: v2.5.3 发布 — Pipeline task subject 指令式格式 + 三层注入 anti-inline 规则
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.5.3: Pipeline task subject 指令式格式（`使用 X 做Y`）+ 三层注入 anti-inline 规则
 - [x] v2.5.2: §4 输出格式精简（Case A/B/C 合并为 1 个完整示例 + 3 行场景规则，衔接任务一致化，pipeline 编号+完整 skill 名）
 - [x] v2.5.1: Pipeline TaskCreate 规范化（顺序创建+blockedBy、skill/衔接任务 subject 格式、re-entry 实际 TaskUpdate）
 - [x] v2.5.0: 系统模板加沟通原则，通用约束/铁律去冗余（铁律 6→5 条）
@@ -69,6 +70,7 @@
 | 2026-04-14 | 系统模板加沟通原则，铁律去冗余 | AI 奉承/过度确认影响效率；通用约束和铁律有重复条款 | 新增沟通原则段，删通用约束验证条款（铁律#4已覆盖），删铁律#5（Skill纪律+冲突解决已覆盖），铁律6→5条 |
 | 2026-04-14 | Pipeline TaskCreate 规范化 | AI 创建任务顺序乱、subject 格式不一致、衔接任务没进 task、re-entry 没实际标记完成 | step 10.5 加 TaskCreate 规范（顺序+blockedBy+subject格式+metadata）、re-entry 改 TaskUpdate(completed)+处理衔接任务、§4.3 补衔接任务格式 |
 | 2026-04-14 | §4 输出格式精简 | Case A/B/C 与 §4.3 格式示例重复（5 处 pipeline 列出）、衔接任务只出现 1 处、skill 名不真实 | Case 合并为 1 个完整示例 + 3 行场景规则，衔接任务所有示例一致，pipeline 用路由表完整 skill 名 + 编号 |
+| 2026-04-14 | Pipeline task subject 指令式格式 + anti-inline 规则 | AI 看到 task subject 描述式格式后 inline 替代 skill 调用 | subject 改为 `使用 X 做Y` 指令式；AGENTS.md + 路由卡 + SKILL.md 三层注入 anti-inline 规则 |
 | 2026-04-09 | init 适配模式：三文件存在时走适配而非覆盖 | 模板更新后已有项目无法同步变更 | CLI 输出 ADAPT_MODE:YES 信号，skill 层做对比建议 |
 | 2026-04-09 | SKILL.md 末行改为疑问句式（"要我用 X 做 Y 吗？"） | 用户按 Enter 即可确认，提升灰色建议命中 | SKILL.md §4.4 格式变更 |
 | 2026-04-09 | update 命令检测模板变更并提示 | 用户不知道模板已更新，遗漏同步 | run_update() 追加 templates/ diff 检查 |
@@ -88,6 +90,12 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.5.3 - 2026-04-14 - (Pipeline Task 指令式格式)**
+- Pipeline task subject 从描述式（`X — Y`）改为指令式（`使用 X 做Y`）
+- SKILL.md step 10.5 spec、§4.3 proposing/continuing、§4.5 Complete Example 全部统一
+- AGENTS.md Skill 纪律：新增 anti-inline 规则
+- 路由卡铁律：新增 anti-inline 规则
 
 ### **V2.5.2 - 2026-04-14 - (§4 输出格式精简)**
 - Case A/B/C 合并为 §4.5 一个完整示例 + §4.4 三行场景适配规则（净删 69 行）

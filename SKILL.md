@@ -108,7 +108,7 @@ When this skill triggers:
 
 **Pipeline TaskCreate 规范**：
 - 链路中每个步骤（skill 或衔接工作）创建一个 task
-- subject：有 skill 写 `{routing-table-skill-name} — {描述}`（用路由表完整名称如 `superpowers:brainstorming`），衔接工作写 `{描述}`
+- subject：有 skill 写 `使用 {routing-table-skill-name} 做{描述}`（指令式，用路由表完整名称），衔接工作写 `{描述}`
 - metadata：skill 任务 `{source: "codesop-pipeline", skill: "routing-table-skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
 - 逐个顺序创建（不并行），第 N+1 个 `addBlockedBy` 第 N 个的 ID，保证执行顺序
 - 第一个 task 创建后立即执行
@@ -172,15 +172,15 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 ```md
 ## 下一步建议
 提议 Pipeline：
-1. superpowers:brainstorming — 需求澄清和设计
-2. codex:rescue — 设计审查
+1. 使用 superpowers:brainstorming 做需求澄清和设计
+2. 使用 codex:rescue 做设计审查
 3. 根据审查反馈修订方案
-4. superpowers:writing-plans — 拆分执行计划
-5. superpowers:subagent-driven-development — 开发实施
-6. code-simplifier:code-simplifier(☆) — 代码润色
-7. superpowers:verification-before-completion — 验证
-8. claude-md-management:claude-md-improver(☆) — 文档审计
-9. superpowers:finishing-a-development-branch — 提交 PR
+4. 使用 superpowers:writing-plans 做拆分执行计划
+5. 使用 superpowers:subagent-driven-development 做开发实施
+6. 使用 code-simplifier:code-simplifier(☆) 做代码润色
+7. 使用 superpowers:verification-before-completion 做验证
+8. 使用 claude-md-management:claude-md-improver(☆) 做文档审计
+9. 使用 superpowers:finishing-a-development-branch 做提交 PR
 ```
 
 **Continuing existing pipeline**:
@@ -188,21 +188,21 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 ```md
 ## 下一步建议
 当前 Pipeline：
-☑ 1. superpowers:brainstorming — 需求澄清和设计
-☑ 2. codex:rescue — 设计审查
+☑ 1. 使用 superpowers:brainstorming 做需求澄清和设计
+☑ 2. 使用 codex:rescue 做设计审查
 ☑ 3. 根据审查反馈修订方案
-☐ 4. superpowers:writing-plans — 拆分执行计划
-☐ 5. superpowers:subagent-driven-development — 开发实施
-☐ 6. code-simplifier:code-simplifier(☆) — 代码润色
-☐ 7. superpowers:verification-before-completion — 验证
-☐ 8. claude-md-management:claude-md-improver(☆) — 文档审计
-☐ 9. superpowers:finishing-a-development-branch — 提交 PR
+☐ 4. 使用 superpowers:writing-plans 做拆分执行计划
+☐ 5. 使用 superpowers:subagent-driven-development 做开发实施
+☐ 6. 使用 code-simplifier:code-simplifier(☆) 做代码润色
+☐ 7. 使用 superpowers:verification-before-completion 做验证
+☐ 8. 使用 claude-md-management:claude-md-improver(☆) 做文档审计
+☐ 9. 使用 superpowers:finishing-a-development-branch 做提交 PR
 ```
 
 **Format rules**:
 - 使用路由表中的完整 skill 名称（如 `superpowers:brainstorming`，不是 `brainstorming`）
-- 每行带序号：`N. skill-name(☆/★) — one-line description`
-- 衔接任务行：`N. one-line description`（无 skill name 前缀，由链路完整性原则动态产生）
+- Skill 任务行：`N. 使用 {skill-name}(☆/★) 做{description}`（指令式，AI 必须调用该 skill）
+- 衔接任务行：`N. {description}`（无 skill 前缀，由链路完整性原则动态产生）
 - **(☆)**: 有插件时才走
 - **(★)**: 必走
 - **☑/☐**: 已完成/待执行（仅 continuing 格式）
@@ -244,15 +244,15 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 
 ## 下一步建议
 提议 Pipeline：
-1. superpowers:brainstorming — 知识图谱 UI 需求澄清（设计审查已通过，此步确认最终方案）
-2. codex:rescue — 设计审查（已完成，跳过）
+1. 使用 superpowers:brainstorming 做知识图谱 UI 需求澄清（设计审查已通过，此步确认最终方案）
+2. 使用 codex:rescue 做设计审查（已完成，跳过）
 3. 根据审查反馈修订方案（已完成，方案微调了数据流方向）
-4. superpowers:writing-plans — 拆分执行计划
-5. superpowers:subagent-driven-development — 开发实施
-6. code-simplifier:code-simplifier(☆) — 代码润色
-7. superpowers:verification-before-completion — 验证
-8. claude-md-management:claude-md-improver(☆) — 文档审计
-9. superpowers:finishing-a-development-branch — 提交 PR
+4. 使用 superpowers:writing-plans 做拆分执行计划
+5. 使用 superpowers:subagent-driven-development 做开发实施
+6. 使用 code-simplifier:code-simplifier(☆) 做代码润色
+7. 使用 superpowers:verification-before-completion 做验证
+8. 使用 claude-md-management:claude-md-improver(☆) 做文档审计
+9. 使用 superpowers:finishing-a-development-branch 做提交 PR
 
 要我创建这个 pipeline 并从 superpowers:writing-plans 开始拆分执行计划吗？
 ```

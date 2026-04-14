@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.3] - 2026-04-14
+
+### Changed
+- Pipeline task subject 改为指令式格式：`使用 {skill-name} 做{描述}`，AI 必须调用该 skill，不接受 inline 替代
+- SKILL.md §4.3/§4.5 所有示例统一使用指令式格式（step 10.5 spec / proposing / continuing / complete example）
+- AGENTS.md Skill 纪律：新增"pipeline task 指定了 skill 时，必须通过 Skill tool 调用，不接受 inline 替代"
+- 路由卡铁律：新增"Task 指定了 skill 就必须调用，不能 inline 替代"
+
 ## [2.5.2] - 2026-04-14
 
 ### Changed
