@@ -54,10 +54,10 @@ grep -q "下一步建议" "$ROOT_DIR/SKILL.md" || fail "Next-step recommendation
 grep -q "workflow instruction" "$ROOT_DIR/SKILL.md" || fail "Final workflow-instruction rule missing from SKILL.md"
 grep -q "document drift scan" "$ROOT_DIR/SKILL.md" || fail "Missing document drift scan guidance"
 grep -q "check_project_document_drift" "$ROOT_DIR/SKILL.md" || fail "Missing current-project doc drift function reference"
-grep -q "1 to 3 skills in sequence" "$ROOT_DIR/SKILL.md" || fail "Missing multi-skill workflow instruction rule"
-grep -q "cleanup-first workflow" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree priority rule"
-grep -q "Case A — Dirty worktree" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree example"
-grep -q "Case B — Clean worktree" "$ROOT_DIR/SKILL.md" || fail "Missing clean-worktree example"
+grep -q "场景适配" "$ROOT_DIR/SKILL.md" || fail "Missing scenario adaptation rules"
+grep -q "cleanup-first\|前置.*finishing" "$ROOT_DIR/SKILL.md" || fail "Missing dirty-worktree priority rule"
+grep -q "Complete Example" "$ROOT_DIR/SKILL.md" || fail "Missing complete output example"
+grep -q "提议 Pipeline" "$ROOT_DIR/SKILL.md" || fail "Missing proposing pipeline format"
 echo "  PASS"
 
 # Test 7: Hook schema is correct
