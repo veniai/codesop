@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.5.0] - 2026-04-14
+
+### Added
+- Communication principles section in system AGENTS.md template: conclusions first, no flattery, no unnecessary confirmations
+
+### Changed
+- Removed redundant "run verification before delivery" from general constraints (iron law #4 already covers this)
+- Removed iron law #5 "process-first priority" (skill discipline + conflict resolution already covers this)
+- Iron laws reduced from 6 to 5, renumbered accordingly
+- System template version bumped to v2.5.0
+
 ## [2.4.3] - 2026-04-13
 
 ### Added

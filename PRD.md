@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 2.4.3
+# Current Version: 2.5.0
 # Last Updated: 2026-04-13
 # Status: active
 
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.4.3 发布 — Chrome DevTools MCP 纳入路由表和依赖检测
+- **最后更新原因**: v2.5.0 发布 — 系统模板加沟通原则，去冗余
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.5.0: 系统模板加沟通原则，通用约束/铁律去冗余（铁律 6→5 条）
 - [x] v2.4.3: Chrome DevTools MCP 纳入路由表和依赖检测（大类 7 重命名 + REQUIRED_PLUGINS 更新）
 - [x] v2.4.2: pipeline relevance 判断原则替代枚举式 stale 检测 + PRD 审计遗留修复
 - [x] v2.4.1: 链路完整性原则 + 任务卫生铁律 + 调试路径修正（三层同步：路由卡 + AGENTS.md + SKILL.md）
@@ -63,7 +64,7 @@
 | 2026-04-12 | pipeline-to-todo: 链路转 TaskCreate 可视化 | AI 频繁遗忘链路中间步骤（simplifier/claude-md） | SKILL.md 加 step 10.5 + pipeline dashboard + re-entry rule |
 | 2026-04-13 | 链路完整性原则 + 任务卫生铁律 | AI 盲走链路不检查 gap；task 不清理堆积 | 路由卡加链路完整性原则 + 调试路径补 claude-md；AGENTS.md 加铁律第 6 条 |
 | 2026-04-13 | pipeline relevance 判断原则 | 枚举式 stale 检测漏掉"项目阶段已变"信号；旧阶段 task 堆积 | step 10.5 改为通用判断原则，不再枚举具体信号 |
-| 2026-04-13 | Chrome DevTools MCP 纳入路由 | 新装了 chrome-devtools-mcp 但路由表和依赖检测不认识它 | 大类 7 重命名+加行，REQUIRED_PLUGINS 补条目 |
+| 2026-04-14 | 系统模板加沟通原则，铁律去冗余 | AI 奉承/过度确认影响效率；通用约束和铁律有重复条款 | 新增沟通原则段，删通用约束验证条款（铁律#4已覆盖），删铁律#5（Skill纪律+冲突解决已覆盖），铁律6→5条 |
 | 2026-04-09 | init 适配模式：三文件存在时走适配而非覆盖 | 模板更新后已有项目无法同步变更 | CLI 输出 ADAPT_MODE:YES 信号，skill 层做对比建议 |
 | 2026-04-09 | SKILL.md 末行改为疑问句式（"要我用 X 做 Y 吗？"） | 用户按 Enter 即可确认，提升灰色建议命中 | SKILL.md §4.4 格式变更 |
 | 2026-04-09 | update 命令检测模板变更并提示 | 用户不知道模板已更新，遗漏同步 | run_update() 追加 templates/ diff 检查 |
@@ -83,6 +84,12 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.5.0 - 2026-04-14 - (Communication Principles + Template Cleanup)**
+- 新增沟通原则段：结论先行、不奉承、不过度确认
+- 通用约束删除"交付前运行验证命令"（铁律 #4 已覆盖）
+- 铁律 #5"流程优先"删除（Skill 纪律 + 冲突解决已覆盖），铁律 6→5 条
+- AGENTS.md 模板版本 v2.4.1 → v2.5.0
 
 ### **V2.4.3 - 2026-04-13 - (Chrome DevTools MCP)**
 - 路由表大类 7 加入 chrome-devtools-mcp（浏览器诊断），重命名为"浏览器工具"
