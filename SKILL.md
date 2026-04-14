@@ -108,8 +108,8 @@ When this skill triggers:
 
 **Pipeline TaskCreate 规范**：
 - 链路中每个步骤（skill 或衔接工作）创建一个 task
-- subject：有 skill 写 `{skill-name} — {描述}`，衔接工作写 `{描述}`
-- metadata：skill 任务 `{source: "codesop-pipeline", skill: "skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
+- subject：有 skill 写 `{routing-table-skill-name} — {描述}`（用路由表完整名称如 `superpowers:brainstorming`），衔接工作写 `{描述}`
+- metadata：skill 任务 `{source: "codesop-pipeline", skill: "routing-table-skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
 - 逐个顺序创建（不并行），第 N+1 个 `addBlockedBy` 第 N 个的 ID，保证执行顺序
 - 第一个 task 创建后立即执行
 
@@ -165,14 +165,21 @@ Each field on its own line — bold key with inline value. NEVER expand into nes
 
 ### 4.3 Pipeline Dashboard
 
-Show the recommended chain as a pipeline with progress markers. Format depends on whether tasks already exist:
+Show the recommended chain as a numbered list with progress markers. Use **routing table's full skill names** (e.g. `superpowers:brainstorming`, not `brainstorming`).
 
 **Proposing new pipeline** (no old tasks or all completed):
 
 ```md
 ## 下一步建议
 提议 Pipeline：
-brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
+1. superpowers:brainstorming — 需求澄清和设计
+2. codex:rescue — 设计审查
+3. superpowers:writing-plans — 拆分执行计划
+4. superpowers:subagent-driven-development — 开发实施
+5. code-simplifier:code-simplifier(☆) — 代码润色
+6. superpowers:verification-before-completion — 验证
+7. claude-md-management:claude-md-improver(☆) — 文档审计
+8. superpowers:finishing-a-development-branch — 提交 PR
 ```
 
 **Continuing existing pipeline** (has pending tasks):
@@ -180,24 +187,25 @@ brainstorming → codex:rescue → writing-plans → subagent-driven-development
 ```md
 ## 下一步建议
 当前 Pipeline：
-☑ brainstorming — 需求澄清和设计
-☑ codex:rescue — 设计审查
-☐ 整理审查反馈并确认修复范围
-☐ writing-plans — 拆分执行计划
-☐ subagent-driven-development — 开发实施
-☐ code-simplifier(☆) — 代码润色
-☐ verification — 验证
-☐ claude-md-management(☆) — 文档审计
-☐ finishing — 提交 PR
+☑ 1. superpowers:brainstorming — 需求澄清和设计
+☑ 2. codex:rescue — 设计审查
+☐ 3. 整理审查反馈并确认修复范围
+☐ 4. superpowers:writing-plans — 拆分执行计划
+☐ 5. superpowers:subagent-driven-development — 开发实施
+☐ 6. code-simplifier:code-simplifier(☆) — 代码润色
+☐ 7. superpowers:verification-before-completion — 验证
+☐ 8. claude-md-management:claude-md-improver(☆) — 文档审计
+☐ 9. superpowers:finishing-a-development-branch — 提交 PR
 ```
 
 **Format rules**:
+- 使用路由表中的完整 skill 名称（如 `superpowers:brainstorming`，不是 `brainstorming`）
+- 每行带序号：`N. skill-name(☆/★) — one-line description`
+- 衔接任务行：`N. one-line description`（无 skill name 前缀）
 - **(☆)**: Skill only runs when the plugin is installed (from routing table chain assembly)
 - **(★)**: Skill always runs (★ from routing table)
-- **☑/☐**: Visual progress indicator — ☑ for completed tasks, ☐ for pending
+- **☑/☐**: Visual progress indicator（仅 continuing 格式使用）
 - One pipeline per output — if user rejects, adjust and re-propose a single pipeline
-- Skill task line: `skill-name(☆/★) — one-line description`
-- Transition task line: `one-line description`（无 skill name 前缀）
 - If stale pipeline detected (branch switch, git state change, open PR appeared, intent shift): show new proposed pipeline instead of continuing old one
 
 ### 4.4 Final Line — Question-Style Workflow Instruction
@@ -243,9 +251,18 @@ Case A — Dirty worktree, no existing pipeline
 
 ## 下一步建议
 提议 Pipeline：
-finishing-a-development-branch → claude-md-management(☆) → brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
+1. superpowers:finishing-a-development-branch — 处理未提交改动
+2. claude-md-management:claude-md-improver(☆) — 文档审计
+3. superpowers:brainstorming — 新功能需求澄清
+4. codex:rescue — 设计审查
+5. superpowers:writing-plans — 拆分执行计划
+6. superpowers:subagent-driven-development — 开发实施
+7. code-simplifier:code-simplifier(☆) — 代码润色
+8. superpowers:verification-before-completion — 验证
+9. claude-md-management:claude-md-improver(☆) — 文档审计
+10. superpowers:finishing-a-development-branch — 提交 PR
 
-要创建这个 pipeline 并从 finishing-a-development-branch 处理未提交改动开始吗？
+要创建这个 pipeline 并从 superpowers:finishing-a-development-branch 处理未提交改动开始吗？
 ```
 
 Case B — Clean worktree, no existing pipeline
@@ -265,9 +282,16 @@ Case B — Clean worktree, no existing pipeline
 
 ## 下一步建议
 提议 Pipeline：
-brainstorming → codex:rescue → writing-plans → subagent-driven-development → code-simplifier(☆) → verification → claude-md-management(☆) → finishing
+1. superpowers:brainstorming — Data 页面知识图谱 UI 的需求澄清
+2. codex:rescue — 设计审查
+3. superpowers:writing-plans — 拆分执行计划
+4. superpowers:subagent-driven-development — 开发实施
+5. code-simplifier:code-simplifier(☆) — 代码润色
+6. superpowers:verification-before-completion — 验证
+7. claude-md-management:claude-md-improver(☆) — 文档审计
+8. superpowers:finishing-a-development-branch — 提交 PR
 
-要创建这个 pipeline 并从 brainstorming 做 Data 页面知识图谱 UI 的需求澄清开始吗？
+要创建这个 pipeline 并从 superpowers:brainstorming 做 Data 页面知识图谱 UI 的需求澄清开始吗？
 ```
 
 Case C — Re-entering /codesop with existing pipeline
@@ -281,16 +305,16 @@ Case C — Re-entering /codesop with existing pipeline
 
 ## 下一步建议
 当前 Pipeline：
-☑ brainstorming — 需求澄清和设计
-☑ codex:rescue — 设计审查
-☐ writing-plans — 拆分执行计划
-☐ subagent-driven-development — 开发实施
-☐ code-simplifier(☆) — 代码润色
-☐ verification — 验证
-☐ claude-md-management(☆) — 文档审计
-☐ finishing — 提交 PR
+☑ 1. superpowers:brainstorming — 需求澄清和设计
+☑ 2. codex:rescue — 设计审查
+☐ 3. superpowers:writing-plans — 拆分执行计划
+☐ 4. superpowers:subagent-driven-development — 开发实施
+☐ 5. code-simplifier:code-simplifier(☆) — 代码润色
+☐ 6. superpowers:verification-before-completion — 验证
+☐ 7. claude-md-management:claude-md-improver(☆) — 文档审计
+☐ 8. superpowers:finishing-a-development-branch — 提交 PR
 
-要继续当前 pipeline，从 writing-plans 开始拆分执行计划吗？
+要继续当前 pipeline，从 superpowers:writing-plans 开始拆分执行计划吗？
 ```
 
 Intent:
