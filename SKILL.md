@@ -96,22 +96,29 @@ When this skill triggers:
    - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
    - **Judge pipeline relevance**: compare existing pipeline tasks against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old pipeline tasks and re-route from scratch
    - If pipeline is still relevant and has pending/in_progress items:
-     - Mark skills that have been executed as ☑ (advisory, based on conversation history)
-     - Output pipeline status view
+     - Output pipeline status view (§4.3)
      - Single confirmation: "要继续当前 pipeline，从 X 开始做 Y 吗？"
-     - If continue → skip TaskCreate, proceed to execute next skill
+     - If continue → proceed to execute next task
      - If adjust → re-run step 9 with new intent, propose updated pipeline
    - If no pipeline tasks exist:
      - Propose new pipeline based on step 9's chain
      - Single confirmation: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
-     - If confirmed → call TaskCreate for each skill with metadata `{source: "codesop-pipeline"}`, then immediately execute first skill
+     - If confirmed → create tasks per the **Pipeline TaskCreate 规范** below, then immediately execute first task
      - If rejected → adjust and re-propose
 
-**Pipeline Re-entry**: After any routed skill completes execution:
-1. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
-2. Mark the just-completed skill as ☑ (advisory)
-3. Identify the next pending skill in the pipeline
-4. Ask the user: "Pipeline 中下一步是 {next-skill}，要继续吗？"
+**Pipeline TaskCreate 规范**：
+- 链路中每个步骤（skill 或衔接工作）创建一个 task
+- subject：有 skill 写 `{skill-name} — {描述}`，衔接工作写 `{描述}`
+- metadata：skill 任务 `{source: "codesop-pipeline", skill: "skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
+- 逐个顺序创建（不并行），第 N+1 个 `addBlockedBy` 第 N 个的 ID，保证执行顺序
+- 第一个 task 创建后立即执行
+
+**Pipeline Re-entry**: After any routed task completes:
+1. TaskUpdate(taskId, status: "completed") — 标记完成
+2. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
+3. Identify the next pending task (skill or transition)
+4. If next is a skill task → load skill and execute. If transition task → complete the work, TaskUpdate(completed), check next again
+5. Ask the user: "Pipeline 中下一步是 {next-task}，要继续吗？"
 This is a soft reminder, not a hard gate.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
@@ -175,6 +182,7 @@ brainstorming → codex:rescue → writing-plans → subagent-driven-development
 当前 Pipeline：
 ☑ brainstorming — 需求澄清和设计
 ☑ codex:rescue — 设计审查
+☐ 整理审查反馈并确认修复范围
 ☐ writing-plans — 拆分执行计划
 ☐ subagent-driven-development — 开发实施
 ☐ code-simplifier(☆) — 代码润色
@@ -186,9 +194,10 @@ brainstorming → codex:rescue → writing-plans → subagent-driven-development
 **Format rules**:
 - **(☆)**: Skill only runs when the plugin is installed (from routing table chain assembly)
 - **(★)**: Skill always runs (★ from routing table)
-- **☑/☐**: Visual progress indicator — mark completed skills ☑ based on conversation history (advisory)
+- **☑/☐**: Visual progress indicator — ☑ for completed tasks, ☐ for pending
 - One pipeline per output — if user rejects, adjust and re-propose a single pipeline
-- Each line: `skill-name — one-line description`
+- Skill task line: `skill-name(☆/★) — one-line description`
+- Transition task line: `one-line description`（无 skill name 前缀）
 - If stale pipeline detected (branch switch, git state change, open PR appeared, intent shift): show new proposed pipeline instead of continuing old one
 
 ### 4.4 Final Line — Question-Style Workflow Instruction

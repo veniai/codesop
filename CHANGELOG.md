@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.5.1] - 2026-04-14
+
+### Added
+- Pipeline TaskCreate spec in SKILL.md step 10.5: two task types (skill vs transition), subject format rules, metadata convention (skill key presence = type indicator)
+- Sequential creation with addBlockedBy to enforce pipeline order
+- Transition task display format in pipeline dashboard (§4.3)
+- Transition task example in dashboard format rules
+
+### Changed
+- Re-entry rule: replaced advisory ☑ with actual TaskUpdate(completed)
+- Re-entry rule: handles transition tasks (auto-complete, then check next)
+- Re-entry rule: "next pending skill" → "next pending task" (covers both types)
+- §4.3 format rules: transition task line format added, ☑/☐ description clarified
+
 ## [2.5.0] - 2026-04-14
 
 ### Added
