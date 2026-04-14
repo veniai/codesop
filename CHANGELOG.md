@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.2] - 2026-04-14
+
+### Changed
+- Consolidate SKILL.md §4: remove Case A/B/C (3 full examples) → one Complete Example + 3-line scenario rules (net -69 lines)
+- Both §4.3 examples now consistent: same chain, same transition task placement
+- Transition task: "根据审查反馈修订方案" (action, not passive "整理")
+- All pipeline examples use routing table's full skill names with sequential numbering
+- Test assertions updated for new structure (codesop-router.sh, detect-environment.sh)
+
 ## [2.5.1] - 2026-04-14
 
 ### Added
