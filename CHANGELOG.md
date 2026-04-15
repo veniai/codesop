@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.4] - 2026-04-15
+
+### Changed
+- Pipeline task subject 格式加入显式 "Skill" 标记：`使用 {skill-name} Skill 做{描述}`，防止 AI 忽略 Skill tool 调用要求
+- SKILL.md 四处统一更新（step 10.5 spec、§4.3 proposing/continuing、§4.3 format rules、§4.5 complete example）
+
 ## [2.5.3] - 2026-04-14
 
 ### Changed

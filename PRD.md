@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.5.3
-# Last Updated: 2026-04-14
+# Current Version: 2.5.4
+# Last Updated: 2026-04-15
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.5.3 发布 — Pipeline task subject 指令式格式 + 三层注入 anti-inline 规则
+- **最后更新原因**: v2.5.4 发布 — Pipeline task subject 加入显式 "Skill" 标记
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.5.4: Pipeline task subject 加入显式 "Skill" 标记（`使用 X Skill 做Y`）
 - [x] v2.5.3: Pipeline task subject 指令式格式（`使用 X 做Y`）+ 三层注入 anti-inline 规则
 - [x] v2.5.2: §4 输出格式精简（Case A/B/C 合并为 1 个完整示例 + 3 行场景规则，衔接任务一致化，pipeline 编号+完整 skill 名）
 - [x] v2.5.1: Pipeline TaskCreate 规范化（顺序创建+blockedBy、skill/衔接任务 subject 格式、re-entry 实际 TaskUpdate）
@@ -90,6 +91,10 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.5.4 - 2026-04-15 - (Skill 显式标记)**
+- Pipeline task subject 格式加入 "Skill"：`使用 {skill-name} Skill 做{描述}`
+- SKILL.md 四处统一（spec + proposing + continuing + complete example）
 
 ### **V2.5.3 - 2026-04-14 - (Pipeline Task 指令式格式)**
 - Pipeline task subject 从描述式（`X — Y`）改为指令式（`使用 X 做Y`）
