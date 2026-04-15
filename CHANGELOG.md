@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.5] - 2026-04-15
+
+### Fixed
+- SKILL.md step 10.5 spec: 明确 TaskCreate subject 不含 `(☆/★)` 标记，给示例 `code-simplifier:code-simplifier`
+- §4.3 format rules: 拆成 Dashboard 显示行（带标记）和 TaskCreate subject（不带标记）两条规则
+- 防止展示层标记泄漏到执行层导致 skill 调用失败
+
 ## [2.5.4] - 2026-04-15
 
 ### Changed

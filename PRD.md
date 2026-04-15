@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 2.5.4
+# Current Version: 2.5.5
 # Last Updated: 2026-04-15
 # Status: active
 
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.5.4 发布 — Pipeline task subject 加入显式 "Skill" 标记
+- **最后更新原因**: v2.5.5 发布 — 展示层/执行层分离：(☆/★) 标记只留在 dashboard，不进 TaskCreate subject
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
 - [x] v2.5.4: Pipeline task subject 加入显式 "Skill" 标记（`使用 X Skill 做Y`）
 - [x] v2.5.3: Pipeline task subject 指令式格式（`使用 X 做Y`）+ 三层注入 anti-inline 规则
 - [x] v2.5.2: §4 输出格式精简（Case A/B/C 合并为 1 个完整示例 + 3 行场景规则，衔接任务一致化，pipeline 编号+完整 skill 名）
@@ -91,6 +92,11 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.5.5 - 2026-04-15 - (展示层/执行层分离)**
+- step 10.5 spec 明确 TaskCreate subject 不含 (☆/★)，给示例 `code-simplifier:code-simplifier`
+- §4.3 format rules 拆成 Dashboard 显示行（带标记）和 TaskCreate subject（不带标记）
+- 全面审查：路由卡、AGENTS.md、CLAUDE.md 均无标记泄漏
 
 ### **V2.5.4 - 2026-04-15 - (Skill 显式标记)**
 - Pipeline task subject 格式加入 "Skill"：`使用 {skill-name} Skill 做{描述}`

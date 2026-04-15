@@ -109,6 +109,7 @@ When this skill triggers:
 **Pipeline TaskCreate 规范**：
 - 链路中每个步骤（skill 或衔接工作）创建一个 task
 - subject：有 skill 写 `使用 {routing-table-skill-name} Skill 做{描述}`（指令式，明确标注 Skill 强制调用），衔接工作写 `{描述}`
+  - **注意**：`{routing-table-skill-name}` 必须是纯 skill 名称（如 `code-simplifier:code-simplifier`），不含 `(☆/★)` 标记——标记只在 §4.3 dashboard 显示层使用，不能进入 task subject
 - metadata：skill 任务 `{source: "codesop-pipeline", skill: "routing-table-skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
 - 逐个顺序创建（不并行），第 N+1 个 `addBlockedBy` 第 N 个的 ID，保证执行顺序
 - 第一个 task 创建后立即执行
@@ -201,7 +202,8 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 
 **Format rules**:
 - 使用路由表中的完整 skill 名称（如 `superpowers:brainstorming`，不是 `brainstorming`）
-- Skill 任务行：`N. 使用 {skill-name}(☆/★) Skill 做{description}`（指令式，明确标注 Skill 强制调用）
+- Dashboard 显示行：`N. 使用 {skill-name}(☆/★) Skill 做{description}`（给用户看的输出，标记表示条件性）
+- TaskCreate subject：`使用 {skill-name} Skill 做{description}`（给 AI 执行的任务标题，不含 (☆/★) 标记，skill-name 必须可直接传给 Skill tool）
 - 衔接任务行：`N. {description}`（无 skill 前缀，由链路完整性原则动态产生）
 - **(☆)**: 有插件时才走
 - **(★)**: 必走
