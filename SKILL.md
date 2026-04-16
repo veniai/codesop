@@ -92,17 +92,17 @@ When this skill triggers:
    - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
    The routing table defines the candidate set. Validation may only rank or reorder within that set. If no candidate fits, ask the user one focused question — do not invent chains outside the routing table.
 
-10.5. **Check TaskList and manage pipeline.**
+10.5. **Check TaskList and manage task list.**
    - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
-   - **Judge pipeline relevance**: compare existing pipeline tasks against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old pipeline tasks and re-route from scratch
-   - If pipeline is still relevant and has pending/in_progress items:
-     - Output pipeline status view (§4.3)
-     - Single confirmation: "要继续当前 pipeline，从 X 开始做 Y 吗？"
+   - **Judge task list relevance**: compare existing tasks in the task list against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old tasks and re-route from scratch
+   - If task list is still relevant and has pending/in_progress items:
+     - Output task list status view (§4.3)
+     - Single confirmation: "要继续当前 task list，从 X Skill 开始做 Y 吗？"
      - If continue → proceed to execute next task
-     - If adjust → re-run step 9 with new intent, propose updated pipeline
-   - If no pipeline tasks exist:
-     - Propose new pipeline based on step 9's chain
-     - Single confirmation: "要创建这个 pipeline 并从 X 开始做 Y 吗？"
+     - If adjust → re-run step 9 with new intent, propose updated task list
+   - If no relevant tasks exist in the task list:
+     - Propose new task list based on step 9's chain
+     - Single confirmation: "要把这个 pipeline 转成 task list 并从 X Skill 开始做 Y 吗？"
      - If confirmed → create tasks per the **Pipeline TaskCreate 规范** below, then immediately execute first task
      - If rejected → adjust and re-propose
 
@@ -119,7 +119,7 @@ When this skill triggers:
 2. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
 3. Identify the next pending task (skill or transition)
 4. If next is a skill task → load skill and execute. If transition task → complete the work, TaskUpdate(completed), check next again
-5. Ask the user: "Pipeline 中下一步是 {next-task}，要继续吗？"
+5. Ask the user: "Task list 中下一步是 {next-task}，要继续吗？"
 This is a soft reminder, not a hard gate.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
@@ -215,14 +215,14 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 末行必须是疑问句，以"吗？"结尾。用户按 Enter 即可确认。
 
 **三种确认句式**：
-1. **Proposing**: `要创建这个 pipeline 并从 {first-skill} 开始做 {intent} 吗？`
-2. **Continuing**: `要继续当前 pipeline，从 {next-skill} 开始做 {intent} 吗？`
-3. **Stale**: `检测到上下文变化（{reason}），建议新 pipeline。要创建并从 {first-skill} 开始做 {intent} 吗？`
+1. **Proposing**: `要把这个 pipeline 转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
+2. **Continuing**: `要继续当前 task list，从 {next-skill} Skill 开始做 {intent} 吗？`
+3. **Stale**: `检测到上下文变化（{reason}），建议新 pipeline。要转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
 
 **场景适配**：
-- 工作区有未提交改动：pipeline 前置 superpowers:finishing-a-development-branch 处理
-- 重新进入 /codesop：用 ☐/☑ 格式显示当前 pipeline，末行用 continuing 句式
-- 检测到上下文变化：输出新的 proposed pipeline，末行用 stale 句式
+- 工作区有未提交改动：task list 前置 superpowers:finishing-a-development-branch 处理
+- 重新进入 /codesop：用 ☐/☑ 格式显示当前 task list，末行用 continuing 句式
+- 检测到上下文变化：输出新的 proposed task list，末行用 stale 句式
 
 **规则**：
 - 末行是整个输出的最后一行，其后不能有任何内容
@@ -256,7 +256,7 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 8. 使用 claude-md-management:claude-md-improver(☆) Skill 做文档审计
 9. 使用 superpowers:finishing-a-development-branch Skill 做提交 PR
 
-要我创建这个 pipeline 并从 superpowers:writing-plans 开始拆分执行计划吗？
+要把这个 pipeline 转成 task list 并从 superpowers:writing-plans Skill 开始拆分执行计划吗？
 ```
 
 ## 5. Completion Gate

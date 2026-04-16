@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.6.0] - 2026-04-16
+
+### Changed
+- 执行层术语统一为 Claude Code 原生 "task list"（对应 TaskCreate/TaskList/TaskUpdate 工具）
+- 展示层保留 "pipeline" 概念（workflow chain 展示），执行层用 "task list"（AI 实际操作对象）
+- §4.4 末行三种句式：pipeline → task list，加 "Skill" 标注
+- step 10.5 标题/判断/确认/re-entry 全部对齐 task list 术语
+- §4.4 场景适配三条规则同步更新
+- §4.5 Complete Example 末行同步更新
+
 ## [2.5.5] - 2026-04-15
 
 ### Fixed

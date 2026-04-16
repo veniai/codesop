@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.5.5
-# Last Updated: 2026-04-15
+# Current Version: 2.6.0
+# Last Updated: 2026-04-16
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.5.5 发布 — 展示层/执行层分离：(☆/★) 标记只留在 dashboard，不进 TaskCreate subject
+- **最后更新原因**: v2.6.0 发布 — 执行层术语统一为 Claude Code 原生 "task list"
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）
 - [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
 - [x] v2.5.4: Pipeline task subject 加入显式 "Skill" 标记（`使用 X Skill 做Y`）
 - [x] v2.5.3: Pipeline task subject 指令式格式（`使用 X 做Y`）+ 三层注入 anti-inline 规则
@@ -92,6 +93,11 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.6.0 - 2026-04-16 - (Task List 术语统一)**
+- 执行层全面改用 Claude Code 原生 "task list"（TaskCreate/TaskList/TaskUpdate）
+- 展示层保留 "pipeline"（dashboard 显示的 workflow chain 概念）
+- §4.4 末行三种句式 + step 10.5 标题/判断/确认/re-entry + §4.4 场景适配 + §4.5 示例，共 15 处改动
 
 ### **V2.5.5 - 2026-04-15 - (展示层/执行层分离)**
 - step 10.5 spec 明确 TaskCreate subject 不含 (☆/★)，给示例 `code-simplifier:code-simplifier`
@@ -221,7 +227,7 @@
 
 ### 5.4 核心功能
 - **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文并组织下一步工作流链
-- **`/codesop` 收尾格式**: pipeline dashboard 展示链路进度（☐/☑），最后一行输出疑问句式工作流指令（"要创建这个 pipeline 并从 X 开始吗？"），用户按 Enter 即可确认创建 task list 并执行
+- **`/codesop` 收尾格式**: pipeline dashboard 展示链路进度（☐/☑），最后一行输出疑问句式工作流指令（"要把这个 pipeline 转成 task list 并从 X Skill 开始做 Y 吗？"），用户按 Enter 即可确认创建 task list 并执行
 - **Pipeline-to-todo**: 链路组装结果转 TaskCreate 任务列表，失效检测（分支/git/意图变化时自动重新路由），re-entry rule（每个 skill 完成后回看 TaskList 提示下一步）
 - **文档漂移扫描**: 在路由前先判断当前项目的 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
