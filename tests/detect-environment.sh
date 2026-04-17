@@ -42,9 +42,8 @@ assert_contains "$skill_header" 'Use `PRD.md` for long-term orientation and dire
 assert_contains "$skill_header" 'Do not trigger when the user is explicitly invoking a mechanical subcommand'
 assert_not_contains "$skill_full" "recommends the next skill"
 assert_contains "$skill_full" "## 工作台摘要"
-assert_contains "$skill_full" "**长期目标**:"
-assert_contains "$skill_full" "**当前阶段**:"
-assert_contains "$skill_full" "**文档状态**:"
+assert_contains "$skill_full" "**状态**:"
+assert_contains "$skill_full" "**分支**:"
 assert_contains "$skill_full" "## 下一步建议"
 assert_contains "$skill_full" "4. **末行**"
 assert_contains "$skill_full" "Perform a quick document drift scan"

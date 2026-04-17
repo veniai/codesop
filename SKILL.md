@@ -139,18 +139,20 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 
 ```md
 ## 工作台摘要
-**长期目标**: ...
-**当前阶段**: ...
-**当前进度**: ...
-**当前分支**: ...
-**文档状态**: ...
-**阻塞/风险**: ...
-**最近决策**: ...
+**状态**: {分支名} — {一句话描述当前在干什么}
+**分支**: {分支名}（{PR 状态}）
 ```
 
-Each field on its own line — bold key with inline value. NEVER expand into nested bullet lists, indented items, or multi-line field values. NEVER cram multiple fields onto one line.
+如果有需要关注的异常（文档漂移、阻塞/风险、重要决策），加一行：
+```md
+**注意**: {具体内容}
+```
 
-摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事。不要混入其他分支的已完成工作或无关信息。
+**规则**：
+- Exactly 2 fields always shown: **状态** + **分支**
+- **注意** field: only when there's something actionable. 如果文档无漂移、无阻塞、无重要决策 → 不显示。永远不输出"无"
+- Each field on its own line — bold key with inline value
+- 摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事
 
 ### 4.2 Skill Ecosystem (放在 Skill 建议之前)
 
@@ -233,13 +235,9 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 
 ```md
 ## 工作台摘要
-**长期目标**: 让 AI 编码助手拥有统一的 workflow 纪律
-**当前阶段**: feat/p1-graph-ui 开发中
-**当前进度**: 设计已完成，准备开发
-**当前分支**: feat/p1-graph-ui（无 open PR）
-**文档状态**: 未见漂移信号
-**阻塞/风险**: 无
-**最近决策**: 设计审查通过，方案微调了数据流方向
+**状态**: feat/p1-graph-ui — 设计完成，准备开发
+**分支**: feat/p1-graph-ui（无 open PR）
+**注意**: 设计审查微调了数据流方向
 
 ## Skill 生态
 - 路由覆盖：✓ 路由覆盖完整

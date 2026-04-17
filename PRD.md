@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.6.0
-# Last Updated: 2026-04-16
+# Current Version: 2.6.1
+# Last Updated: 2026-04-17
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.6.0 发布 — 执行层术语统一为 Claude Code 原生 "task list"
+- **最后更新原因**: v2.6.1 发布 — 工作台摘要精简（7 字段 → 2 固定 + 1 条件）
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v2.6.1: 工作台摘要精简——7 字段 → 2 固定（状态+分支）+ 1 条件（注意）
 - [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）
 - [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
 - [x] v2.5.4: Pipeline task subject 加入显式 "Skill" 标记（`使用 X Skill 做Y`）
@@ -93,6 +94,10 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V2.6.1 - 2026-04-17 - (工作台摘要精简)**
+- 7 字段 → 2 固定 + 1 条件：**状态**（阶段+进度）、**分支**、**注意**（仅异常）
+- 删除长期目标（PRD 已有）、文档状态/阻塞/决策合并为条件字段
 
 ### **V2.6.0 - 2026-04-16 - (Task List 术语统一)**
 - 执行层全面改用 Claude Code 原生 "task list"（TaskCreate/TaskList/TaskUpdate）
