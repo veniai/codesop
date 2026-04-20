@@ -5,3 +5,6 @@ codesop-workspace/
 codex-review-output.txt
 .codex
 .claude/scheduled_tasks.lock
+
+# Session state (local, never committed)
+.codesop/session-state.md

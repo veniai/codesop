@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 2.6.1
-# Last Updated: 2026-04-17
+# Current Version: 3.0.0
+# Last Updated: 2026-04-20
 # Status: active
 
 ---
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v2.0.0 已发布 (Superpowers-only backbone + curated plugins)
+- **当前里程碑**: v3.0.0 已发布 (Sub-agent execution architecture)
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v2.6.1 发布 — 工作台摘要精简（7 字段 → 2 固定 + 1 条件）
+- **最后更新原因**: v3.0.0 发布 — 子 agent 执行架构（A/B/C 分类、sub-agent dispatch、session state 持久化、compact 提醒）
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.0.0: 子 agent 执行架构——A/B/C 执行分类、sub-agent dispatch + retry、session state 持久化、compact 提醒
 - [x] v2.6.1: 工作台摘要精简——7 字段 → 2 固定（状态+分支）+ 1 条件（注意）
 - [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）
 - [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
@@ -94,6 +95,17 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V3.0.0 - 2026-04-20 - (Sub-agent Execution Architecture)**
+- **目标**: 解决长 pipeline 会话的 context bloat 问题
+- **变更摘要**:
+  - 路由表新增"执行方式"列（A/B/C 分类），所有 skill 统一分类
+  - SKILL.md 新增 sub-agent dispatch 逻辑、retry template、failure strategy
+  - SKILL.md 新增 session-state.md 读写（5 行覆盖模式）
+  - AGENTS.md 模板新增 sub-agent 原则和 compact 提醒规则
+  - setup 新增 statusLine tee 配置（写入 `/tmp/claude-context.json`）
+  - .gitignore 新增 `.codesop/session-state.md`
+  - 测试新增 sub-agent dispatch 和执行方式列断言
 
 ### **V2.6.1 - 2026-04-17 - (工作台摘要精简)**
 - 7 字段 → 2 固定 + 1 条件：**状态**（阶段+进度）、**分支**、**注意**（仅异常）

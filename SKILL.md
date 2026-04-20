@@ -59,14 +59,15 @@ When this skill triggers:
 
 1. Read `AGENTS.md`
 2. Read `PRD.md`
-3. Decide whether fresh repo facts are needed and gather them via direct git/file commands
-4. Decide whether `README.md` is needed
-5. Run ecosystem report:
+3. **Read session state** if `.codesop/session-state.md` exists. Use Last/Next/Note fields to orient routing decisions. If the file doesn't exist, proceed normally.
+4. Decide whether fresh repo facts are needed and gather them via direct git/file commands
+5. Decide whether `README.md` is needed
+6. Run ecosystem report:
    ```bash
    (source ~/codesop/lib/output.sh && source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_routing_coverage) || echo "生态检查跳过: 模块不可用"
    ```
-6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
-7. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts:
+7. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
+8. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts:
    ```bash
    git branch --show-current 2>/dev/null
    git log --oneline -5 2>/dev/null
@@ -75,7 +76,7 @@ When this skill triggers:
    ```
    Use the results to disambiguate the user's intent. The principle is: **when the signal could mean multiple things, observed git state breaks the tie.**
    When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow before recommending roadmap-next work.
-8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
+9. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
    - workflow/tooling/constraints changed → `CLAUDE.md`
    - product state/progress/decisions/scope changed → `PRD.md`
    - user-visible usage/commands/config changed → `README.md`
@@ -84,15 +85,15 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/updates.sh && PROJECT_ROOT="$(pwd)" check_project_document_drift) || echo "当前项目文档检查跳过: 模块不可用"
    ```
-9. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name. When multiple skills match, prefer ★-marked skills (e.g. subagent-driven-development over executing-plans). After assembling the chain, apply the **链路完整性** principle: check for logical gaps between adjacent skills (e.g. code-review without receiving-code-review, feedback without fix-and-verify), and fill them before outputting.
-10. If step 9 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
+10. **Read the routing table** (`~/.claude/codesop-router.md` or `config/codesop-router.md`). Match the user's signal against the "什么时候用" column. Use it as a palette, then compose the matching workflow chain using the **链路组装** rules — do not stop at one skill name. When multiple skills match, prefer ★-marked skills (e.g. subagent-driven-development over executing-plans). After assembling the chain, apply the **链路完整性** principle: check for logical gaps between adjacent skills (e.g. code-review without receiving-code-review, feedback without fix-and-verify), and fill them before outputting.
+11. If step 10 produced a lead skill → read that skill's full content (invoke Skill tool), then assess fit on this scale:
    - ✅ 适合 — skill trigger matches user intent, preconditions met, process appropriate
    - ⚠️ 部分适合 — skill works but has gaps; some preconditions unmet or context partially mismatched
    - ❌ 不适合 — skill mismatch; another skill would be significantly better
    - ❓ 信息不足 — context insufficient to judge fit; skip validation, output routing table recommendation only
    The routing table defines the candidate set. Validation may only rank or reorder within that set. If no candidate fits, ask the user one focused question — do not invent chains outside the routing table.
 
-10.5. **Check TaskList and manage task list.**
+11.5. **Check TaskList and manage task list.**
    - Call TaskList() and filter to tasks with metadata `source: codesop-pipeline` — ignore tasks created by the user or other skills
    - **Judge task list relevance**: compare existing tasks in the task list against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old tasks and re-route from scratch
    - If task list is still relevant and has pending/in_progress items:
@@ -121,6 +122,41 @@ When this skill triggers:
 4. If next is a skill task → load skill and execute. If transition task → complete the work, TaskUpdate(completed), check next again
 5. Ask the user: "Task list 中下一步是 {next-task}，要继续吗？"
 This is a soft reminder, not a hard gate.
+
+**Sub-agent Dispatch**: When executing a pipeline task with a skill:
+1. Check the routing table's "执行方式" column for the skill
+2. If **A-class**: dispatch via Agent tool with the prompt template below
+3. If **B/C-class**: execute in main session via Skill tool directly
+4. After sub-agent returns: update session-state.md, then proceed to re-entry step 1
+
+**Sub-agent Prompt Template**:
+```
+项目根目录: {project_root}
+分支: {branch}
+任务: {task_subject}
+请先读取 CLAUDE.md 了解项目规范，然后通过 Skill tool 调用 {skill_name}。
+执行完成后，简要报告结果（成功/失败 + 关键发现）。
+```
+
+**Retry Template** (for fixable error retry):
+```
+项目根目录: {project_root}
+分支: {branch}
+任务: {task_subject}
+上次执行失败: {error_summary}
+请先读取 CLAUDE.md 了解项目规范，然后通过 Skill tool 调用 {skill_name}。
+注意上述失败信息，避免重复相同错误。执行完成后，简要报告结果。
+```
+
+**Failure Strategy**:
+| Failure type | Response |
+|---|---|
+| Fixable error | Update session-state.md Note, dispatch retry sub-agent with Retry Template |
+| Wrong direction | Dispatch new sub-agent with different approach |
+| Repeated failure (≥2 retries) | Report to user, ask for guidance |
+| Dirty worktree (sub-agent modified files) | `git status` check before retry; report to user if unexpected changes |
+| Sub-agent timeout | Treat as "wrong direction" |
+| Branch changed between retry | Verify current branch matches session-state.md Branch field |
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
@@ -263,7 +299,15 @@ Before the final answer on any routed implementation task:
 
 1. decide whether `CLAUDE.md`, `PRD.md`, and `README.md` need updates
 2. if any document needs updates, invoke `claude-md-management` skill to audit and revise
-3. include this exact block in the final answer:
+3. update `.codesop/session-state.md` (5-line overwrite):
+   ```markdown
+   # Session State
+   Last: {current task + result}
+   Next: {next step or "无"}
+   Branch: {current branch}
+   Note: {exceptions, if any, or "无"}
+   ```
+4. include this exact block in the final answer:
 
 ```md
 ## 文档判定

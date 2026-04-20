@@ -176,18 +176,41 @@ configure_hooks() {
   existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" != "0" ]; then
     echo "  ✓ codesop-router hook already configured"
-    return 0
+  else
+    # Ensure hooks.SessionStart array exists, then append
+    # Use $HOME instead of ~ for cross-shell compatibility
+    if jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]' \
+      "$settings" > "$settings.tmp"; then
+      mv "$settings.tmp" "$settings"
+      echo "  ✓ SessionStart hook configured"
+    else
+      rm -f "$settings.tmp"
+      echo "  ⚠ Failed to update $settings — hook not configured"
+    fi
   fi
 
-  # Ensure hooks.SessionStart array exists, then append
-  # Use $HOME instead of ~ for cross-shell compatibility
-  if jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]' \
-    "$settings" > "$settings.tmp"; then
-    mv "$settings.tmp" "$settings"
-    echo "  ✓ SessionStart hook configured"
+  # Configure statusLine for compact detection
+  # Check if statusLine already has the tee command
+  local statusline_existing
+  statusline_existing=$(jq -r '.statusLine.command // ""' "$settings" 2>/dev/null || echo "")
+  if [[ "$statusline_existing" == *"tee /tmp/claude-context.json"* ]]; then
+    echo "  ✓ statusLine already configured for context tracking"
   else
-    rm -f "$settings.tmp"
-    echo "  ⚠ Failed to update $settings — hook not configured"
+    # Write the exact command string to a temp file, then use jq --rawfile
+    local cmd_tmp
+    cmd_tmp=$(mktemp)
+    cat > "$cmd_tmp" << 'STATUSLINE_EOF'
+cat | tee /tmp/claude-context.json | jq -r '"\(.model.display_name) 已用 \(.context_window.used_percentage // 0)%"'
+STATUSLINE_EOF
+    if jq --rawfile cmd "$cmd_tmp" '.statusLine = ((.statusLine // {}) + {"type":"command","command":$cmd})' \
+      "$settings" > "$settings.tmp"; then
+      mv "$settings.tmp" "$settings"
+      rm -f "$cmd_tmp"
+      echo "  ✓ statusLine configured for context tracking"
+    else
+      rm -f "$cmd_tmp" "$settings.tmp"
+      echo "  ⚠ Failed to configure statusLine"
+    fi
   fi
 }
 
