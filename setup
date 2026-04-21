@@ -190,6 +190,9 @@ configure_hooks() {
   fi
 
   # Configure statusLine for compact detection
+  # NOTE: /tmp/claude-context.json is a global path — concurrent sessions will
+  # overwrite each other. This is acceptable for v3.0 (compact hint is soft, not
+  # critical). Per-session isolation requires statusLine API changes (tracked).
   # Check if statusLine already has the tee command
   local statusline_existing
   statusline_existing=$(jq -r '.statusLine.command // ""' "$settings" 2>/dev/null || echo "")
