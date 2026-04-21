@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- 子 agent 执行架构：A 类 skill 通过 Agent tool 派子 agent 执行，B/C 类在主 session 执行
+- 路由卡新增"执行方式"列（A/B/C 分类）
+- Session state 持久化文件（`.codesop/session-state.md`，5 行覆盖模式）
+- 子 agent 失败重试策略（含脏工作区检查、超时处理、分支变化检测）
+- Compact 提醒：context 超过 80% 且任务未完成时提醒用户 `/compact`
+- Setup 脚本自动配置 statusLine tee 到 `/tmp/claude-context.json`
+
 ## [2.6.1] - 2026-04-17
 
 ### Changed

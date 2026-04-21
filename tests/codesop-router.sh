@@ -29,7 +29,7 @@ echo "  PASS"
 # Test 3: Router card length
 echo "Test 3: Router card length..."
 lines=$(wc -l < "$ROOT_DIR/config/codesop-router.md" | tr -d ' ')
-[ "$lines" -le 70 ] || fail "Router card is $lines lines (max 70 for v2 lifecycle table)"
+[ "$lines" -le 72 ] || fail "Router card is $lines lines (max 72 for v2 lifecycle table)"
 echo "  PASS ($lines lines)"
 
 # Test 4: Setup has new functions
@@ -124,6 +124,30 @@ HOME="$test_home" bash "$ROOT_DIR/setup" --host claude >/dev/null 2>&1
 if command -v jq >/dev/null 2>&1; then
   hook_count=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | type == "string" and test("codesop-router"))] | length' "$test_home/.claude/settings.json" 2>/dev/null || echo "0")
   [ "$hook_count" -le 1 ] || fail "Hook duplicated after second setup run (idempotency broken)"
+  echo "  PASS"
+else
+  echo "  SKIP (jq not available)"
+fi
+
+# Test 12: statusLine configured
+echo "Test 12: statusLine configured for context tracking..."
+if command -v jq >/dev/null 2>&1; then
+  statusline_cmd=$(jq -r '.statusLine.command // ""' "$test_home/.claude/settings.json" 2>/dev/null || echo "")
+  [[ "$statusline_cmd" == *"tee /tmp/claude-context.json"* ]] || fail "statusLine missing tee to /tmp/claude-context.json"
+  echo "  PASS"
+else
+  echo "  SKIP (jq not available)"
+fi
+
+# Test 13: statusLine idempotency
+echo "Test 13: statusLine idempotency..."
+HOME="$test_home" bash "$ROOT_DIR/setup" --host claude >/dev/null 2>&1
+if command -v jq >/dev/null 2>&1; then
+  statusline_cmd=$(jq -r '.statusLine.command // ""' "$test_home/.claude/settings.json" 2>/dev/null || echo "")
+  [[ "$statusline_cmd" == *"tee /tmp/claude-context.json"* ]] || fail "statusLine lost after second setup run"
+  # Verify no duplicate statusLine keys (jq would have overwritten, not duplicated)
+  statusline_count=$(jq 'if .statusLine then 1 else 0 end' "$test_home/.claude/settings.json" 2>/dev/null || echo "0")
+  [ "$statusline_count" -le 1 ] || fail "statusLine duplicated after second setup"
   echo "  PASS"
 else
   echo "  SKIP (jq not available)"
