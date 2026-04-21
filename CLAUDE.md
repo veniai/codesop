@@ -14,6 +14,7 @@ bash codesop init [path]        # Initialize project: AGENTS.md + PRD.md + READM
 bash codesop update             # Update via git pull + setup sync
 
 # Core tests
+bash tests/run_all.sh                 # All tests (unified runner)
 bash tests/codesop-router.sh          # Router card consistency + setup integration
 bash tests/codesop-init-interview.sh  # Init interview tests (34 tests)
 bash tests/detect-environment.sh      # Documentation consistency tests

@@ -3,7 +3,7 @@
 #
 # This module provides functions for generating project templates:
 # - AGENTS.md wrapper template
-# - PRD.md template with full product documentation structure
+# - PRD.md template from external file
 # - Template generation orchestration
 # - Merge suggestions for existing AGENTS.md files
 #
@@ -37,181 +37,18 @@ write_prd_template() {
   local target_dir="$1"
   local project_name="$2"
   local date_today="$3"
-  local tech_stack="$4"
+  local _tech_stack="$4"
   local prd_file="$target_dir/PRD.md"
+  local template_file="$SOURCE_DIR/templates/project/PRD.md"
 
-  cat >"$prd_file" <<EOF
-# Product: $project_name
-# Current Version: 1.0.0
-# Last Updated: $date_today
-# Status: active
+  if [ ! -f "$template_file" ]; then
+    echo "Error: PRD template not found: $template_file" >&2
+    return 1
+  fi
 
----
-
-## 0. 使用说明
-> PRD 只管"造什么"：产品定义、范围、功能、进度、决策。
-> 技术架构/命令/规范 → \`CLAUDE.md\`；安装/部署/测试 → \`README.md\`。
->
-> 更新规则：
-> - 长期稳定信息：直接覆盖更新，保持"当前真实状态"
-> - 短期流动信息：追加记录，保留时间线
-> - 每次任务结束前，检查是否需要更新本文件
-
-## 1. 当前快照
-> 给人和 AI 在 30 秒内看懂"我们在做什么、做到哪了、下一步是什么"。
-
-- **当前阶段**: discovery | planning | implementation | testing | review | release | maintenance
-- **当前目标**: [一句话说明这阶段正在推进什么]
-- **长期目标**: [一句话说明项目最终要解决什么问题]
-- **当前里程碑**: [例如 v0.3 MVP / 支付闭环 / codesop v2]
-- **完成度**: [例如 60%]
-- **下一步**: [最明确的一步动作]
-- **负责人/执行主体**: Human | AI | Mixed
-- **最后更新原因**: [为什么这次更新 PRD]
-
-## 2. 当前进度
-> 路线图/阶段规划只在此处维护，不在 §5 重复。
-
-### 2.1 In Progress
-- [ ] [正在做的事 1]
-
-### 2.2 Next Up
-- [ ] [接下来最该做的事 1]
-
-### 2.3 Blocked
-- 无
-
-### 2.4 Done Recently
-- [x] [最近完成的重要事项 1]
-
-## 3. 最近决策记录
-> 只保留最近 5-10 条仍然影响当前工作的决策。更早的可归档到版本历史。
-
-| Date | Decision | Why | Impact |
-|------|----------|-----|--------|
-| $date_today | [决定了什么] | [为什么这样定] | [影响哪些模块/流程] |
-
-## 4. 版本历史
-> 规则：新版本追加在最上方。超过 5 个版本时，最旧的压缩为一行摘要。
-
-### **V1.0.0 - $date_today - (Initial Release)**
-- 项目初始化，创建 \`PRD.md\` v1.0.0。
-
-## 5. 产品核心规范
-> 此区域始终反映产品"当前真实状态"，每次迭代直接更新。
-
-### 5.1 核心目标
-- [一句话描述产品愿景与目标价值]
-
-### 5.2 用户画像
-- **目标用户**: [描述用户角色]
-- **核心痛点**:
-  - [痛点 1]
-  - [痛点 2]
-
-### 5.3 范围定义
-#### In Scope
-- [当前版本明确要做的内容]
-
-#### Out of Scope
-- [当前明确不做的内容]
-
-### 5.4 核心功能
-- [功能点 1]
-- [功能点 2]
-
-### 5.5 领域实体
-> 描述业务数据模型，不绑定具体框架实现。
-
-- \`User\`: { id, email, name, createdAt }
-- \`[YourEntity]\`: { id, [字段...] }
-
-### 5.6 业务用例
-> 描述业务规则与流程，不写技术实现细节。
-
-- **UC1**: [当...时，系统应...]
-- **UC2**: [只有...才能...]
-
-### 5.7 ASCII UI 原型图（可选）
-> 架构图和系统交互图放 \`CLAUDE.md\`，不放此处。
-
-\`\`\`text
-+------------------------------------------+
-| $project_name                            |
-|                                          |
-| [核心界面元素示意]                        |
-|                                          |
-+------------------------------------------+
-\`\`\`
-
-### 5.8 技术实现规范
-> 仅保留"项目技术决策与质量标准"，不放 AI 代理行为规则。
-
-#### Domain 规范
-
-- D1. 业务规则内聚：核心业务规则在 Domain 定义并可独立测试
-- D2. 接口驱动：数据访问通过抽象接口约束
-- D3. 模型一致性：领域实体字段与术语在全系统保持一致
-
-#### Data / Infra 规范
-
-- S1. 数据一致性：时间、时区、金额精度等规则统一
-- S2. 外部依赖隔离：第三方 API 通过适配层接入，避免污染领域模型
-
-#### Presentation 规范
-
-- P1. 状态管理策略：定义状态边界（页面级/全局）
-- P2. 交互一致性：统一错误提示、加载态、空态策略
-
-#### 验收标准 (Definition of Done)
-
-- [ ] 需求范围内功能全部实现
-- [ ] 核心业务用例可验证（测试/验收用例通过）
-- [ ] 文档同步更新（本 PRD、接口文档、发布说明）
-- [ ] 无阻塞上线的已知缺陷（或明确风险与补救计划）
-
-## 6. 当前风险与假设
-### 6.1 Risks
-- [风险 1]
-
-### 6.2 Assumptions
-- [假设 1]
-
-## 7. 工作日志
-> 只保留最近 5 条。更早的删除——git log 是权威来源。
-> 每条简短、事实化：背景 → 动作 → 结果 → 后续。
-
-### $date_today 10:00 - [标题]
-- **背景**: [为什么做这一步]
-- **动作**: [做了什么]
-- **结果**: [产出/变更]
-- **后续**: [下一步是什么]
-
-## 8. 并行开发记录
-
-> **规则**：worktree 中只能编辑当前分支名的子节；全局内容只能回 main 修改。
-> 分支合并后，将结论吸收到正式章节，删除该分支子节。每个子节只记 3 项：进展、卡点、是否影响全局设计。
-
-<!-- 活跃分支在此添加子节，格式：
-### <branch-name>
-- **进展**：
-- **卡点**：
-- **影响全局**：是/否，说明：
--->
-
-## 9. 可选扩展（按需启用）
-
-### 9.1 依赖注入规范 (DI)（可选）
-
-- 依赖关系统一在组合根（Composition Root）装配
-- 模块间通过接口协作，降低耦合
-
-### 9.2 防腐层规范 (Anti-Corruption Layer)（可选）
-
-- 外部 DTO 与内部 Entity 分离
-- 通过 mapper/adapter 做模型转换
-- 第三方 API 变更优先收敛在 Data/Infra 层
-EOF
+  local escaped_name
+  escaped_name=$(printf '%s\n' "$project_name" | sed 's/[&/\]/\\&/g')
+  sed -e "s/{PROJECT_NAME}/$escaped_name/g" -e "s/{DATE}/$date_today/g" "$template_file" > "$prd_file"
 }
 
 generate_templates() {

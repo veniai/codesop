@@ -1,0 +1,14 @@
+source-path=lib
+
+# Dynamic source patterns (modules loaded at runtime)
+disable=SC1090
+disable=SC1091
+
+# Cross-module global variables (_DET_*, etc.)
+disable=SC2154
+
+# Unused variables that may be used by callers
+disable=SC2034
+
+# Trap functions reachable despite static analysis
+disable=SC2317
