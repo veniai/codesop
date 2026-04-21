@@ -395,22 +395,15 @@ ensure_new_init_env() {
     return 0
   fi
 
-  # Use python3 to safely add env key
-  if command -v python3 &>/dev/null; then
-    python3 -c "
-import json, sys
-with open('$settings_file') as f:
-    data = json.load(f)
-if 'env' not in data:
-    data['env'] = {}
-data['env']['CLAUDE_CODE_NEW_INIT'] = '1'
-with open('$settings_file', 'w') as f:
-    json.dump(data, f, indent=2)
-    f.write('\n')
-" 2>/dev/null
-    if [ $? -eq 0 ]; then
+  # Use jq to safely add env key
+  if command -v jq >/dev/null 2>&1; then
+    if jq '.env = ((.env | if type == "object" then . else {} end) + {"CLAUDE_CODE_NEW_INIT": "1"})' \
+      "$settings_file" > "$settings_file.tmp" 2>/dev/null; then
+      mv "$settings_file.tmp" "$settings_file"
       echo "  ✓ 已启用 CLAUDE_CODE_NEW_INIT"
       return 0
+    else
+      rm -f "$settings_file.tmp"
     fi
   fi
 

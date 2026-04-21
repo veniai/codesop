@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.0.0
-# Last Updated: 2026-04-20
+# Current Version: 3.0.1
+# Last Updated: 2026-04-21
 # Status: active
 
 ---
@@ -24,7 +24,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.0.0 发布 — 子 agent 执行架构（A/B/C 分类、sub-agent dispatch、session state 持久化、compact 提醒）
+- **最后更新原因**: v3.0.1 发布 — 开源基建补全（CI、shellcheck、测试统一入口、PRD 模板去重、README 国际化）
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.0.1: 开源基建补全——tests/run_all.sh、PRD 模板去重、Python→jq、GitHub Actions CI + shellcheck、skill.json 补字段、README 国际化
 - [x] v3.0.0: 子 agent 执行架构——A/B/C 执行分类、sub-agent dispatch + retry、session state 持久化、compact 提醒
 - [x] v2.6.1: 工作台摘要精简——7 字段 → 2 固定（状态+分支）+ 1 条件（注意）
 - [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）

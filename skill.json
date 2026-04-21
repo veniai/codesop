@@ -1,11 +1,14 @@
 {
   "name": "codesop",
   "displayName": "codesop",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Project workbench and workflow-chain router. Proactively invoke when user asks what to do next, wants status, needs workflow guidance, or describes a feature/bug/refactor without specifying a workflow. (codesop)",
   "author": "veniai",
   "repository": "https://github.com/veniai/codesop",
   "license": "MIT",
+  "keywords": ["claude-code", "codex", "ai-coding", "workflow", "skill-router"],
+  "homepage": "https://github.com/veniai/codesop#readme",
+  "bugs": "https://github.com/veniai/codesop/issues",
   "commands": [
     "init",
     "update"
