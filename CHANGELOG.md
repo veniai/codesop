@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-04-22
+
+### Changed
+- 路由表简化：去掉 B/C 分类，只保留 A 标记；未标 A 的 skill 不限制执行方式
+- codex:review、codex:adversarial-review、receiving-code-review 不再标 A（需用户手动输入或需要交互）
+- AGENTS.md 和 SKILL.md 的分类描述从"A/B/C 三类"简化为"标 A 的派子 agent，其余不限制"
+
 ## [3.0.1] - 2026-04-21
 
 ### Added

@@ -126,7 +126,7 @@ This is a soft reminder, not a hard gate.
 **Sub-agent Dispatch**: When executing a pipeline task with a skill:
 1. Check the routing table's "执行方式" column for the skill
 2. If **A-class**: dispatch via Agent tool with the prompt template below
-3. If **B/C-class**: execute in main session via Skill tool directly
+3. If not A-class: execute in main session via Skill tool directly
 4. After sub-agent returns: update session-state.md, then proceed to re-entry step 1
 
 **Sub-agent Prompt Template**:

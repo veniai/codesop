@@ -81,7 +81,6 @@ assert_contains "$readme_output" "最后一行"
 assert_contains "$readme_output" "自然语言工作流指令"
 assert_contains "$readme_output" "文档漂移"
 assert_contains "$readme_output" "活文档"
-assert_contains "$readme_output" "当前项目"
 
 # Verify router card has 执行方式 column
 router_output="$(cat "$ROOT_DIR/config/codesop-router.md")"

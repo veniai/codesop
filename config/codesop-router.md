@@ -8,17 +8,17 @@
 | 大类 | 优选 | 来源 | Skill | 执行方式 | 什么时候用 |
 |------|------|------|-------|----------|-----------|
 | **1. 需求分析与设计** | | | | | |
-| | ★ | sp | superpowers:brainstorming | C | 任何新功能/改动前：理解需求→澄清问题→出设计方案→写 spec→spec 自审→用户审阅 |
+| | ★ | sp | superpowers:brainstorming | | 任何新功能/改动前：理解需求→澄清问题→出设计方案→写 spec→spec 自审→用户审阅 |
 | | ★ | plugin | codex:rescue | A | spec 完成后的独立设计审查（双 AI 设计审查，必走） |
-| | ★ | plugin | frontend-design:frontend-design | C | 做前端 UI 时：强制设计思维阶段，拒绝通用 AI 审美，独特的排版/配色/动效 |
+| | ★ | plugin | frontend-design:frontend-design | | 做前端 UI 时：强制设计思维阶段，拒绝通用 AI 审美，独特的排版/配色/动效 |
 | **2. 生成执行文档** | | | | | |
 | | ★ | sp | superpowers:writing-plans | A | spec 已批准，拆成可执行的分步任务 |
 | **3. 开发与执行** | | | | | |
-| | ★ | sp | superpowers:using-git-worktrees | C | 开发前创建隔离工作区 |
-| | ★ | sp | superpowers:subagent-driven-development | B | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
+| | ★ | sp | superpowers:using-git-worktrees | | 开发前创建隔离工作区 |
+| | ★ | sp | superpowers:subagent-driven-development | | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
 | | | plugin | code-simplifier:code-simplifier | A | 开发完成后、验证前：自动检查最近修改的代码，优化可读性和结构（dev → simplifier → verification 链路） |
-| | | sp | superpowers:dispatching-parallel-agents | B | 2+ 个完全独立任务并行加速时（仅 plan 已拆出独立任务后触发） |
-| | | sp | superpowers:requesting-code-review | B | 开发中完成一个功能后提前让 AI 审一遍 |
+| | | sp | superpowers:dispatching-parallel-agents | | 2+ 个完全独立任务并行加速时（仅 plan 已拆出独立任务后触发） |
+| | | sp | superpowers:requesting-code-review | | 开发中完成一个功能后提前让 AI 审一遍 |
 | **4. 测试与验证** | | | | | |
 | | ★ | sp | superpowers:verification-before-completion | A | 声明完成前必须运行验证命令确认输出 |
 | | ★ | plugin | claude-md-management:claude-md-improver | A | 验证通过后、提交前：审计 CLAUDE.md/PRD.md/README.md 是否需要更新（防止文档落后于代码） |
@@ -28,13 +28,13 @@
 | **6. 代码审查** | | | | | |
 | | ★ | plugin | code-review:code-review | A | PR 提交后自动审查：5 agent 并行 + 置信度评分 + 自动发评论 |
 | | ★ | plugin | codex:rescue | A | code-review 之后的独立第二意见（双 AI 审查，必走） |
-| | | sp | superpowers:receiving-code-review | A | 收到 code-review 评论后，先技术评估再执行 |
+| | | sp | superpowers:receiving-code-review | | 收到 code-review 评论后，先技术评估再执行 |
 | **7. 浏览器工具** | | | | | |
 | | | plugin | playwright | A | 页面交互与自动化测试：导航/截图/填表/点击/E2E 流程 |
 | | | plugin | chrome-devtools-mcp | A | 浏览器诊断：性能分析(LCP)/a11y 审计/CDP 调试/渲染排查 |
 | | | skill | browser-use | A | 需要 cloud browser/tunnel/登录态时的补充 |
 | **8. 调试与调查** | | | | | |
-| | ★ | sp | superpowers:systematic-debugging | C | 遇到 bug/测试失败/异常行为时，假设驱动逐步排查（修 bug 必走） |
+| | ★ | sp | superpowers:systematic-debugging | | 遇到 bug/测试失败/异常行为时，假设驱动逐步排查（修 bug 必走） |
 | **9. 文档管理** | | | | | |
 | | | plugin | claude-md-management:claude-md-improver | A | CLAUDE.md 质量审计：6 维度评分→出报告→定向修复 |
 | | | plugin | context7 | A | 查询第三方库/框架的最新文档和代码示例 |
@@ -42,13 +42,13 @@
 | | ★ | plugin | skill-creator:skill-creator | A | Skill 全生命周期：创建→测试→基准评估→盲测 A/B→描述优化 |
 | | | sp | superpowers:writing-skills | A | 轻量备选：创建/编辑 skill 的流程指导 |
 | **11. 项目编排** | | | | | |
-| | ★ | skill | codesop | C | 项目工作台：上下文恢复→路由推荐→fit 验证→完成关卡 |
+| | ★ | skill | codesop | | 项目工作台：上下文恢复→路由推荐→fit 验证→完成关卡 |
 | **12. 通讯桥梁** | | | | | |
-| | | skill | claude-to-im | C | Claude Code 桥接到 Telegram/Discord/飞书/QQ/微信 |
+| | | skill | claude-to-im | | Claude Code 桥接到 Telegram/Discord/飞书/QQ/微信 |
 | **13. 应急接管** | | | | | |
 | | | plugin | codex:rescue | A | 用户说"让 codex 看看/交给 codex/第二意见"、线程卡住、需要换个智能体时——AI 可自动调用的唯一 codex 执行命令 |
-| | | plugin | codex:review | A | 需要 OpenAI 第二意见审查代码 diff 时（独立视角）⚠️ 需用户手动输入 |
-| | | plugin | codex:adversarial-review | A | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |
+| | | plugin | codex:review | | 需要 OpenAI 第二意见审查代码 diff 时（独立视角）⚠️ 需用户手动输入 |
+| | | plugin | codex:adversarial-review | | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |
 
 ### 链路组装（路由表是链路唯一真相源）
 所有链路必须应用以下插入规则（☆=有插件时走）：
