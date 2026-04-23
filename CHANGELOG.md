@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-04-23
+
+### Changed
+- 移除子 agent 执行架构：去掉 A/B/C 分类、Sub-agent Dispatch、session-state、Retry Template
+- 路由表恢复到 v2.6.1 状态（无执行方式列），SKILL.md 恢复到 v2.6.1 状态
+- 保留 v3.0.0 的好东西：statusLine 配置（context 追踪）、compact 提醒（AGENTS.md）
+- 保留 v3.0.1 全部改动：统一测试入口、PRD 模板去重、Python→jq、README 国际化、skill.json 补字段
+
 ## [3.0.2] - 2026-04-22
 
 ### Changed

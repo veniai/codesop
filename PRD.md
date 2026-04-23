@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.0.2
-# Last Updated: 2026-04-22
+# Current Version: 3.1.0
+# Last Updated: 2026-04-23
 # Status: active
 
 ---
@@ -38,9 +38,10 @@
 - 无
 
 ### 2.4 Done Recently
-- [x] v3.0.2: 路由表分类简化——去掉 B/C，只保留 A 标记；未标 A 的 skill 不限制执行方式
-- [x] v3.0.1: 开源基建补全——tests/run_all.sh、PRD 模板去重、Python→jq、GitHub Actions CI + shellcheck、skill.json 补字段、README 国际化
-- [x] v3.0.0: 子 agent 执行架构——A/B/C 执行分类、sub-agent dispatch + retry、session state 持久化、compact 提醒
+- [x] v3.1.0: 移除子 agent 执行架构——去掉 A/B/C 分类、Sub-agent Dispatch、session-state；保留 statusLine + compact 提醒 + v3.0.1 开源基建
+- [x] v3.0.2: 路由表分类简化——去掉 B/C，只保留 A 标记（已被 v3.1.0 完全取代）
+- [x] v3.0.1: 开源基建补全——tests/run_all.sh、PRD 模板去重、Python→jq、skill.json 补字段、README 国际化
+- [x] v3.0.0: 子 agent 执行架构——已被 v3.1.0 移除（冷启动延迟问题）
 - [x] v2.6.1: 工作台摘要精简——7 字段 → 2 固定（状态+分支）+ 1 条件（注意）
 - [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）
 - [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
