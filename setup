@@ -148,6 +148,41 @@ install_router_card() {
   echo "  ✓ Router card: $dst"
 }
 
+patch_skills() {
+  local plugin_dir
+  plugin_dir=$(find "$HOME/.claude/plugins/cache/claude-plugins-official/superpowers" -maxdepth 1 -type d -name "[0-9]*" 2>/dev/null | sort -V | tail -1)
+  if [ -z "$plugin_dir" ]; then
+    return 0
+  fi
+
+  local patches_dir="$SOURCE_DIR/patches/superpowers"
+  local patched=0
+
+  # writing-plans: remove Execution Handoff
+  local wp="$plugin_dir/skills/writing-plans/SKILL.md"
+  local wp_patch="$patches_dir/writing-plans-SKILL.md"
+  if [ -f "$wp" ] && [ -f "$wp_patch" ]; then
+    if ! diff -q "$wp" "$wp_patch" >/dev/null 2>&1; then
+      cp "$wp_patch" "$wp"
+      patched=$((patched + 1))
+    fi
+  fi
+
+  # finishing-a-development-branch: skip options, go straight to PR
+  local fb="$plugin_dir/skills/finishing-a-development-branch/SKILL.md"
+  local fb_patch="$patches_dir/finishing-a-development-branch-SKILL.md"
+  if [ -f "$fb" ] && [ -f "$fb_patch" ]; then
+    if ! diff -q "$fb" "$fb_patch" >/dev/null 2>&1; then
+      cp "$fb_patch" "$fb"
+      patched=$((patched + 1))
+    fi
+  fi
+
+  if [ "$patched" -gt 0 ]; then
+    echo "  ✓ Skill patches applied ($patched files)"
+  fi
+}
+
 configure_hooks() {
   local settings="$HOME/.claude/settings.json"
 
@@ -247,6 +282,7 @@ install_claude() {
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"
   install_router_card
   configure_hooks
+  patch_skills
 }
 
 install_opencode() {
