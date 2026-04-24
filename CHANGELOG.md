@@ -2,13 +2,19 @@
 
 ## [Unreleased]
 
-## [3.1.0] - 2026-04-23
+## [3.1.0] - 2026-04-24
 
 ### Changed
 - 移除子 agent 执行架构：去掉 A/B/C 分类、Sub-agent Dispatch、session-state、Retry Template
 - 路由表恢复到 v2.6.1 状态（无执行方式列），SKILL.md 恢复到 v2.6.1 状态
 - 保留 v3.0.0 的好东西：statusLine 配置（context 追踪）、compact 提醒（AGENTS.md）
 - 保留 v3.0.1 全部改动：统一测试入口、PRD 模板去重、Python→jq、README 国际化、skill.json 补字段
+
+### Added
+- Skill patch 机制：`patches/superpowers/` 目录存放修改后的 skill 文件，setup 自动同步
+  - writing-plans：删除 Execution Handoff（pipeline re-entry 处理下一步）
+  - finishing-a-development-branch：跳过 4 选项菜单，直接 push + PR
+- worktree 条件化：从 ★（必走）改为仅用户明确要求时插入，默认只开分支
 
 ## [3.0.2] - 2026-04-22
 
@@ -20,18 +26,7 @@
 ## [3.0.1] - 2026-04-21
 
 ### Added
-- 子 agent 执行架构：A 类 skill 通过 Agent tool 派子 agent 执行，B/C 类在主 session 执行
-- 路由卡新增"执行方式"列（A/B/C 分类）
-- Session state 持久化文件（`.codesop/session-state.md`，5 行覆盖模式）
-- 子 agent 失败重试策略（含脏工作区检查、超时处理、分支变化检测）
-- Compact 提醒：context 超过 80% 且任务未完成时提醒用户 `/compact`
-- Setup 脚本自动配置 statusLine tee 到 `/tmp/claude-context.json`
-
-## [3.0.1] - 2026-04-21
-
-### Added
 - `tests/run_all.sh` 统一测试入口（9 个套件一键运行）
-- GitHub Actions CI（shellcheck + 全部测试）
 - `.shellcheckrc` 静态分析配置
 - `skill.json` 补充 keywords/homepage/bugs 字段
 - README 英文版（README.en.md）+ 语言切换链接
@@ -40,6 +35,16 @@
 - PRD 模板去重：`templates.sh` 内联模板改为读外部文件 `templates/project/PRD.md`
 - `init-interview.sh` Python JSON 操作改用 jq（和 setup 保持一致）
 - README 改为纯中文（英文版见 README.en.md）
+
+## [3.0.0] - 2026-04-20
+
+### Added
+- 子 agent 执行架构：A 类 skill 通过 Agent tool 派子 agent 执行，B/C 类在主 session 执行
+- 路由卡新增"执行方式"列（A/B/C 分类）
+- Session state 持久化文件（`.codesop/session-state.md`，5 行覆盖模式）
+- 子 agent 失败重试策略（含脏工作区检查、超时处理、分支变化检测）
+- Compact 提醒：context 超过 80% 且任务未完成时提醒用户 `/compact`
+- Setup 脚本自动配置 statusLine tee 到 `/tmp/claude-context.json`
 
 ## [2.6.1] - 2026-04-17
 

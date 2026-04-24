@@ -101,7 +101,7 @@ The routing table (`config/codesop-router.md`) is the single source of truth for
 
 | Scenario | Chain |
 |----------|-------|
-| New feature | brainstorming → codex:rescue → writing-plans → worktree → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
+| New feature | brainstorming → codex:rescue → writing-plans → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
 | Bug fix | systematic-debugging → verification → ☆claude-md → finishing |
 | Small change | subagent-dev → ☆simplifier → verification → finishing |
 | Review feedback | receiving-code-review → fix → verification → reply |

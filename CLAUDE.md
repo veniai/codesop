@@ -58,7 +58,9 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   └── superpowers/
 │       ├── specs/          # Approved design documents
 │       └── plans/          # Implementation plans
-├── setup                   # Host-aware installation script (router card + hook config)
+├── patches/                # Skill patches applied by setup on sync
+│   └── superpowers/        # Modified superpowers skill files
+├── setup                   # Host-aware installation script (router card + hook config + skill patches)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)
 ├── CLAUDE.md               # This file
@@ -115,6 +117,8 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `CORE_PLUGINS` / `OPTIONAL_PLUGINS` / `OPTIONAL_SKILLS` arrays in `lib/updates.sh` define the plugin dependency tiers; `has_plugin()` in `lib/detection.sh` is the central detection helper
 - `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback (e.g. browser-use installed via pip, not as skill directory)
+- `patch_skills()` in setup overwrites third-party skill files from `patches/superpowers/` — logic is "different from ours → overwrite, same → skip". Plugin updates will be re-patched on next `setup` run
+- `find` on non-existent directory returns exit 1; under `set -e`, always append `|| true` to `find` in command substitutions
 
 ## File References
 
