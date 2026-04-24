@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.1.0
-# Last Updated: 2026-04-23
+# Current Version: 3.3.1
+# Last Updated: 2026-04-24
 # Status: active
 
 ---
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.0.0 已发布 (Sub-agent execution architecture)
+- **当前里程碑**: v3.3.1 已发布 (skill patch 机制 + worktree 条件化)
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.0.1 发布 — 开源基建补全（CI、shellcheck、测试统一入口、PRD 模板去重、README 国际化）
+- **最后更新原因**: v3.3.1 发布 — skill patch 机制、worktree 条件化
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.3.1: skill patch 机制（writing-plans + finishing-branch）、worktree 条件化、setup set -e 修复
 - [x] v3.1.0: 移除子 agent 执行架构——去掉 A/B/C 分类、Sub-agent Dispatch、session-state；保留 statusLine + compact 提醒 + v3.0.1 开源基建
 - [x] v3.0.2: 路由表分类简化——去掉 B/C，只保留 A 标记（已被 v3.1.0 完全取代）
 - [x] v3.0.1: 开源基建补全——tests/run_all.sh、PRD 模板去重、Python→jq、skill.json 补字段、README 国际化
@@ -98,6 +99,21 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V3.3.1 - 2026-04-24 - (Skill Patch + Worktree 条件化)**
+- **目标**: 修复 writing-plans/finishing-branch 阻塞 pipeline 的问题，worktree 退出默认链路
+- **变更摘要**:
+  - 新增 skill patch 机制：writing-plans 删除 Execution Handoff、finishing-branch 直接 push+PR
+  - worktree 从必走改为仅用户明确要求时插入
+  - setup 修复 `set -e` 下 `find` 不存在目录的退出码问题
+
+### **V3.1.0 - 2026-04-24 - (回退子 Agent 架构)**
+- **目标**: 回退冷启动延迟严重的子 agent 执行架构，保留 statusLine/compact 等好东西
+- **变更摘要**:
+  - 路由表和 SKILL.md 恢复到 v2.6.1 状态
+  - 新增 skill patch 机制：writing-plans 删除 Execution Handoff、finishing-branch 直接 push+PR
+  - worktree 从必走改为仅用户明确要求时插入
+  - setup 修复 `set -e` 下 `find` 不存在目录的退出码问题
 
 ### **V3.0.0 - 2026-04-20 - (Sub-agent Execution Architecture)**
 - **目标**: 解决长 pipeline 会话的 context bloat 问题
