@@ -130,3 +130,11 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+
+## Pipeline Continuation
+
+**Do not stop.** After self-review:
+1. TaskUpdate(current task, completed)
+2. TaskList → find next pending task (source: codesop-pipeline) → execute immediately
+
+The task list was already approved. Proceed without asking.

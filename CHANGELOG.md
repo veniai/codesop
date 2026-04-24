@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [3.3.3] - 2026-04-24
+
+### Changed
+- writing-plans skill patch 新增 Pipeline Continuation 触发器：Self-Review 后自动 TaskUpdate + TaskList → 下一个 task，不停止询问
+- 根因：writing-plans 是唯一删除了原版 ending（Execution Handoff）但没加替代指导的 skill，导致 Claude 完成后不知道下一步
+- setup patch_skills() 改用 find_superpowers_plugin_path() 替代硬编码路径（Codex P2 review）
+
 ## [3.3.2] - 2026-04-24
 
 ### Changed
