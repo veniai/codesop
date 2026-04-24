@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [3.1.0] - 2026-04-24
+## [3.3.1] - 2026-04-24
 
 ### Changed
 - 移除子 agent 执行架构：去掉 A/B/C 分类、Sub-agent Dispatch、session-state、Retry Template
