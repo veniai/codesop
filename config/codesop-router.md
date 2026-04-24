@@ -14,7 +14,7 @@
 | **2. 生成执行文档** | | | | |
 | | ★ | sp | superpowers:writing-plans | spec 已批准，拆成可执行的分步任务 |
 | **3. 开发与执行** | | | | |
-| | | sp | superpowers:using-git-worktrees | 较大功能开发且需要隔离时：创建独立工作区 |
+| | | sp | superpowers:using-git-worktrees | 用户明确要求隔离工作区时使用，默认只开分支 |
 | | ★ | sp | superpowers:subagent-driven-development | 日常首选，内含 TDD + 两阶段 review + 自动 finishing |
 | | | plugin | code-simplifier:code-simplifier | 开发完成后、验证前：自动检查最近修改的代码，优化可读性和结构（dev → simplifier → verification 链路） |
 | | | sp | superpowers:dispatching-parallel-agents | 2+ 个完全独立任务并行加速时（仅 plan 已拆出独立任务后触发） |
@@ -52,7 +52,7 @@
 
 ### 链路组装（路由表是链路唯一真相源）
 所有链路必须应用以下插入规则（☆=有插件时走）：
-开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue | 计划后、开发前 → 仅 main/master 且任务较大时插入 using-git-worktrees
+开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue | using-git-worktrees 仅用户明确要求时插入，默认只开分支
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
