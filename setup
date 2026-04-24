@@ -148,9 +148,23 @@ install_router_card() {
   echo "  ✓ Router card: $dst"
 }
 
+find_superpowers_plugin_path() {
+  local marketplace_dir version_dir
+  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
+    [ -d "$marketplace_dir" ] || continue
+    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
+    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ]; then
+      [ -f "$version_dir/.orphaned_at" ] && continue
+      printf '%s\n' "$version_dir"
+      return 0
+    fi
+  done
+  return 1
+}
+
 patch_skills() {
   local plugin_dir
-  plugin_dir=$(find "$HOME/.claude/plugins/cache/claude-plugins-official/superpowers" -maxdepth 1 -type d -name "[0-9]*" 2>/dev/null | sort -V | tail -1 || true)
+  plugin_dir=$(find_superpowers_plugin_path || true)
   if [ -z "$plugin_dir" ]; then
     return 0
   fi
