@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.3.2] - 2026-04-24
+
+### Changed
+- Pipeline auto re-entry：task list 确认后全程自动执行，skill 完成后不再问"要不要继续"
+- SKILL.md re-entry 从"Ask the user"改为 auto-proceed
+- SKILL.md §4.4 删除 Continuing 句式（保留 Proposing 首次确认 + Stale 上下文变化确认）
+- AGENTS.md Skill 纪律补 pipeline auto re-entry 规则
+- PRD/CLAUDE.md 描述同步更新
+
 ## [3.3.1] - 2026-04-24
 
 ### Changed

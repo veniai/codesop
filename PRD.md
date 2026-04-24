@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 3.3.1
+# Current Version: 3.3.2
 # Last Updated: 2026-04-24
 # Status: active
 
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.3.1 已发布 (skill patch 机制 + worktree 条件化)
+- **当前里程碑**: v3.3.2 已发布 (pipeline auto re-entry + skill patch + worktree 条件化)
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.3.1 发布 — skill patch 机制、worktree 条件化
+- **最后更新原因**: v3.3.2 发布 — pipeline auto re-entry（task 确认后全程自动执行）
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.3.2: pipeline auto re-entry — task list 确认后全程自动执行，不逐个询问
 - [x] v3.3.1: skill patch 机制（writing-plans + finishing-branch）、worktree 条件化、setup set -e 修复
 - [x] v3.1.0: 移除子 agent 执行架构——去掉 A/B/C 分类、Sub-agent Dispatch、session-state；保留 statusLine + compact 提醒 + v3.0.1 开源基建
 - [x] v3.0.2: 路由表分类简化——去掉 B/C，只保留 A 标记（已被 v3.1.0 完全取代）
@@ -99,6 +100,13 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V3.3.2 - 2026-04-24 - (Pipeline Auto Re-entry)**
+- **目标**: pipeline task list 确认后全程自动执行，不逐个询问
+- **变更摘要**:
+  - SKILL.md: re-entry 从"Ask the user"改为 auto-proceed；§4.4 Continuing 句式删除，保留 Proposing/Stale
+  - AGENTS.md: Skill 纪律补 pipeline auto re-entry 规则
+  - PRD/CLAUDE.md: 描述同步更新
 
 ### **V3.3.1 - 2026-04-24 - (Skill Patch + Worktree 条件化)**
 - **目标**: 修复 writing-plans/finishing-branch 阻塞 pipeline 的问题，worktree 退出默认链路
@@ -263,8 +271,8 @@
 
 ### 5.4 核心功能
 - **`/codesop` skill**: 工作台摘要 + 工作流路由，读取项目上下文并组织下一步工作流链
-- **`/codesop` 收尾格式**: pipeline dashboard 展示链路进度（☐/☑），最后一行输出疑问句式工作流指令（"要把这个 pipeline 转成 task list 并从 X Skill 开始做 Y 吗？"），用户按 Enter 即可确认创建 task list 并执行
-- **Pipeline-to-todo**: 链路组装结果转 TaskCreate 任务列表，失效检测（分支/git/意图变化时自动重新路由），re-entry rule（每个 skill 完成后回看 TaskList 提示下一步）
+- **`/codesop` 收尾格式**: pipeline dashboard 展示链路进度（☐/☑），首次确认时末行输出疑问句（"要把这个 pipeline 转成 task list 并从 X Skill 开始做 Y 吗？"），用户按 Enter 确认后全程自动执行
+- **Pipeline-to-todo**: 链路组装结果转 TaskCreate 任务列表，失效检测（分支/git/意图变化时自动重新路由），auto re-entry（每个 task 完成后自动执行下一个，不逐个询问）
 - **文档漂移扫描**: 在路由前先判断当前项目的 `CLAUDE.md` / `PRD.md` / `README.md` 是否已经落后于代码与当前状态，并把必要的文档更新编进下一步工作流链
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`；已有项目自动进入适配模式，对比模板差异由用户确认

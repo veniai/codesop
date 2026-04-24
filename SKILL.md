@@ -97,8 +97,7 @@ When this skill triggers:
    - **Judge task list relevance**: compare existing tasks in the task list against current project context (PRD state, git state, user intent). If they no longer align, delete ALL old tasks and re-route from scratch
    - If task list is still relevant and has pending/in_progress items:
      - Output task list status view (§4.3)
-     - Single confirmation: "要继续当前 task list，从 X Skill 开始做 Y 吗？"
-     - If continue → proceed to execute next task
+     - 自动执行下一个 pending task（已确认的 task list 等于授权全程执行）
      - If adjust → re-run step 9 with new intent, propose updated task list
    - If no relevant tasks exist in the task list:
      - Propose new task list based on step 9's chain
@@ -119,8 +118,7 @@ When this skill triggers:
 2. Call TaskList() and filter to tasks with metadata `source: codesop-pipeline`
 3. Identify the next pending task (skill or transition)
 4. If next is a skill task → load skill and execute. If transition task → complete the work, TaskUpdate(completed), check next again
-5. Ask the user: "Task list 中下一步是 {next-task}，要继续吗？"
-This is a soft reminder, not a hard gate.
+5. Auto-proceed to execute next task. Only pause on pipeline failure, real blocker, or user interrupt.
 
 Default to orientation and routing first. Do not jump into implementation unless the user clearly asks to proceed.
 
@@ -214,16 +212,16 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 
 ### 4.4 Final Line
 
-末行必须是疑问句，以"吗？"结尾。用户按 Enter 即可确认。
+首次确认或上下文变化时，末行必须是疑问句，以"吗？"结尾。用户按 Enter 即可确认。
+pipeline 执行过程中（task list 已确认），不问，自动执行下一个。
 
-**三种确认句式**：
+**两种确认句式**：
 1. **Proposing**: `要把这个 pipeline 转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
-2. **Continuing**: `要继续当前 task list，从 {next-skill} Skill 开始做 {intent} 吗？`
-3. **Stale**: `检测到上下文变化（{reason}），建议新 pipeline。要转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
+2. **Stale**: `检测到上下文变化（{reason}），建议新 pipeline。要转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
 
 **场景适配**：
 - 工作区有未提交改动：task list 前置 superpowers:finishing-a-development-branch 处理
-- 重新进入 /codesop：用 ☐/☑ 格式显示当前 task list，末行用 continuing 句式
+- 重新进入 /codesop：用 ☐/☑ 格式显示当前 task list，自动继续下一个 pending task
 - 检测到上下文变化：输出新的 proposed task list，末行用 stale 句式
 
 **规则**：
