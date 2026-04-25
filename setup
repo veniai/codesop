@@ -241,7 +241,7 @@ configure_hooks() {
 
   # Configure statusLine for compact detection
   # NOTE: /tmp/claude-context.json is a global path — concurrent sessions will
-  # overwrite each other. This is acceptable for v3.0 (compact hint is soft, not
+  # overwrite each other. This is acceptable (compact hint is soft, not
   # critical). Per-session isolation requires statusLine API changes (tracked).
   # Check if statusLine already has the tee command
   local statusline_existing

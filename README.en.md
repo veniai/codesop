@@ -92,7 +92,6 @@ codesop update
 
 - One main flow: `/codesop`
 - Two mechanical commands: `codesop init`, `codesop update`
-- `status` / `diagnose` removed from product contract
 - Primarily designed and tested for Claude Code; Codex / OpenCode partially supported
 
 ## Workflow Scenarios

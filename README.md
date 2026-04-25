@@ -98,7 +98,6 @@ codesop update
 
 - 主流程只有一个：`/codesop`
 - 机械命令只有两个：`codesop init`、`codesop update`
-- `status` / `diagnose` 已从产品合同中移除
 - 主要围绕 Claude Code 设计和测试，Codex / OpenCode 可部分适配
 
 ## 覆盖场景

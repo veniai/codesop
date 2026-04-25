@@ -1,4 +1,4 @@
-## codesop 路由卡 (v2)
+## codesop 路由卡 (v3)
 
 新任务必须先输出任务对齐块（理解 + 阶段 + Skill）。
 完整 pipeline 定义见 /codesop。

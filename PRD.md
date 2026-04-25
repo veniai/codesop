@@ -126,9 +126,6 @@
 - **目标**: 回退冷启动延迟严重的子 agent 执行架构，保留 statusLine/compact 等好东西
 - **变更摘要**:
   - 路由表和 SKILL.md 恢复到 v2.6.1 状态
-  - 新增 skill patch 机制：writing-plans 删除 Execution Handoff、finishing-branch 直接 push+PR
-  - worktree 从必走改为仅用户明确要求时插入
-  - setup 修复 `set -e` 下 `find` 不存在目录的退出码问题
 
 ### **V3.0.0 - 2026-04-20 - (Sub-agent Execution Architecture)**
 - **目标**: 解决长 pipeline 会话的 context bloat 问题
@@ -297,7 +294,7 @@
 - `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
-- **Now (v2.4.x)**: 按需迭代，稳定维护
+- **Now (v3.3.x)**: 按需迭代，稳定维护
 - **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
