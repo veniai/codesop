@@ -25,7 +25,7 @@ assert_not_contains() {
 
 # --- Source dependencies ---
 VERSION_FILE="$ROOT_DIR/VERSION"
-source "$ROOT_DIR/lib/output.sh"
+source "$ROOT_DIR/lib/detection.sh"
 source "$ROOT_DIR/lib/updates.sh"
 
 # --- Test 1: check_routing_coverage against real router table ---

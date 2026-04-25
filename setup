@@ -148,6 +148,7 @@ install_router_card() {
   echo "  ✓ Router card: $dst"
 }
 
+# Canonical: lib/detection.sh — setup 保留独立副本（自包含脚本）
 find_superpowers_plugin_path() {
   local marketplace_dir version_dir
   for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do

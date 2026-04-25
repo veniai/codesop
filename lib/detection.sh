@@ -274,3 +274,22 @@ detect_environment() {
   detect_all_tools
   detect_all_ecosystems
 }
+
+# Find superpowers installed via Claude Code plugin marketplace.
+# The actual path is ~/.claude/plugins/cache/<marketplace>/superpowers/<version>/
+# Returns the path to the latest version directory, or nothing if not found.
+find_superpowers_plugin_path() {
+  local marketplace_dir version_dir
+  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
+    [ -d "$marketplace_dir" ] || continue
+    # Find the latest version directory (sorted by version, pick last)
+    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
+    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ]; then
+      # Skip orphaned installations
+      [ -f "$version_dir/.orphaned_at" ] && continue
+      printf '%s\n' "$version_dir"
+      return 0
+    fi
+  done
+  return 1
+}
