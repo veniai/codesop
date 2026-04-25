@@ -16,12 +16,14 @@ bash codesop update             # Update via git pull + setup sync
 # Core tests
 bash tests/run_all.sh                 # All tests (unified runner)
 bash tests/codesop-router.sh          # Router card consistency + setup integration
-bash tests/codesop-init-interview.sh  # Init interview tests (34 tests)
+bash tests/codesop-init-interview.sh  # Init interview tests
 bash tests/detect-environment.sh      # Documentation consistency tests
 bash tests/codesop-e2e.sh             # End-to-end test
 bash tests/codesop-init.sh            # Init command tests
 bash tests/setup.sh                   # Host setup tests
 bash tests/codesop-symlink.sh         # Symlink tests
+bash tests/codesop-update.sh          # Update command tests
+bash tests/skill-routing-coverage.sh  # Skill routing coverage tests
 
 # Resync after local edits
 bash setup --host claude
