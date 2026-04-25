@@ -6,7 +6,6 @@
 #
 # Usage:
 #   source /path/to/detection.sh
-#   detect_environment "/path/to/project"
 #
 # Output:
 #   Key=value pairs describing the project and tool state
