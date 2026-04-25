@@ -38,12 +38,10 @@ bash setup --host claude
 ```
 codesop                     # CLI entrypoint, sources lib modules in order
 ├── lib/
-│   ├── output.sh           # Formatting: tech stack rendering, tool state display
-│   ├── detection.sh        # Project detection for init/setup, has_mcp_server() helper
-│   ├── templates.sh        # AGENTS.md template generation
-│   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks, plugin dependency system (CORE_PLUGINS/OPTIONAL_PLUGINS)
-│   ├── commands.sh         # Subcommands; target contract keeps init/update only; uses print_dependency_report()
-│   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files, plugin checks
+│   ├── detection.sh        # Project detection, find_superpowers_plugin_path(), has_mcp_server()
+│   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
+│   ├── commands.sh         # Subcommands; target contract keeps init/update only
+│   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files
 ├── commands/               # Sub-command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
 │   └── codesop-update.md   # /codesop-update
@@ -68,7 +66,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 ```
 
 **Module loading order** (in codesop entrypoint):
-1. `lib/output.sh` → 2. `lib/detection.sh` → 3. `lib/templates.sh` → 4. `lib/updates.sh` → 5. `lib/commands.sh` → 6. `lib/init-interview.sh`
+1. `lib/detection.sh` → 2. `lib/updates.sh` → 3. `lib/commands.sh` → 4. `lib/init-interview.sh`
 
 ## Init Flow
 
@@ -114,7 +112,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - SKILL.md §3 step 10.5 manages pipeline-to-todo: TaskList check → stale detection → initial confirmation → TaskCreate. Auto re-entry after each task completion (no per-step confirmation)
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
-- `CORE_PLUGINS` / `OPTIONAL_PLUGINS` / `OPTIONAL_SKILLS` arrays in `lib/updates.sh` define the plugin dependency tiers
+- `SUPERPOWERS_PLUGIN` and `REQUIRED_PLUGINS` in `lib/updates.sh` define the plugin dependency tiers
 - `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback (e.g. browser-use installed via pip, not as skill directory)
 - `patch_skills()` in setup overwrites third-party skill files from `patches/superpowers/` — logic is "different from ours → overwrite, same → skip". Plugin updates will be re-patched on next `setup` run
 - `find` on non-existent directory returns exit 1; under `set -e`, always append `|| true` to `find` in command substitutions
