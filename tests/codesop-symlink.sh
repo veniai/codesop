@@ -5,19 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLI="$ROOT_DIR/codesop"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
-assert_contains() {
-  local haystack="$1"
-  local needle="$2"
-
-  if [[ "$haystack" != *"$needle"* ]]; then
-    fail "expected output to contain: $needle"
-  fi
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT

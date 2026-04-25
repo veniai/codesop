@@ -166,38 +166,6 @@ setup_system_links() {
   return 0
 }
 
-# ============================================================================
-# Skill Dependency Checking
-# ============================================================================
-
-# Skill paths for has_superpowers (order: most common first)
-_SP_CANDIDATES=(
-  "$HOME/.claude/plugins/cache"
-  "$HOME/.codex/superpowers"
-  "$HOME/.codex/skills/.system"
-  "$HOME/.claude/skills/superpowers"
-  "$HOME/.agents/skills/superpowers"
-  "$HOME/.config/opencode/plugins/superpowers"
-)
-
-# Detect if superpowers is installed
-# Uses: find_superpowers_plugin_path (from output.sh) + candidate directories
-# Returns: 0 if installed, 1 if not
-has_superpowers() {
-  # Check plugin cache (Claude Code marketplace install)
-  if type find_superpowers_plugin_path >/dev/null 2>&1; then
-    find_superpowers_plugin_path >/dev/null 2>&1 && return 0
-  fi
-
-  # Check candidate directories
-  local path
-  for path in "${_SP_CANDIDATES[@]}"; do
-    [ -d "$path" ] && return 0
-  done
-
-  return 1
-}
-
 # Check skill dependencies and print status
 # Checks multiple installation locations (Claude Code + Codex)
 check_skill_dependencies() {
@@ -208,10 +176,10 @@ check_skill_dependencies() {
     _check_skills_all || true
   else
     echo "⚠ 更新检查不可用（lib/updates.sh 未加载）"
-    if ! has_superpowers; then
-      echo "⚠ superpowers 未安装"
-    else
+    if type find_superpowers_plugin_path >/dev/null 2>&1 && find_superpowers_plugin_path >/dev/null 2>&1; then
       echo "✓ superpowers 已安装"
+    else
+      echo "⚠ superpowers 未安装"
     fi
   fi
 

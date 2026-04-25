@@ -4,28 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
-assert_contains() {
-  local haystack="$1"
-  local needle="$2"
-
-  if [[ "$haystack" != *"$needle"* ]]; then
-    fail "expected output to contain: $needle"
-  fi
-}
-
-assert_not_contains() {
-  local haystack="$1"
-  local needle="$2"
-
-  if [[ "$haystack" == *"$needle"* ]]; then
-    fail "expected output to not contain: $needle"
-  fi
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 skill_output="$(sed -n '/^## 8\. Sub-commands/,/^## 9\./p' "$ROOT_DIR/SKILL.md")"
 skill_header="$(sed -n '1,120p' "$ROOT_DIR/SKILL.md")"

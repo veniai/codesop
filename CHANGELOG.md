@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-04-25
+
+### Added
+- Pipeline 分支衔接：main/master 上开发前自动插入衔接任务"创建 feat/ 分支"（条件性，用户可覆盖为 worktree）
+- tests/test_helpers.sh：统一测试辅助函数（fail + assert_contains + assert_not_contains）
+
+### Changed
+- 删除死模块 lib/templates.sh（全部 6 函数从未被调用）
+- 删除死模块 lib/output.sh（8/10 函数死代码，find_superpowers_plugin_path 迁入 detection.sh）
+- 删除 detection.sh 死代码：detect_environment、has_plugin、AI_TOOLS、ECOSYSTEM_REGISTRY 等 7 函数 + 2 数组
+- 删除 updates.sh 死代码：check_plugin_versions、CORE_PLUGINS、OPTIONAL_PLUGINS、check_document_consistency 包装器
+- 删除 init-interview.sh 死代码：has_superpowers、_SP_CANDIDATES
+- run_all.sh 改为失败时显示输出（不再吞 stderr）
+- 路由卡版本标签 v2→v3
+- finishing-branch patch 描述对齐实际行为（直接 push+PR）
+- 多处过时文档修复：版本标签、死引用、CHANGELOG v1.2→v1.1.x
+
+### Fixed
+- assert_contains 的 grep 缺少 -- 分隔符导致 - 开头的 needle 解析失败
+- codesop-init-interview.sh 重复调用 test_check_user_preferences
+
 ## [3.3.3] - 2026-04-24
 
 ### Changed
@@ -303,10 +324,10 @@
 ### Fixed
 
 - `scan_routed_skills()` regex updated to handle three formats: code block, backtick+tag, and routing policy arrow styles
-- `verification-before-comp` → `verification-before-completion` alias restored (was dropped in v1.2 cleanup but still needed for test fixtures)
+- `verification-before-comp` → `verification-before-completion` alias restored (was dropped in v1.1.x cleanup but still needed for test fixtures)
 - `check_skill_routing_coverage()` skip list updated to include `design-html` gstack skill
 - SKILL.md coverage check command now passes `ROOT_DIR=~/codesop` — was causing `scan_routed_skills` to look for `/SKILL.md`
-- `tests/detect-environment.sh` assertions updated to match v1.2 Section 8 table format (was expecting old `### 8.1` subsection format)
+- `tests/detect-environment.sh` assertions updated to match v1.1.x Section 8 table format (was expecting old `### 8.1` subsection format)
 - Fixed backtick execution bug in `detect-environment.sh` test assertions
 
 ## [1.1.4] - 2026-03-31

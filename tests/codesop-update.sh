@@ -4,29 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT_DIR/lib/updates.sh"
-
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
-assert_contains() {
-  local haystack="$1"
-  local needle="$2"
-
-  if [[ "$haystack" != *"$needle"* ]]; then
-    fail "expected output to contain: $needle"
-  fi
-}
-
-assert_not_contains() {
-  local haystack="$1"
-  local needle="$2"
-
-  if [[ "$haystack" == *"$needle"* ]]; then
-    fail "expected output not to contain: $needle"
-  fi
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 init_repo_fixture() {
   local case_dir="$1"

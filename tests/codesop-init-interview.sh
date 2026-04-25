@@ -14,11 +14,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Source the library modules in correct order
-source "$ROOT_DIR/lib/output.sh"
 source "$ROOT_DIR/lib/detection.sh"
-source "$ROOT_DIR/lib/templates.sh"
 source "$ROOT_DIR/lib/updates.sh"
 source "$ROOT_DIR/lib/init-interview.sh"
+source "$(dirname "$0")/test_helpers.sh"
 
 # Set source_dir for template functions
 source_dir="$ROOT_DIR"
@@ -543,11 +542,6 @@ run_tests() {
   echo "--- Template generation tests ---"
   test_generate_prd_template
   test_generate_readme_template
-  echo ""
-
-  # check_user_preferences tests
-  echo "--- check_user_preferences() tests ---"
-  test_check_user_preferences
   echo ""
 
   # Adapt mode signal tests

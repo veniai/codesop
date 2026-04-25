@@ -4,28 +4,11 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
-assert_contains() {
-  local haystack="$1"
-  local needle="$2"
-  printf '%s' "$haystack" | grep -qxF "$needle" || fail "expected output to contain: $needle"
-}
-
-assert_not_contains() {
-  local haystack="$1"
-  local needle="$2"
-  if printf '%s' "$haystack" | grep -qxF "$needle"; then
-    fail "expected output to NOT contain: $needle"
-  fi
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 # --- Source dependencies ---
 VERSION_FILE="$ROOT_DIR/VERSION"
-source "$ROOT_DIR/lib/output.sh"
+source "$ROOT_DIR/lib/detection.sh"
 source "$ROOT_DIR/lib/updates.sh"
 
 # --- Test 1: check_routing_coverage against real router table ---
@@ -60,22 +43,22 @@ echo "  PASS"
 # --- Test 4: Dependency arrays are populated ---
 echo "Test 4: Dependency arrays are populated"
 
-[ ${#CORE_PLUGINS[@]} -gt 0 ] || fail "CORE_PLUGINS is empty"
+[ -n "$SUPERPOWERS_PLUGIN" ] || fail "SUPERPOWERS_PLUGIN is empty"
 [ ${#REQUIRED_PLUGINS[@]} -gt 0 ] || fail "REQUIRED_PLUGINS is empty"
 [ ${#OPTIONAL_SKILLS[@]} -gt 0 ] || fail "OPTIONAL_SKILLS is empty"
 
 echo "  PASS (${#REQUIRED_PLUGINS[@]} required, ${#OPTIONAL_SKILLS[@]} skills)"
 
-# --- Test 5: check_document_consistency version alignment (real repo) ---
-echo "Test 5: check_document_consistency version alignment"
+# --- Test 5: check_codesop_document_consistency version alignment (real repo) ---
+echo "Test 5: check_codesop_document_consistency version alignment"
 
-result="$(ROOT_DIR="$ROOT_DIR" VERSION_FILE="$ROOT_DIR/VERSION" check_document_consistency)" || true
+result="$(ROOT_DIR="$ROOT_DIR" VERSION_FILE="$ROOT_DIR/VERSION" check_codesop_document_consistency)" || true
 printf '%s' "$result" | grep -q "版本" || fail "version alignment line missing"
 
 echo "  PASS"
 
-# --- Test 6: check_document_consistency detects version mismatch ---
-echo "Test 6: check_document_consistency detects version mismatch"
+# --- Test 6: check_codesop_document_consistency detects version mismatch ---
+echo "Test 6: check_codesop_document_consistency detects version mismatch"
 
 _mismatch_dir="$(mktemp -d)"
 echo "1.0.0" > "$_mismatch_dir/VERSION"
@@ -83,14 +66,14 @@ echo '{"version": "2.0.0"}' > "$_mismatch_dir/skill.json"
 mkdir -p "$_mismatch_dir/config"
 echo '# Current Version: 3.0.0' > "$_mismatch_dir/PRD.md"
 cp "$ROOT_DIR/config/codesop-router.md" "$_mismatch_dir/config/" 2>/dev/null || true
-result="$(ROOT_DIR="$_mismatch_dir" VERSION_FILE="$_mismatch_dir/VERSION" check_document_consistency)" || true
+result="$(ROOT_DIR="$_mismatch_dir" VERSION_FILE="$_mismatch_dir/VERSION" check_codesop_document_consistency)" || true
 printf '%s' "$result" | grep -q "版本不一致" || fail "should detect version mismatch"
 rm -rf "$_mismatch_dir"
 
 echo "  PASS"
 
-# --- Test 7: check_document_consistency detects stale references ---
-echo "Test 7: check_document_consistency detects stale references"
+# --- Test 7: check_codesop_document_consistency detects stale references ---
+echo "Test 7: check_codesop_document_consistency detects stale references"
 
 _stale_dir="$(mktemp -d)"
 echo "2.0.0" > "$_stale_dir/VERSION"
@@ -103,7 +86,7 @@ echo "Use codesop-setup for setup" > "$_stale_dir/README.md"
 : > "$_stale_dir/templates/system/AGENTS.md"
 : > "$_stale_dir/commands/codesop-init.md"
 : > "$_stale_dir/commands/codesop-update.md"
-result="$(ROOT_DIR="$_stale_dir" VERSION_FILE="$_stale_dir/VERSION" check_document_consistency)" || true
+result="$(ROOT_DIR="$_stale_dir" VERSION_FILE="$_stale_dir/VERSION" check_codesop_document_consistency)" || true
 printf '%s' "$result" | grep -q "过时引用" || fail "should detect stale reference 'codesop-setup'"
 rm -rf "$_stale_dir"
 

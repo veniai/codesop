@@ -6,10 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SETUP="$ROOT_DIR/setup"
 VERSION_VALUE="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 assert_exists() {
   local path="$1"

@@ -7,7 +7,7 @@
 skill-first 的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init` 和 `update`。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.3.3-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](VERSION)
 
 ---
 
@@ -98,7 +98,6 @@ codesop update
 
 - 主流程只有一个：`/codesop`
 - 机械命令只有两个：`codesop init`、`codesop update`
-- `status` / `diagnose` 已从产品合同中移除
 - 主要围绕 Claude Code 设计和测试，Codex / OpenCode 可部分适配
 
 ## 覆盖场景

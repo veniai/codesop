@@ -2,18 +2,14 @@
 # updates.sh - Version checking and dependency utilities for codesop v2
 #
 # This module provides functions for:
-# - Checking plugin completeness (CORE + OPTIONAL)
+# - Checking plugin completeness (REQUIRED)
 # - Checking independent skill completeness
-# - Checking plugin versions
 # - Checking routing coverage against the router table
 # - Checking current-project document drift
 # - Checking codesop's own document consistency
 # - Printing a unified dependency report
 # - Checking git repository update status
 # - Getting current version
-#
-# Dependencies:
-# - lib/output.sh: format_tool_state(), format_ecosystem_state()
 #
 # Expected caller-set variables:
 # - ROOT_DIR: Root directory of codesop installation
@@ -41,10 +37,6 @@ REQUIRED_PLUGINS=(
   "codex@openai-codex"
   "chrome-devtools-mcp@claude-plugins-official"
 )
-
-# Legacy aliases for backward compatibility
-CORE_PLUGINS=("$SUPERPOWERS_PLUGIN" "${REQUIRED_PLUGINS[@]}")
-OPTIONAL_PLUGINS=()
 
 # Independent skills — missing = warning
 OPTIONAL_SKILLS=(
@@ -229,20 +221,6 @@ check_skill_completeness() {
   else
     printf '%s\n' "✓ 所有独立 Skill 已安装"
   fi
-
-  return 0
-}
-
-check_plugin_versions() {
-  local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
-  [ -f "$plugins_file" ] || return 1
-
-  # List installed plugin versions (informational)
-  local plugin_id version
-  while IFS=$'\t' read -r plugin_id version; do
-    [ -z "$plugin_id" ] && continue
-    printf '  %s: %s\n' "$plugin_id" "${version:-unknown}"
-  done < <(jq -r '.plugins | to_entries[] | "\(.key)\t\(.value[0].version // "")"' "$plugins_file" 2>/dev/null)
 
   return 0
 }
@@ -496,10 +474,6 @@ check_codesop_document_consistency() {
   fi
 
   return 0
-}
-
-check_document_consistency() {
-  check_codesop_document_consistency "$@"
 }
 
 # Extract CHANGELOG entries between two versions
@@ -767,7 +741,7 @@ print_dependency_report() {
   check_routing_coverage
 
   printf '\n%s\n' "文档一致性："
-  check_document_consistency
+  check_codesop_document_consistency
 
   # Superpowers update check
   if [ "$host" = "claude" ]; then

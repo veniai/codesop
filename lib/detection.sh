@@ -6,7 +6,6 @@
 #
 # Usage:
 #   source /path/to/detection.sh
-#   detect_environment "/path/to/project"
 #
 # Output:
 #   Key=value pairs describing the project and tool state
@@ -75,8 +74,6 @@ detect_project_language() {
 # Detect project shape and framework from package.json or pyproject.toml.
 # Arguments:
 #   $1 - Target directory
-#   $2 - Reference to project_shape variable (updated in place)
-#   $3 - Reference to project_framework variable (updated in place)
 # Sets: _DET_PROJECT_SHAPE, _DET_PROJECT_FRAMEWORK
 detect_project_shape_and_framework() {
   local TARGET_DIR="${1:-.}"
@@ -146,131 +143,36 @@ detect_project_shape_and_framework() {
   _DET_PROJECT_FRAMEWORK="$project_framework"
 }
 
-# ============================================================================
-# 工具注册表 (Tool Registry)
-  # 格式: "名称:检测路径1,检测路径2,..."
-  # 新增工具只需在此添加一行
-  # ============================================================================
-  AI_TOOLS=(
-    "claude:$HOME/.claude"
-    "codex:$HOME/.codex"
-    "opencode:$HOME/.config/opencode"
-    "cursor:$HOME/.cursor"
-    "aider:$(command -v aider 2>/dev/null || echo '')"
-    "windsurf:$HOME/.windsurf"
-  )
+# Check if a specific MCP server is configured in Claude Code settings
+# Arguments:
+#   $1 - MCP server name (e.g. "browser-use")
+# Returns: 0 if configured, 1 if not
+has_mcp_server() {
+  local server_name="$1"
+  local settings_file="$HOME/.claude/settings.json"
+  [ -f "$settings_file" ] || return 1
+  # Check exact name and common hyphen/underscore variation
+  local name_alt="${server_name//-/_}"
+  jq -e --arg name "$server_name" --arg alt "$name_alt" \
+    '.mcpServers | if . then (has($name) or has($alt)) else false end' \
+    "$settings_file" 2>/dev/null | grep -q true
+}
 
-  # 技能/生态系统注册表
-  ECOSYSTEM_REGISTRY=(
-    "superpowers:$HOME/.codex/superpowers,$HOME/.codex/skills/.system,$HOME/.claude/plugins/superpowers,$HOME/.claude/skills/superpowers,$HOME/.config/opencode/plugins/superpowers,$HOME/.agents/skills/superpowers"
-  )
-
-  detect_tool_by_registry() {
-    local entry="$1"
-    local name="${entry%%:*}"
-    local paths="${entry#*:}"
-
-    # 处理空路径（如 command -v 结果为空）
-    if [ -z "$paths" ]; then
-      echo "tool.$name=missing"
-      return
+# Find superpowers installed via Claude Code plugin marketplace.
+# The actual path is ~/.claude/plugins/cache/<marketplace>/superpowers/<version>/
+# Returns the path to the latest version directory, or nothing if not found.
+find_superpowers_plugin_path() {
+  local marketplace_dir version_dir
+  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
+    [ -d "$marketplace_dir" ] || continue
+    # Find the latest version directory (sorted by version, pick last)
+    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
+    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ]; then
+      # Skip orphaned installations
+      [ -f "$version_dir/.orphaned_at" ] && continue
+      printf '%s\n' "$version_dir"
+      return 0
     fi
-
-    # 逗号分隔的多个路径
-    local IFS=','
-    for path in $paths; do
-      if [ -e "$path" ]; then
-        echo "tool.$name=installed"
-        return
-      fi
-    done
-
-    echo "tool.$name=missing"
-  }
-
-  detect_ecosystem_by_registry() {
-    local entry="$1"
-    local name="${entry%%:*}"
-    local paths="${entry#*:}"
-
-    local IFS=','
-    for path in $paths; do
-      if [ -e "$path" ]; then
-        echo "ecosystem.$name=installed"
-        return
-      fi
-    done
-
-    # superpowers 特殊处理：Claude Code 插件市场缓存路径
-    if [ "$name" = "superpowers" ]; then
-      if type find_superpowers_plugin_path >/dev/null 2>&1 && find_superpowers_plugin_path >/dev/null 2>&1; then
-        echo "ecosystem.$name=installed"
-        return
-      fi
-    fi
-
-    echo "ecosystem.$name=missing"
-  }
-
-  # Check if a specific plugin is installed via Claude Code plugin system
-  # Arguments:
-  #   $1 - plugin ID (e.g. "superpowers@claude-plugins-official")
-  # Returns: 0 if installed, 1 if not
-  has_plugin() {
-    local plugin_id="$1"
-    local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
-    [ -f "$plugins_file" ] || return 1
-    jq -e --arg id "$plugin_id" '.plugins | has($id)' "$plugins_file" 2>/dev/null | grep -q true
-  }
-
-  # Check if a specific MCP server is configured in Claude Code settings
-  # Arguments:
-  #   $1 - MCP server name (e.g. "browser-use")
-  # Returns: 0 if configured, 1 if not
-  has_mcp_server() {
-    local server_name="$1"
-    local settings_file="$HOME/.claude/settings.json"
-    [ -f "$settings_file" ] || return 1
-    # Check exact name and common hyphen/underscore variation
-    local name_alt="${server_name//-/_}"
-    jq -e --arg name "$server_name" --arg alt "$name_alt" \
-      '.mcpServers | if . then (has($name) or has($alt)) else false end' \
-      "$settings_file" 2>/dev/null | grep -q true
-  }
-
-  detect_all_tools() {
-    for entry in "${AI_TOOLS[@]}"; do
-      detect_tool_by_registry "$entry"
-    done
-  }
-
-  detect_all_ecosystems() {
-    for entry in "${ECOSYSTEM_REGISTRY[@]}"; do
-      detect_ecosystem_by_registry "$entry"
-    done
-  }
-
-# ============================================================================
-# detect_environment() — main entry point
-# Calls top-level detection functions and prints results.
-# ============================================================================
-detect_environment() {
-  local TARGET_DIR="${1:-.}"
-
-  # Run detection (results in global vars)
-  detect_project_language "$TARGET_DIR"
-  detect_project_shape_and_framework "$TARGET_DIR"
-
-  local project_language="${_DET_PROJECT_LANGUAGE:-Unknown}"
-  local project_shape="${_DET_PROJECT_SHAPE:-General Project}"
-  local project_framework="${_DET_PROJECT_FRAMEWORK:-None}"
-
-  echo "project.language=$project_language"
-  echo "project.shape=$project_shape"
-  echo "project.framework=$project_framework"
-  echo "output.language=zh-CN"
-
-  # 使用注册表检测所有工具和生态系统
-  detect_all_tools
-  detect_all_ecosystems
+  done
+  return 1
 }

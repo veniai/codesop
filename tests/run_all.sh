@@ -21,13 +21,14 @@ failed=0
 failures=()
 
 for suite in "${suites[@]}"; do
-  if bash "$ROOT_DIR/tests/$suite" >/dev/null 2>&1; then
+  if output=$(bash "$ROOT_DIR/tests/$suite" 2>&1); then
     passed=$((passed + 1))
     echo "  PASS  $suite"
   else
     failed=$((failed + 1))
     failures+=("$suite")
     echo "  FAIL  $suite"
+    echo "$output"
   fi
 done
 

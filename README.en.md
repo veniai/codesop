@@ -7,7 +7,7 @@
 A skill-first operating system for AI-assisted coding workflows. The current core keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.3.3-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](VERSION)
 
 ---
 
@@ -92,7 +92,6 @@ codesop update
 
 - One main flow: `/codesop`
 - Two mechanical commands: `codesop init`, `codesop update`
-- `status` / `diagnose` removed from product contract
 - Primarily designed and tested for Claude Code; Codex / OpenCode partially supported
 
 ## Workflow Scenarios

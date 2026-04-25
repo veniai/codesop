@@ -1,15 +1,15 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: Use when implementation is complete, all tests pass, and you need to push and create a PR - handles branch push, PR creation, and worktree cleanup
 ---
 
 # Finishing a Development Branch
 
 ## Overview
 
-Guide completion of development work by presenting clear options and handling chosen workflow.
+Complete development work by pushing the branch and creating a PR directly, then cleaning up the worktree.
 
-**Core principle:** Verify tests → Present options → Execute choice → Clean up.
+**Core principle:** Verify tests → Push + PR → Clean up worktree.
 
 **Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
@@ -67,8 +67,6 @@ Then: Cleanup worktree (Step 4)
 
 ### Step 4: Cleanup Worktree
 
-**For Options 1, 2, 4:**
-
 Check if in worktree:
 ```bash
 git worktree list | grep $(git branch --show-current)
@@ -78,8 +76,6 @@ If yes:
 ```bash
 git worktree remove <worktree-path>
 ```
-
-**For Option 3:** Keep worktree.
 
 ## Common Mistakes
 

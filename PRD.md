@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 3.3.3
+# Current Version: 3.4.0
 # Last Updated: 2026-04-24
 # Status: active
 
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.3.3 已发布 (writing-plans Pipeline Continuation 触发器)
+- **当前里程碑**: v3.4.0 已发布 (代码库全面清理 + Pipeline 分支衔接)
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.3.3 发布 — writing-plans skill patch 加 Pipeline Continuation 触发器
+- **最后更新原因**: v3.4.0 发布 — 删死代码、统一测试、Pipeline 分支衔接、过时文档修复
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.4.0: 代码库全面清理 — 删死模块(templates.sh/output.sh)、删死函数、统一测试框架、Pipeline 分支衔接、过时文档修复
 - [x] v3.3.3: writing-plans skill patch Pipeline Continuation 触发器 — 补回 skill ending 的 next-step 指导
 - [x] v3.3.2: pipeline auto re-entry — task list 确认后全程自动执行，不逐个询问
 - [x] v3.3.1: skill patch 机制（writing-plans + finishing-branch）、worktree 条件化、setup set -e 修复
@@ -102,6 +103,15 @@
 
 ## 4. 版本历史
 
+### **V3.4.0 - 2026-04-25 - (Codebase Cleanup + Pipeline Branch Transition)**
+- **目标**: 清理死代码、统一测试框架、修复过时内容、补全 Pipeline 分支衔接
+- **变更摘要**:
+  - 删除死模块: lib/templates.sh、lib/output.sh（find_superpowers_plugin_path 迁入 detection.sh）
+  - 删除死函数: detection.sh (7 函数 + 2 数组)、updates.sh (3 项)、init-interview.sh (2 项)
+  - 统一测试框架: tests/test_helpers.sh + run_all.sh 失败输出 + 删重复测试
+  - Pipeline 分支衔接: main 上开发前插入衔接任务"创建 feat/ 分支"
+  - 过时文档修复: 版本标签、死引用、patch 描述对齐
+
 ### **V3.3.3 - 2026-04-24 - (Writing-plans Pipeline Continuation Trigger)**
 - **目标**: 修复 writing-plans 完成后停止询问的根因——skill ending 缺少 next-step 指导
 - **变更摘要**:
@@ -126,9 +136,6 @@
 - **目标**: 回退冷启动延迟严重的子 agent 执行架构，保留 statusLine/compact 等好东西
 - **变更摘要**:
   - 路由表和 SKILL.md 恢复到 v2.6.1 状态
-  - 新增 skill patch 机制：writing-plans 删除 Execution Handoff、finishing-branch 直接 push+PR
-  - worktree 从必走改为仅用户明确要求时插入
-  - setup 修复 `set -e` 下 `find` 不存在目录的退出码问题
 
 ### **V3.0.0 - 2026-04-20 - (Sub-agent Execution Architecture)**
 - **目标**: 解决长 pipeline 会话的 context bloat 问题
@@ -297,7 +304,7 @@
 - `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
-- **Now (v2.4.x)**: 按需迭代，稳定维护
+- **Now (v3.3.x)**: 按需迭代，稳定维护
 - **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
