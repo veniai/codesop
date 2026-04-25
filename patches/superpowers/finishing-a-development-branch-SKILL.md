@@ -52,8 +52,11 @@ Or ask: "This branch split from main - is that correct?"
 # Push branch
 git push -u origin <feature-branch>
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
+# Create PR (skip if one already exists for this branch)
+if gh pr list --state open --head "$(git branch --show-current)" --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
+  echo "PR already exists, skipping creation."
+else
+  gh pr create --title "<title>" --body "$(cat <<'EOF'
 ## Summary
 <2-3 bullets of what changed>
 
@@ -61,6 +64,7 @@ gh pr create --title "<title>" --body "$(cat <<'EOF'
 - [ ] <verification steps>
 EOF
 )"
+fi
 ```
 
 Then: Cleanup worktree (Step 4)
