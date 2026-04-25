@@ -4,10 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 echo "=== codesop-router consistency tests ==="
 echo ""

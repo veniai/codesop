@@ -4,24 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
-}
-
-assert_contains() {
-  local haystack="$1"
-  local needle="$2"
-  printf '%s' "$haystack" | grep -qxF "$needle" || fail "expected output to contain: $needle"
-}
-
-assert_not_contains() {
-  local haystack="$1"
-  local needle="$2"
-  if printf '%s' "$haystack" | grep -qxF "$needle"; then
-    fail "expected output to NOT contain: $needle"
-  fi
-}
+source "$(dirname "$0")/test_helpers.sh"
 
 # --- Source dependencies ---
 VERSION_FILE="$ROOT_DIR/VERSION"
