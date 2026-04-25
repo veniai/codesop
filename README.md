@@ -7,7 +7,7 @@
 skill-first 的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init` 和 `update`。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](VERSION)
 
 ---
 
@@ -109,7 +109,7 @@ codesop update
 | 新功能 | brainstorming → codex:rescue → writing-plans → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
 | Bug 修复 | systematic-debugging → verification → ☆claude-md → finishing |
 | 小改动 | subagent-dev → ☆simplifier → verification → finishing |
-| Code Review 反馈 | receiving-code-review → fix → verification → reply |
+| Code Review 反馈 | receiving-code-review → finishing（含全量测试门禁） |
 
 ☆ = 有插件时走。完整插入规则见路由表链路组装段。
 

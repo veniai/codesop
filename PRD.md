@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 3.4.0
+# Current Version: 3.4.1
 # Last Updated: 2026-04-24
 # Status: active
 
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.4.0 已发布 (代码库全面清理 + Pipeline 分支衔接)
+- **当前里程碑**: v3.4.1 已发布 (代码库全面清理 + Pipeline 分支衔接 + PR Review 反馈链路)
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.4.0 发布 — 删死代码、统一测试、Pipeline 分支衔接、过时文档修复
+- **最后更新原因**: v3.4.1 发布 — 删死代码、统一测试、Pipeline 分支衔接、过时文档修复
 
 ## 2. 当前进度
 
@@ -38,7 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
-- [x] v3.4.0: 代码库全面清理 — 删死模块(templates.sh/output.sh)、删死函数、统一测试框架、Pipeline 分支衔接、过时文档修复
+- [x] v3.4.1: PR Review 反馈链路补全 — 路由表+SKILL.md+README 三层同步补 receiving-code-review → finishing 反馈路径；含代码库全面清理（删死模块/函数、统一测试、Pipeline 分支衔接）
 - [x] v3.3.3: writing-plans skill patch Pipeline Continuation 触发器 — 补回 skill ending 的 next-step 指导
 - [x] v3.3.2: pipeline auto re-entry — task list 确认后全程自动执行，不逐个询问
 - [x] v3.3.1: skill patch 机制（writing-plans + finishing-branch）、worktree 条件化、setup set -e 修复
@@ -103,9 +103,12 @@
 
 ## 4. 版本历史
 
-### **V3.4.0 - 2026-04-25 - (Codebase Cleanup + Pipeline Branch Transition)**
-- **目标**: 清理死代码、统一测试框架、修复过时内容、补全 Pipeline 分支衔接
+### **V3.4.1 - 2026-04-25 - (PR Review Feedback Chain + Codebase Cleanup)**
+- **目标**: 补全 PR Review 反馈链路；清理死代码、统一测试框架
 - **变更摘要**:
+  - PR Review 反馈链路: 路由表加 receiving-code-review → finishing 反馈路径（三层同步：路由卡+SKILL.md+README）
+  - SKILL.md 冲突解决表补 review feedback 条目
+  - README/README.en Code Review 反馈场景更新
   - 删除死模块: lib/templates.sh、lib/output.sh（find_superpowers_plugin_path 迁入 detection.sh）
   - 删除死函数: detection.sh (7 函数 + 2 数组)、updates.sh (3 项)、init-interview.sh (2 项)
   - 统一测试框架: tests/test_helpers.sh + run_all.sh 失败输出 + 删重复测试
@@ -313,9 +316,7 @@
 codesop                     # CLI 入口，只暴露 init / update
 setup                       # 宿主安装与同步
 ├── lib/
-│   ├── output.sh           # 格式化工具
 │   ├── detection.sh        # 项目与宿主检测
-│   ├── templates.sh        # AGENTS.md 模板生成
 │   ├── updates.sh          # 版本管理与依赖检查
 │   ├── commands.sh         # 子命令入口
 │   └── init-interview.sh   # Init 交互流程
@@ -336,7 +337,7 @@ setup                       # 宿主安装与同步
 └── tests/                  # 内核合同测试
 ```
 
-**模块加载顺序**: output → detection → templates → updates → commands → init-interview
+**模块加载顺序**: detection → updates → commands → init-interview
 
 **宿主集成**:
 
