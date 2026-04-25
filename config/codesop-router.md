@@ -56,6 +56,8 @@
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
+PR review 反馈路径：receiving-code-review → superpowers:finishing-a-development-branch（receiving-code-review 内含逐项测试验证，finishing Step 1 自带全量测试门禁，无需额外插入 verification-before-completion）
+
 调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch
 
 ### Codex 路由

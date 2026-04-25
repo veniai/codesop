@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [3.4.1] - 2026-04-25
+
+### Added
+- PR Review 反馈链路：路由表补 receiving-code-review → finishing-a-development-branch 路径（含完整说明：receiving 内含测试验证，finishing Step 1 自带全量测试门禁）
+- SKILL.md 冲突解决表新增 review feedback 条目
+- README.md / README.en.md Code Review 反馈场景更新（三层同步）
+
+### Fixed
+- PRD §5.7 目标架构：移除已删除模块（templates.sh、output.sh），更新模块加载顺序
+
 ## [3.4.0] - 2026-04-25
 
 ### Added

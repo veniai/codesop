@@ -7,7 +7,7 @@
 A skill-first operating system for AI-assisted coding workflows. The current core keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](VERSION)
 
 ---
 
@@ -103,7 +103,7 @@ The routing table (`config/codesop-router.md`) is the single source of truth for
 | New feature | brainstorming → codex:rescue → writing-plans → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
 | Bug fix | systematic-debugging → verification → ☆claude-md → finishing |
 | Small change | subagent-dev → ☆simplifier → verification → finishing |
-| Review feedback | receiving-code-review → fix → verification → reply |
+| Review feedback | receiving-code-review → finishing (includes full test gate) |
 
 ☆ = only if plugin available. Full rules in routing table.
 
