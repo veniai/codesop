@@ -52,7 +52,7 @@
 
 ### 链路组装（路由表是链路唯一真相源）
 所有链路必须应用以下插入规则（☆=有插件时走）：
-开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue | using-git-worktrees 仅用户明确要求时插入，默认只开分支
+开发前 → 如在 main/master 上则插入衔接任务"创建 feat/ 分支"（条件性，用户可覆盖为 worktree）| 开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue | using-git-worktrees 仅用户明确要求时插入，默认只开分支
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
