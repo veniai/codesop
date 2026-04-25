@@ -16,7 +16,6 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Source the library modules in correct order
 source "$ROOT_DIR/lib/output.sh"
 source "$ROOT_DIR/lib/detection.sh"
-source "$ROOT_DIR/lib/templates.sh"
 source "$ROOT_DIR/lib/updates.sh"
 source "$ROOT_DIR/lib/init-interview.sh"
 
