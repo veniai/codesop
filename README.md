@@ -7,7 +7,7 @@
 skill-first 的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init` 和 `update`。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](VERSION)
 
 ---
 
@@ -72,11 +72,15 @@ codesop update
    - `AGENTS.md` → `@CLAUDE.md`（轻量引用）
    - `PRD.md` → 活文档（产品规范 + 进度 + 工作日志）
    - `README.md` → 安装/运行/测试命令（如不存在）
+   - `CONTEXT.md` → 领域词汇表（可选，按需懒创建）
+   - `docs/adr/` → 架构决策记录（可选，按需懒创建）
 4. CLAUDE.md 由 Claude Code 的 `/init` 生成，codesop 不覆盖
 
 其中：
 - `AGENTS.md` 是宿主工具的入口，指向 `CLAUDE.md`
 - `PRD.md` 同时承担产品规范和当前工作记录
+- `CONTEXT.md` 提供领域词汇管理，让 AI 对齐项目术语（可选，懒创建）
+- `docs/adr/` 提供架构决策记录，追踪关键设计选择（可选，懒创建）
 - 默认中文，自动推断 test/lint/typecheck/smoke 命令
 
 ## 文档收尾规则
