@@ -684,6 +684,15 @@ generate_project_files() {
     echo "✓ README.md 已存在"
   fi
 
+  # 4. docs/adr/ — ADR directory with .gitkeep
+  if [ ! -d ./docs/adr ]; then
+    mkdir -p ./docs/adr
+    touch ./docs/adr/.gitkeep
+    echo "✓ 创建 docs/adr/"
+  else
+    echo "✓ docs/adr/ 已存在"
+  fi
+
   # CLAUDE.md 由 Claude Code /init 生成，此处不处理
 
   # Output adapt mode signal for skill layer
