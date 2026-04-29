@@ -51,14 +51,14 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   └── codesop-router.md   # Router card
 ├── templates/
 │   ├── system/             # System-level AGENTS.md template
-│   ├── project/            # Project-level templates (PRD.md, README.md)
+│   ├── project/             # Project-level templates (PRD.md, README.md, CONTEXT.md, adr-template.md)
 │   └── init/               # Init prompt templates
 ├── docs/                   # Design specs and implementation plans
 │   └── superpowers/
 │       ├── specs/          # Approved design documents
 │       └── plans/          # Implementation plans
 ├── patches/                # Skill patches applied by setup on sync
-│   └── superpowers/        # Modified superpowers skill files
+│   └── superpowers/        # Modified superpowers skill files (writing-plans, finishing-branch, brainstorming)
 ├── setup                   # Host-aware installation script (router card + hook config + skill patches)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)

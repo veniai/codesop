@@ -193,6 +193,16 @@ patch_skills() {
     fi
   fi
 
+  # brainstorming: grill enhancement
+  local bs="$plugin_dir/skills/brainstorming/SKILL.md"
+  local bs_patch="$patches_dir/brainstorming-SKILL.md"
+  if [ -f "$bs" ] && [ -f "$bs_patch" ]; then
+    if ! diff -q "$bs" "$bs_patch" >/dev/null 2>&1; then
+      cp "$bs_patch" "$bs"
+      patched=$((patched + 1))
+    fi
+  fi
+
   if [ "$patched" -gt 0 ]; then
     echo "  ✓ Skill patches applied ($patched files)"
   fi

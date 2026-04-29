@@ -8,7 +8,7 @@
 | 大类 | 优选 | 来源 | Skill | 什么时候用 |
 |------|------|------|-------|-----------|
 | **1. 需求分析与设计** | | | | |
-| | ★ | sp | superpowers:brainstorming | 任何新功能/改动前：理解需求→澄清问题→出设计方案→写 spec→spec 自审→用户审阅 |
+| | ★ | sp | superpowers:brainstorming | 任何新功能/改动前：理解需求→grill 式术语对齐→澄清问题→出设计方案→写 spec→spec 自审→用户审阅；架构审查/重构/模块边界 |
 | | ★ | plugin | codex:rescue | spec 完成后的独立设计审查（双 AI 设计审查，必走） |
 | | ★ | plugin | frontend-design:frontend-design | 做前端 UI 时：强制设计思维阶段，拒绝通用 AI 审美，独特的排版/配色/动效 |
 | **2. 生成执行文档** | | | | |
@@ -58,7 +58,7 @@
 
 PR review 反馈路径：receiving-code-review → superpowers:finishing-a-development-branch（receiving-code-review 内含逐项测试验证，finishing Step 1 自带全量测试门禁，无需额外插入 verification-before-completion）
 
-调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch
+调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch；修 bug 后追问架构反思，如有价值建议写 ADR
 
 ### Codex 路由
 用户提到 codex（"让 codex 看看"、"交给 codex"、"codex 审查"、"第二意见"）时：
@@ -66,7 +66,7 @@ PR review 反馈路径：receiving-code-review → superpowers:finishing-a-devel
 codex:review 和 codex:adversarial-review 需用户手动输入，AI 不可自动调用。需要审查功能时，用 rescue 并在 prompt 中指定审查意图。
 
 ### 铁律
-- 跳过必走 Skill = 先输出对齐块说明原因
-- Task 指定了 skill 就必须调用，不能 inline 替代
+- 跳过必走 Skill = 先输出对齐块说明原因；Task 指定了 skill 就必须调用，不能 inline 替代
 - 不确定 → 先调用 /codesop
 - 任务完成后及时标记，过期/废弃任务及时清理，不堆积
+- 领域语言：涉及需求/架构/跨模块改动时先读 CONTEXT.md 和 ADR（如存在），用术语，发现缺口标记，发现冲突指出
