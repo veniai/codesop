@@ -2,6 +2,37 @@
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-04-29
+
+### Added
+- 变更影响矩阵：文档判定 gate 按变更类型（命令/目录/环境变量/依赖/API 等）精确映射到必检文档段落
+- 自检清单：文档判定输出前 5 条硬检查，防止漏改
+- SKILL.md §5 completion gate 流程从 3 步扩展为 4 步（识别变更类型 → 逐个判断 → 自检 → 输出）
+
+### Changed
+- AGENTS.md 文档判定段：通用标准后追加变更影响矩阵（11 行表格）+ 自检清单（5 条）
+
+### Fixed
+- CONTEXT.md 从 PROJECT_DOC_TARGETS 移出：可选文件不应触发 drift 误报
+
+## [3.5.0] - 2026-04-29
+
+### Added
+- CONTEXT.md 领域词汇表模板（懒创建）：术语定义、Avoid 列表、关系、示例对话、模糊点标记
+- ADR 架构决策记录机制（懒创建）：docs/adr/ 目录 + NNNN-kebab-case.md 格式 + 触发条件（不可逆 + 令人意外 + 有真实取舍）
+- Brainstorming patch：grill 模式三行为增强（代码优先回答、决策树追踪、领域词汇对齐）
+- AGENTS.md 架构原则段：Clean Architecture + 深模块合成（定依赖方向 + 定边界质量 + 禁止浅模块）
+- AGENTS.md 领域语言段：跨 skill 领域语言规则（先读 CONTEXT.md 和 ADR，发现缺口标记，发现冲突指出）
+- 路由卡：brainstorming 描述增加 grill 式术语对齐 + 架构审查/重构/模块边界触发范围
+- 路由卡：铁律新增领域语言规则
+- 路由卡：调试路径追加架构反思提示
+- 文档 gate 扩展至可选 CONTEXT.md（SKILL.md + AGENTS.md 判定标准 + updates.sh）
+- Setup patch_skills() 增加 brainstorming 映射
+
+### Changed
+- 路由卡铁律压缩（两行合并为一行），净增 0 行（保持 72 行）
+- 路由卡测试阈值从 72 更新为 75
+
 ## [3.4.1] - 2026-04-25
 
 ### Added
