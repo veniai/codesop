@@ -26,7 +26,7 @@ echo "  PASS"
 # Test 3: Router card length
 echo "Test 3: Router card length..."
 lines=$(wc -l < "$ROOT_DIR/config/codesop-router.md" | tr -d ' ')
-[ "$lines" -le 72 ] || fail "Router card is $lines lines (max 72 for v2 lifecycle table)"
+[ "$lines" -le 75 ] || fail "Router card is $lines lines (max 75 for v3 domain layer table)"
 echo "  PASS ($lines lines)"
 
 # Test 4: Setup has new functions
