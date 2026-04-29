@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.5.2] - 2026-04-29
+
+### Added
+- `codesop init` 创建 `docs/adr/` 目录（含 `.gitkeep`），ADR 从懒创建升级为半显式
+- Brainstorming patch 新增 ADR trigger：涉及架构决策/重大权衡时提议写 ADR
+
+### Changed
+- AGENTS.md 领域语言：删除死信号"发现术语缺口时标记"，改写 ADR 冲突规则为有后续动作版本
+
 ## [3.5.1] - 2026-04-29
 
 ### Added
