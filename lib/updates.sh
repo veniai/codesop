@@ -79,6 +79,7 @@ PROJECT_DOC_TARGETS=(
   "AGENTS.md"
   "PRD.md"
   "README.md"
+  "CONTEXT.md"
 )
 
 check_plugin_completeness() {

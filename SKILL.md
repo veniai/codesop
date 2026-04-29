@@ -279,12 +279,14 @@ Before the final answer on any routed implementation task:
 - CLAUDE.md: 已更新 / 未更新，原因：...
 - PRD.md: 已更新 / 未更新，原因：...
 - README.md: 已更新 / 未更新，原因：...
+- CONTEXT.md: 已更新 / 未更新，原因：...（如存在，可选）
 ```
 
 Notes:
 
 - do not list `AGENTS.md` as a separate document decision target; project `AGENTS.md` should stay a thin wrapper to `CLAUDE.md`
 - `CHANGELOG.md` is not part of the default document gate
+- `CONTEXT.md` is optional — only include in the gate output if the file exists in the project
 - for pure refactors, test-only changes, or formatting-only changes, it is valid to mark all three as "未更新" with a concrete reason
 - in a worktree, PRD edits are restricted to the current branch's subsection under "并行开发记录"; global PRD changes require switching to main
 
