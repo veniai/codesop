@@ -9,24 +9,32 @@
   上下文恢复 · Skill 路由 · Pipeline task list · 验证与文档完成关卡
 </p>
 
-# codesop
-
-**AI 编码标准操作流程 / AI Coding SOP**
-
-skill-first 的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init` 和 `update`。
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.5.2-blue.svg)](VERSION)
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  <img src="https://img.shields.io/badge/Claude_Code-Plugin-blue.svg" alt="Claude Code">
+  <img src="https://img.shields.io/badge/version-3.5.2-blue.svg" alt="Version">
+</p>
 
 ---
 
-## 这是什么？
+> 让 AI 助手在任意项目中拥有统一的 workflow 纪律——<br>
+> 知道用什么 skill、按什么顺序执行、什么时候该停下来验证。
 
-跨工具的 AI 编码工作流操作系统，面向 Claude Code、Codex、OpenCode 等 AI 编码助手。
+## 快速体验
 
-核心价值：让 AI 助手在任意项目中拥有统一的 workflow 纪律——知道用什么 skill、按什么顺序执行、什么时候该停下来验证。
+在你的 AI 编码助手中发送：
 
-## 安装
+> 帮我安装 codesop：https://github.com/veniai/codesop
+
+AI 会自动完成克隆和配置。然后：
+
+```bash
+/codesop init .    # 初始化当前项目
+/codesop           # 打开工作台
+```
+
+<details>
+<summary>手动安装</summary>
 
 ```bash
 git clone https://github.com/veniai/codesop.git ~/codesop
@@ -35,113 +43,59 @@ cd ~/codesop && bash install.sh
 
 确保 `~/.local/bin` 在你的 `PATH` 中。
 
-## 安装了什么？
+</details>
 
-| 组件 | 目标路径 | 作用 |
-|------|---------|------|
-| 路由卡 | `~/.claude/codesop-router.md` | SessionStart hook 注入纪律表 |
-| Slash 命令 | `~/.claude/commands/` | `/codesop` + `/codesop-init` + `/codesop-update` |
-| 系统 AGENTS.md | `~/.claude/CLAUDE.md` → `templates/system/AGENTS.md` | 全局 AI 契约 + skill 纪律 |
-| Skill 运行时 | `~/.claude/skills/codesop/` | Skill 文件运行时 |
-| CLI | `~/.local/bin/codesop` | 命令行工具 |
+## 它做什么
 
-## 使用方法
+`/codesop` 是你的 AI 编码工作台。每次进入项目时：
 
-### 初始化新项目
+1. **恢复上下文** — 读取 AGENTS.md、PRD.md，理解项目当前状态
+2. **路由推荐** — 根据你的意图，组装最合适的 skill 链路
+3. **Pipeline 执行** — 将链路转为 task list，逐步自动执行
+4. **验证关卡** — 每个环节完成前必须通过验证，不允许跳过
+
+跨工具支持：Claude Code（主要）· Codex · OpenCode
+
+## 覆盖场景
+
+| 你想做什么 | /codesop 的链路 |
+|-----------|----------------|
+| 新功能 | brainstorming → 设计审查 → 计划 → 开发 → 验证 → 提交 PR |
+| 修 Bug | 定位根因 → 验证 → 提交 PR |
+| 小改动 | 开发 → 验证 → 提交 PR |
+| PR 反馈 | 评估意见 → 修复 → 全量测试 → 提交 |
+
+## 初始化项目
 
 ```bash
 /codesop init .
 ```
 
-### 进入工作台
+自动扫描项目形态，生成 AI 助手所需的项目文件：
+
+- `AGENTS.md` → `@CLAUDE.md`（AI 入口）
+- `PRD.md` → 产品规范 + 进度 + 工作日志
+- `README.md` → 安装/运行/测试命令（如不存在）
+- `docs/adr/` → 架构决策记录
+
+## Skill 生态
+
+codesop 编排以下 skill：
+
+- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-dev, verification
+- **code-review** — 5 agent 并行 PR 审查 + 置信度评分
+- **codex** — 双 AI 审查（设计 + 代码审查阶段）
+- **claude-md-management** — 文档漂移检查
+- **code-simplifier** — 代码润色
 
 ```bash
-/codesop
+/plugin install superpowers                      # Claude Code
+/plugin install code-review
+/plugin marketplace add openai/codex-plugin-cc
 ```
 
-`/codesop` 会输出工作台摘要和下一步建议，最后一行是自然语言工作流指令（1-3 个 skill 串联），按回车即可确认执行。
-
-### Pipeline-to-todo
-
-`/codesop` 会将推荐的链路转为 TaskCreate 任务列表（☐/☑ 可视化进度），防止 AI 遗忘链路中间步骤。再次调用 `/codesop` 时会检测链路是否过期，过期则重新路由。
-
-### 更新
-
-```bash
-codesop update
-# 或
-/codesop-update
-```
-
-## `/codesop init` 会做什么？
-
-1. 扫描项目：判断主语言、项目形态、框架
-2. 检测环境：Claude Code / Codex / OpenCode / superpowers
-3. 生成项目文件：
-   - `AGENTS.md` → `@CLAUDE.md`（轻量引用）
-   - `PRD.md` → 活文档（产品规范 + 进度 + 工作日志）
-   - `README.md` → 安装/运行/测试命令（如不存在）
-   - `CONTEXT.md` → 领域词汇表（可选，按需懒创建）
-   - `docs/adr/` → 架构决策记录（可选，按需懒创建）
-4. CLAUDE.md 由 Claude Code 的 `/init` 生成，codesop 不覆盖
-
-其中：
-- `AGENTS.md` 是宿主工具的入口，指向 `CLAUDE.md`
-- `PRD.md` 同时承担产品规范和当前工作记录
-- `CONTEXT.md` 提供领域词汇管理，让 AI 对齐项目术语（可选，懒创建）
-- `docs/adr/` 提供架构决策记录，追踪关键设计选择（可选，懒创建）
-- 默认中文，自动推断 test/lint/typecheck/smoke 命令
-
-## 文档收尾规则
-
-- `/codesop` 路由后的实现任务，在最终回复前必须判定 `CLAUDE.md`、`PRD.md`、`README.md` 是否需要更新
-- 如果任一文档需要更新，优先调用 `claude-md-management`
-- `AGENTS.md` 不进入默认判定集合，因为它应始终保持为 `@CLAUDE.md` 的薄包装
-- `CHANGELOG.md` 不属于默认强制集合
-- `/codesop` 会先做一次文档漂移判断，再决定是否把文档更新编进工作流链
-
-## 版本规则
-
-- `VERSION` 是发布版本的唯一真相源
-- `skill.json` 和 `PRD.md` 中的版本号必须与 `VERSION` 一致
-- `CHANGELOG.md` 顶部默认使用 `Unreleased`，真正进入发布流程时再切成具体版本
-- git tag 只在 ship 阶段创建，例如 `v3.0.1`
-
-## 产品边界
-
-- 主流程只有一个：`/codesop`
-- 机械命令只有两个：`codesop init`、`codesop update`
-- 主要围绕 Claude Code 设计和测试，Codex / OpenCode 可部分适配
-
-## 覆盖场景
-
-链路的唯一真相源是路由表（`config/codesop-router.md`）的 **链路组装** 规则。以下为典型场景的链路示意（非穷举）：
-
-| 场景 | 链路示意 |
-|------|----------|
-| 新功能 | brainstorming → codex:rescue → writing-plans → subagent-dev → ☆simplifier → verification → ☆claude-md → finishing → code-review → codex:rescue → receiving-code-review |
-| Bug 修复 | systematic-debugging → verification → ☆claude-md → finishing |
-| 小改动 | subagent-dev → ☆simplifier → verification → finishing |
-| Code Review 反馈 | receiving-code-review → finishing（含全量测试门禁） |
-
-☆ = 有插件时走。完整插入规则见路由表链路组装段。
-
-## 依赖
-
-codesop 编排以下 skill 生态：
-
-- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-driven-dev, verification-before-completion, receiving-code-review
-- **code-review** — PR 审查：5 agent 并行 + 置信度评分
-- **codex** — codex:rescue 双 AI 审查（设计阶段 + 代码审查阶段必走）
-- **claude-md-management** — 文档漂移检查（验证后、提交前必走）
-- **code-simplifier** — 代码润色（开发后、验证前）
-
-安装方式：
-- superpowers: `/plugin install superpowers`（Claude Code）
-- code-review: `/plugin install code-review`
-- codex: `/plugin marketplace add openai/codex-plugin-cc`
-
-## 架构
+<details>
+<summary>架构</summary>
 
 ```
 codesop                     # CLI 入口
@@ -156,22 +110,21 @@ setup                       # 宿主安装与同步
 │   ├── project/            # PRD.md, README.md 模板
 │   └── init/               # Init prompt 模板
 ├── tests/                  # 合同测试
-│   └── run_all.sh          # 统一测试入口
 ├── AGENTS.md               # → @CLAUDE.md
 ├── CLAUDE.md               # 项目指南
 ├── PRD.md                  # 活文档
 ```
 
-## 测试
+</details>
+
+<details>
+<summary>测试</summary>
 
 ```bash
-# 统一入口
 bash tests/run_all.sh
-
-# 或逐个运行
-bash tests/codesop-router.sh
-bash tests/detect-environment.sh
 ```
+
+</details>
 
 ## License
 
