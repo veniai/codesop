@@ -95,7 +95,9 @@
 
 #### 2.3.3 §4.2 Skill Ecosystem（line 162-172）
 
-**当前 11 行**。压缩到 5 行。
+**当前 11 行**。压缩到 6 行。
+
+**测试约束**：`文档状态`（line 172）被 codesop-router.sh:49 检查，必须保留。
 
 **改为**：
 ```markdown
@@ -106,10 +108,10 @@
 - 路由覆盖：（粘贴 check_routing_coverage 输出）
 ```
 
-三种结果映射："路由覆盖完整"→"✓ 路由覆盖完整"，不完整→显示原文含缺失条目，模块不可用→标注。此区只反映 skill 生态，不用于项目文档判断。
+三种结果映射："路由覆盖完整"→"✓ 路由覆盖完整"，不完整→显示原文含缺失条目，模块不可用→标注。此区块只反映 codesop 的 skill/runtime 生态，当前项目文档状态应放在 `## 工作台摘要` 中。
 ```
 
-**行数变化**：11 → 5。**测试影响**：无（没有测试检查 §4.2 内容）。
+**行数变化**：11 → 6。**测试检查**：`文档状态` 保留在最后一行中。
 
 #### 2.3.4 §4.3 Pipeline Dashboard（line 174-220）
 
@@ -180,11 +182,11 @@ pipeline 执行中（task list 已确认），不问，自动执行下一个。
 | §3 TaskCreate 规范 | 7 | 5 | -2 |
 | §3 衔接任务 | 6 | 3 | -3 |
 | §4.1 Workbench Summary | 18 | 9 | -9 |
-| §4.2 Skill Ecosystem | 11 | 5 | -6 |
+| §4.2 Skill Ecosystem | 11 | 6 | -5 |
 | §4.3 Pipeline Dashboard | 47 | ~30 | -17 |
 | §4.4 Final Line | 18 | 12 | -6 |
 | 其余不动区域 | ~223 | ~223 | 0 |
-| **总计** | **330** | **~287** | **-43** |
+| **总计** | **330** | **~288** | **-42** |
 
 **精简比：13%**，比初版的 40% 保守得多。但这是经过测试审计的安全精简。
 
@@ -194,7 +196,7 @@ pipeline 执行中（task list 已确认），不问，自动执行下一个。
 
 **当前 ~47 行**。四层叠加（语义 + 矩阵 + checklist + 格式）。
 
-**测试约束**：`codesop-router.sh` 检查 `Skill 纪律` 标题和 `任务对齐块`，不在此区域。`detect-environment.sh` 检查 `## 文档判定` 和 `- CLAUDE.md: 已更新 / 未更新，原因：...`，这两个在格式层，必须保留。
+**测试约束**：`codesop-router.sh` 检查 `Skill 纪律` 标题和 `任务对齐块`，不在此区域。`detect-environment.sh` 检查的是 SKILL.md 中的 `## 文档判定` 和 `- CLAUDE.md: 已更新 / 未更新，原因：...`（在 SKILL.md §5 Completion Gate 中），不是 AGENTS.md。AGENTS.md 的文档判定内容没有任何测试直接检查。
 
 **精简方案**：
 - 语义层（line 87-93）：保留
@@ -292,7 +294,7 @@ pipeline 执行中（task list 已确认），不问，自动执行下一个。
 | codesop-router.sh:41 | `Skill 纪律` | ✅ 保留（AGENTS.md 精简后仍有） |
 | codesop-router.sh:42 | `任务对齐块` | ✅ 保留（AGENTS.md 精简后仍有） |
 | codesop-router.sh:48 | `工作台摘要` | ✅ 保留 |
-| codesop-router.sh:49 | `文档状态` | ✅ 保留（§4.1 模板中） |
+| codesop-router.sh:49 | `文档状态` | ✅ 保留（§4.2 精简后仍有） |
 | codesop-router.sh:50 | `下一步建议` | ✅ 保留 |
 | codesop-router.sh:51 | `workflow instruction` | ✅ 保留（§4 开头 line 139） |
 | codesop-router.sh:52 | `document drift scan` | ✅ 保留（§3.8 不动） |
