@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Skill-first workflow OS for AI-assisted coding</strong><br>
-  Context restore · Skill routing · Pipeline task list · Verification and document gates
+  Give your AI SOP discipline — knowing which skill to use, what order to execute, and when to stop and verify
 </p>
 
 <p align="center">
@@ -17,16 +17,20 @@
 
 ---
 
-> Give AI assistants unified workflow discipline in any project —<br>
-> knowing which skill to use, what order to execute, and when to stop and verify.
-
 ## Quick Start
 
-Send this to your AI coding assistant:
+**Copy and paste** this prompt to your AI coding assistant:
 
-> Install codesop for me: https://github.com/veniai/codesop
+```text
+Install codesop — an AI coding workflow OS. Follow these steps:
+1. git clone https://github.com/veniai/codesop.git ~/codesop
+2. cd ~/codesop && bash install.sh
+3. Verify ~/.local/bin/codesop is executable (add ~/.local/bin to PATH in ~/.bashrc or ~/.zshrc if needed)
+4. Run codesop init . in the current project directory to initialize
+After installation, explain how to use the /codesop workbench.
+```
 
-The AI handles cloning and configuration. Then:
+Once installed:
 
 ```bash
 /codesop init .    # Initialize current project
@@ -50,11 +54,27 @@ Make sure `~/.local/bin` is on your `PATH`.
 `/codesop` is your AI coding workbench. Every time you enter a project:
 
 1. **Restore context** — reads AGENTS.md and PRD.md to understand project state
-2. **Route** — assembles the best skill chain for your intent
-3. **Pipeline execution** — converts the chain into a task list, auto-executes step by step
+2. **Route** — selects the best skill chain from the routing table based on your intent
+3. **Pipeline execution** — converts the chain into a task list (☐/☑ progress), auto-executes step by step
 4. **Verification gate** — every step must pass verification before completion, no skipping
 
 Cross-tool support: Claude Code (primary) · Codex · OpenCode
+
+## Key Highlights
+
+**Four Iron Laws** — Design before coding · Fail before producing · No fix without root cause · No completion without evidence
+
+**Skill Routing** — Routing-table-driven skill selection. New features go through brainstorming → plan → dev → verify. Bugs go through debugging → verify. No guessing.
+
+**Long Task Orchestration** — Pipeline task list with auto-split, sequential execution, and visual progress. Long development sessions stay on track without losing control.
+
+**Iterative Questioning** — The brainstorming skill uses iterative requirement clarification: ask → understand → ask deeper, progressively converging on real requirements before writing any code.
+
+**Context Management** — Dual-document context restore (AGENTS.md for discipline + PRD.md for product progress). AI recovers full project context automatically every session.
+
+**ADR (Architecture Decision Records)** — Auto-detects architecture decision conflicts. Reads ADRs before cross-module changes, preventing duplicate or contradictory decisions.
+
+**Documentation Gate** — Before completing any task, auto-evaluates whether CLAUDE.md / PRD.md / README.md need updates, preventing docs from drifting behind code.
 
 ## Scenarios
 
@@ -65,20 +85,8 @@ Cross-tool support: Claude Code (primary) · Codex · OpenCode
 | Small change | dev → verify → submit PR |
 | PR feedback | evaluate → fix → full test → submit |
 
-## Initialize a project
-
-```bash
-/codesop init .
-```
-
-Auto-scans project shape and generates the files your AI assistant needs:
-
-- `AGENTS.md` → `@CLAUDE.md` (AI entry point)
-- `PRD.md` → product spec + progress + work log
-- `README.md` → install/run/test commands (if missing)
-- `docs/adr/` → architecture decision records
-
-## Skill Ecosystem
+<details>
+<summary>Skill Ecosystem</summary>
 
 codesop orchestrates these skills:
 
@@ -93,6 +101,24 @@ codesop orchestrates these skills:
 /plugin install code-review
 /plugin marketplace add openai/codex-plugin-cc
 ```
+
+</details>
+
+<details>
+<summary>Initialize a project</summary>
+
+```bash
+/codesop init .
+```
+
+Auto-scans project shape and generates the files your AI assistant needs:
+
+- `AGENTS.md` → `@CLAUDE.md` (AI entry point)
+- `PRD.md` → product spec + progress + work log
+- `README.md` → install/run/test commands (if missing)
+- `docs/adr/` → architecture decision records
+
+</details>
 
 <details>
 <summary>Architecture</summary>
