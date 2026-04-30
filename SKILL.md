@@ -106,19 +106,15 @@ When this skill triggers:
      - If rejected → adjust and re-propose
 
 **Pipeline TaskCreate 规范**：
-- 链路中每个步骤（skill 或衔接工作）创建一个 task
-- subject：有 skill 写 `使用 {routing-table-skill-name} Skill 做{描述}`（指令式，明确标注 Skill 强制调用），衔接工作写 `{描述}`
-  - **注意**：`{routing-table-skill-name}` 必须是纯 skill 名称（如 `code-simplifier:code-simplifier`），不含 `(☆/★)` 标记——标记只在 §4.3 dashboard 显示层使用，不能进入 task subject
-- metadata：skill 任务 `{source: "codesop-pipeline", skill: "routing-table-skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`（有 `skill` 键 = skill 任务，没有 = 衔接任务）
-- 逐个顺序创建（不并行），第 N+1 个 `addBlockedBy` 第 N 个的 ID，保证执行顺序
-- 第一个 task 创建后立即执行
+- 链路中每个步骤创建一个 task，subject 用指令式（有 skill 写"使用 {skill-name} Skill 做{描述}"，不含 ☆/★）
+- metadata：skill 任务 `{source: "codesop-pipeline", skill: "skill-name"}`，衔接任务 `{source: "codesop-pipeline"}`
+- 逐个顺序创建，第 N+1 个 blockedBy 第 N 个
+- 衔接任务（无 skill）：从上下文推断该做什么，完成后 TaskUpdate(completed)
 
 **衔接任务 — 创建分支**：
-- 条件：当组装"新功能"类链路且当前分支是 main/master 时，在 writing-plans 后、subagent-driven-development 前插入
-- subject: `创建 feat/ 分支`
-- metadata: `{source: "codesop-pipeline"}`（衔接任务，无 skill 键）
-- 执行时：从上下文推断分支名（PRD 里程碑、spec 文件名、用户原始请求），`git checkout -b feat/<feature-name>`，TaskUpdate(completed)
-- 用户说"用 worktree"时，衔接任务改为"创建 worktree 并切换"
+- 新功能链路且当前在 main/master 时，在 writing-plans 后、开发前插入
+- 用户说"用 worktree"时改为 worktree
+- 完成后 TaskUpdate(completed)
 
 **Pipeline Re-entry**: After any routed task completes:
 1. TaskUpdate(taskId, status: "completed") — 标记完成
@@ -146,51 +142,25 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 ## 工作台摘要
 **状态**: {分支名} — {一句话描述当前在干什么}
 **分支**: {分支名}（{PR 状态}）
+**注意**: {具体内容}（仅在异常时加此行，无异常不输出）
 ```
 
-如果有需要关注的异常（文档漂移、阻塞/风险、重要决策），加一行：
-```md
-**注意**: {具体内容}
-```
+2 个必显字段（**状态** + **分支**），每行一个 bold key + inline value。摘要反映当前分支上下文。
 
-**规则**：
-- Exactly 2 fields always shown: **状态** + **分支**
-- **注意** field: only when there's something actionable. 如果文档无漂移、无阻塞、无重要决策 → 不显示。永远不输出"无"
-- Each field on its own line — bold key with inline value
-- 摘要必须反映当前 git 分支的上下文。在 main 分支就讲 main 的事，在 feature 分支就讲 feature 分支的事
-
-### 4.2 Skill Ecosystem (放在 Skill 建议之前)
+### 4.2 Skill Ecosystem
 
 ```md
 ## Skill 生态
 - 路由覆盖：（粘贴 check_routing_coverage 输出）
-  - "路由覆盖完整"→ "✓ 路由覆盖完整"
-  - 不完整 → 显示原文（含缺失条目列表）
-  - 模块不可用 → "路由覆盖：模块不可用"
 ```
 
-这个区块只反映 codesop 的 skill/runtime 生态，不用于判断当前项目文档是否健康。当前项目文档状态应放在 `## 工作台摘要` 中。
+三种结果映射："路由覆盖完整"→"✓ 路由覆盖完整"，不完整→显示原文含缺失条目，模块不可用→标注。此区块只反映 codesop 的 skill/runtime 生态，当前项目文档状态应放在 `## 工作台摘要` 中。
 
 ### 4.3 Pipeline Dashboard
 
 Show the pipeline as a numbered list. Use **routing table's full skill names** (e.g. `superpowers:brainstorming`, not `brainstorming`). Apply **链路完整性** principle: after chain assembly, check for logical gaps between adjacent skills and insert transition tasks.
 
-**Proposing new pipeline**:
-
-```md
-## 下一步建议
-提议 Pipeline：
-1. 使用 superpowers:brainstorming Skill 做需求澄清和设计
-2. 使用 codex:rescue Skill 做设计审查
-3. 根据审查反馈修订方案
-4. 使用 superpowers:writing-plans Skill 做拆分执行计划
-5. 创建 feat/ 分支
-6. 使用 superpowers:subagent-driven-development Skill 做开发实施
-7. 使用 code-simplifier:code-simplifier(☆) Skill 做代码润色
-8. 使用 superpowers:verification-before-completion Skill 做验证
-9. 使用 claude-md-management:claude-md-improver(☆) Skill 做文档审计
-10. 使用 superpowers:finishing-a-development-branch Skill 做提交 PR
-```
+**Proposing new pipeline** — 见 §4.5 Complete Example。
 
 **Continuing existing pipeline**:
 
@@ -224,9 +194,7 @@ Show the pipeline as a numbered list. Use **routing table's full skill names** (
 首次确认或上下文变化时，末行必须是疑问句，以"吗？"结尾。用户按 Enter 即可确认。
 pipeline 执行过程中（task list 已确认），不问，自动执行下一个。
 
-**两种确认句式**：
-1. **Proposing**: `要把这个 pipeline 转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
-2. **Stale**: `检测到上下文变化（{reason}），建议新 pipeline。要转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`
+**确认句式**：`要把这个 pipeline 转成 task list 并从 {first-skill} Skill 开始做 {intent} 吗？`（上下文变化时在句首加变化原因）。
 
 **场景适配**：
 - 工作区有未提交改动：task list 前置 superpowers:finishing-a-development-branch 处理
