@@ -1,5 +1,14 @@
 [English](README.en.md) | **中文**
 
+<p align="center">
+  <img src="docs/assets/codesop-readme-hero.png" alt="codesop — AI Coding SOP" width="100%">
+</p>
+
+<p align="center">
+  <strong>Skill-first 的 AI 编码工作流操作系统</strong><br>
+  上下文恢复 · Skill 路由 · Pipeline task list · 验证与文档完成关卡
+</p>
+
 # codesop
 
 **AI 编码标准操作流程 / AI Coding SOP**

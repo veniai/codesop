@@ -1,5 +1,14 @@
 **English** | [中文](README.md)
 
+<p align="center">
+  <img src="docs/assets/codesop-readme-hero.png" alt="codesop — AI Coding SOP" width="100%">
+</p>
+
+<p align="center">
+  <strong>Skill-first workflow OS for AI-assisted coding</strong><br>
+  Context restore · Skill routing · Pipeline task list · Verification and document gates
+</p>
+
 # codesop
 
 **AI Coding Standard Operating Procedure**
@@ -7,7 +16,7 @@
 A skill-first operating system for AI-assisted coding workflows. The current core keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.4.1-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.5.2-blue.svg)](VERSION)
 
 ---
 
