@@ -159,6 +159,10 @@ bash tests/run_all.sh
 
 </details>
 
+## Related Projects
+
+- **[cc-monitor](https://github.com/veniai/cc-monitor)** — Remote monitoring and control for Claude Code. Get notified on WeChat/DingTalk/Feishu when tasks complete, auto-recover stuck sessions, send commands from your phone. Pair with codesop: codesop orchestrates the workflow, cc-monitor watches from your phone.
+
 ## License
 
 MIT

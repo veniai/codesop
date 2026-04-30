@@ -161,6 +161,10 @@ bash tests/run_all.sh
 
 </details>
 
+## 相关项目
+
+- **[cc-monitor](https://github.com/veniai/cc-monitor)** — Claude Code 远程监控与控制。任务完成自动通知到微信/钉钉/飞书，会话卡死自动恢复，手机远程发命令。搭配 codesop 使用：codesop 编排 workflow，cc-monitor 在手机上帮你盯着
+
 ## License
 
 MIT
