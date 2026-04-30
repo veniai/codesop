@@ -17,6 +17,10 @@
 
 ---
 
+> 不知道怎么让 AI 帮你写代码？不知道该给 AI 准备什么文档？长任务做到一半就失控？AI 写完代码你不敢用？
+>
+> codesop 解决这些问题。装一次，所有项目 AI-ready。
+
 ## 快速体验
 
 把下面这段话**复制粘贴**给你的 AI 编码助手：
@@ -62,15 +66,17 @@ cd ~/codesop && bash install.sh
 
 ## 核心亮点
 
-**SOP 四条铁律** — 先设计再编码 · 先失败再生产 · 无根因不修 bug · 无证据不完工
+**一键初始化** — 安装后运行 `/codesop init .`，自动生成全部 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（使用说明）、ADR（架构决策）。同时同步系统级配置到 `~/.claude/CLAUDE.md`。装一次，所有项目 AI-ready
 
-**Skill 路由** — 路由表驱动的 Skill 选择。新功能走 brainstorming → plan → dev → verify，修 bug 走 debugging → verify，不做猜测
+**SOP 四条铁律** — 先设计再编码 · 先失败再生产 · 无根因不修 bug · 无证据不完工。AI 不能随便写代码，每一步都有纪律约束
 
-**长任务编排** — Pipeline task list 自动拆分、顺序执行、进度可视化。长时间开发任务也能稳定推进，不会中途失控
+**Skill 路由** — 不知道该用什么 Skill？路由表自动选择。新功能走 brainstorming → plan → dev → verify，修 bug 走 debugging → verify，不用你自己判断
+
+**长任务编排** — Pipeline task list 自动拆分、顺序执行、☐/☑ 进度可视化。长时间开发任务也能稳定推进，不会中途失控
 
 **循环追问** — brainstorming Skill 采用迭代式需求澄清：一轮提问 → 理解 → 再追问，逐步逼近真实需求，拒绝拍脑袋开工
 
-**Context 管理** — 双文档上下文恢复（AGENTS.md 管纪律 + PRD.md 管产品进度）。每次进入项目，AI 自动恢复完整上下文
+**Context 管理** — 每次进入项目，AI 自动读取 AGENTS.md（纪律）+ PRD.md（产品进度），恢复完整上下文。不用担心 AI 忘了之前做了什么
 
 **ADR 架构决策记录** — 自动检测架构决策冲突。涉及跨模块改动时，先读 ADR 再动手，避免重复决策和矛盾
 

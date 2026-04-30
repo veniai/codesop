@@ -17,6 +17,10 @@
 
 ---
 
+> Don't know how to get AI to write code for you? Don't know what docs to prepare? Long tasks spinning out of control? Afraid to trust AI-generated code?
+>
+> codesop solves these problems. Install once, every project is AI-ready.
+
 ## Quick Start
 
 **Copy and paste** this prompt to your AI coding assistant:
@@ -62,15 +66,17 @@ Cross-tool support: Claude Code (primary) · Codex · OpenCode
 
 ## Key Highlights
 
-**Four Iron Laws** — Design before coding · Fail before producing · No fix without root cause · No completion without evidence
+**One-Command Init** — Run `/codesop init .` after installing. Auto-generates all AI collaboration docs: AGENTS.md (discipline), PRD.md (product progress), README.md (usage guide), ADR (architecture decisions). Also syncs system-level config to `~/.claude/CLAUDE.md`. Install once, every project is AI-ready.
 
-**Skill Routing** — Routing-table-driven skill selection. New features go through brainstorming → plan → dev → verify. Bugs go through debugging → verify. No guessing.
+**Four Iron Laws** — Design before coding · Fail before producing · No fix without root cause · No completion without evidence. AI can't just write code freely — every step is discipline-constrained.
 
-**Long Task Orchestration** — Pipeline task list with auto-split, sequential execution, and visual progress. Long development sessions stay on track without losing control.
+**Skill Routing** — Don't know which skill to use? The routing table picks for you. New features → brainstorming → plan → dev → verify. Bugs → debugging → verify. No guessing required.
+
+**Long Task Orchestration** — Pipeline task list with auto-split, sequential execution, ☐/☑ visual progress. Long development sessions stay on track without losing control.
 
 **Iterative Questioning** — The brainstorming skill uses iterative requirement clarification: ask → understand → ask deeper, progressively converging on real requirements before writing any code.
 
-**Context Management** — Dual-document context restore (AGENTS.md for discipline + PRD.md for product progress). AI recovers full project context automatically every session.
+**Context Management** — Every time you enter a project, AI auto-reads AGENTS.md (discipline) + PRD.md (product progress) and restores full context. No more "AI forgot what it did last time."
 
 **ADR (Architecture Decision Records)** — Auto-detects architecture decision conflicts. Reads ADRs before cross-module changes, preventing duplicate or contradictory decisions.
 
