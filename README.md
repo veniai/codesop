@@ -7,7 +7,7 @@
 skill-first 的 AI 编码工作流操作系统。当前内核只保留 1 套主流程 `/codesop`，以及 2 个机械命令 `init` 和 `update`。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-3.5.2-blue.svg)](VERSION)
 
 ---
 

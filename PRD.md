@@ -319,7 +319,7 @@
 - `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
-- **Now (v3.3.x)**: 按需迭代，稳定维护
+- **Now (v3.5.x)**: 稳定维护，按需迭代
 - **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
