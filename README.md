@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-blue.svg" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-3.5.2-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.6.0-blue.svg" alt="Version">
 </p>
 
 ---
@@ -39,6 +39,7 @@
 ```bash
 /codesop init .    # 初始化当前项目
 /codesop           # 打开工作台，开始工作
+/codesop update    # 更新到最新版本
 ```
 
 <details>
@@ -146,6 +147,8 @@ setup                       # 宿主安装与同步
 ├── CLAUDE.md               # 项目指南
 ├── PRD.md                  # 活文档
 ```
+
+`VERSION` 是发布版本的唯一真相源。Skill 路由完成后，最后一行输出自然语言工作流指令。路由前执行文档漂移扫描，确保项目文档不落后。
 
 </details>
 

@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.5.2
-# Last Updated: 2026-04-24
+# Current Version: 3.6.0
+# Last Updated: 2026-04-30
 # Status: active
 
 ---
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.5.0 领域语言层 + 架构原则增强
+- **当前里程碑**: v3.6.0 README 重设计 + AI 安装提示 + 亮点展示
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.5.0 发布 — 领域语言层 + 架构原则增强
+- **最后更新原因**: v3.6.0 发布 — README 重设计（AI 安装提示 + 痛点开场 + 核心亮点）
 
 ## 2. 当前进度
 
@@ -38,6 +38,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.6.0: README 重设计 — AI 安装提示（结构化多步指令）、痛点开场（面向不会用 AI 编程的用户）、核心亮点展示（一键初始化/SOP铁律/Skill路由/长任务编排/循环追问/Context/ADR/文档关卡）、详情折叠化
 - [x] v3.5.0: 领域语言层 + 架构原则增强 — CONTEXT.md 领域词汇表、ADR 架构决策记录、brainstorming grill patch、跨 skill 领域语言规则、路由卡增强、文档 gate 扩展
 - [x] v3.4.1: PR Review 反馈链路补全 — 路由表+SKILL.md+README 三层同步补 receiving-code-review → finishing 反馈路径；含代码库全面清理（删死模块/函数、统一测试、Pipeline 分支衔接）
 - [x] v3.3.3: writing-plans skill patch Pipeline Continuation 触发器 — 补回 skill ending 的 next-step 指导
@@ -76,6 +77,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-04-30 | README 重设计：AI 安装提示 + 痛点开场 + 亮点展示 | 首页无法传达核心价值，AI 安装提示太模糊 | README 中英文全面重写，参考 oh-my-opencode 模式 |
 | 2026-04-29 | 新增领域语言层 + 架构原则增强 | Matt Pocock skills 研究后提取行为，不搬文件 | CONTEXT.md + ADR + grill patch + 深模块原则 |
 | 2026-04-09 | 路由表链路组装规则替换调试路径 | AI 照抄 SKILL.md 示例链路，跳过 code-simplifier/claude-md-management | 路由表加链路组装段，SKILL.md 示例去硬编码 |
 | 2026-04-12 | pipeline-to-todo: 链路转 TaskCreate 可视化 | AI 频繁遗忘链路中间步骤（simplifier/claude-md） | SKILL.md 加 step 10.5 + pipeline dashboard + re-entry rule |
@@ -104,6 +106,15 @@
 | 2026-03-30 | 冻结产品合同为 1 套流程 + 2 个命令 | 先收窄边界，避免在噪音上叠功能 | setup 退回内部工具 |
 
 ## 4. 版本历史
+
+### **V3.6.0 - 2026-04-30 - (README Redesign + AI Install Prompt)**
+- **目标**: README 重设计，传达核心价值，AI 安装提示可用
+- **变更摘要**:
+  - AI 安装提示：从一句话改为结构化多步指令（参考 oh-my-opencode 模式），AI 可直接理解并执行
+  - 痛点开场：面向不会用 AI 编程的用户，blockquote 直接点出四大痛点
+  - 核心亮点：新增 8 个亮点（一键初始化/SOP铁律/Skill路由/长任务编排/循环追问/Context管理/ADR/文档关卡）
+  - 详情折叠：Skill 生态、初始化、架构、测试全部放进 `<details>` 折叠
+  - 副标题改为"让 AI 拥有 SOP 纪律"
 
 ### **V3.5.0 - 2026-04-29 - (Domain Language Layer + Architecture Principles)**
 - **目标**: 增加领域语言层，增强 brainstorming 提问质量，合成 Clean Architecture + 深模块原则
