@@ -34,9 +34,9 @@
 安装完成后，告诉我如何使用 /codesop 工作台。
 ```
 
-安装成功后：
+安装成功后（在 Claude Code 中）：
 
-```bash
+```
 /codesop init .    # 初始化当前项目
 /codesop           # 打开工作台，开始工作
 /codesop update    # 更新到最新版本
@@ -67,7 +67,7 @@ cd ~/codesop && bash install.sh
 
 ## 核心亮点
 
-**一键初始化** — 安装后运行 `/codesop init .`，自动生成全部 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（使用说明）、ADR（架构决策）。同时同步系统级配置到 `~/.claude/CLAUDE.md`。装一次，所有项目 AI-ready
+**一键初始化** — 安装后运行 `/codesop init .`，自动生成 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（如缺失则生成）、ADR（架构决策）。同时同步系统级配置到 `~/.claude/CLAUDE.md`。装一次，所有项目 AI-ready
 
 **SOP 四条铁律** — 先设计再编码 · 先失败再生产 · 无根因不修 bug · 无证据不完工。AI 不能随便写代码，每一步都有纪律约束
 

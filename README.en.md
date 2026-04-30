@@ -34,11 +34,12 @@ Install codesop — an AI coding workflow OS. Follow these steps:
 After installation, explain how to use the /codesop workbench.
 ```
 
-Once installed:
+Once installed (in Claude Code):
 
-```bash
+```
 /codesop init .    # Initialize current project
 /codesop           # Open the workbench
+/codesop update    # Update to latest version
 ```
 
 <details>
@@ -66,7 +67,7 @@ Cross-tool support: Claude Code (primary) · Codex · OpenCode
 
 ## Key Highlights
 
-**One-Command Init** — Run `/codesop init .` after installing. Auto-generates all AI collaboration docs: AGENTS.md (discipline), PRD.md (product progress), README.md (usage guide), ADR (architecture decisions). Also syncs system-level config to `~/.claude/CLAUDE.md`. Install once, every project is AI-ready.
+**One-Command Init** — Run `/codesop init .` after installing. Auto-generates AI collaboration docs: AGENTS.md (discipline), PRD.md (product progress), README.md (if missing), ADR (architecture decisions). Also syncs system-level config to `~/.claude/CLAUDE.md`. Install once, every project is AI-ready.
 
 **Four Iron Laws** — Design before coding · Fail before producing · No fix without root cause · No completion without evidence. AI can't just write code freely — every step is discipline-constrained.
 
@@ -147,7 +148,7 @@ setup                       # Host integration sync
 ├── PRD.md                  # Living document
 ```
 
-</details>
+`VERSION` is the single source of truth for releases. After skill routing, the last line outputs a natural-language workflow instruction. A document drift scan runs before routing to keep project docs current.
 
 <details>
 <summary>Testing</summary>
