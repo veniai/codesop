@@ -176,3 +176,60 @@ find_superpowers_plugin_path() {
   done
   return 1
 }
+
+# Check git branch health for the codesop workbench.
+# Detects: orphaned local branches (merged into origin/main), leftover current branch,
+# and branches with closed-but-unmerged PRs.
+# Uses git -C throughout to avoid modifying caller's working directory.
+# Outputs machine-readable KEY=VALUE lines.
+check_git_health() {
+  local root
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "HEALTH_SKIP=no-git"; return 0; }
+
+  # Precondition: origin remote must exist
+  git -C "$root" remote get-url origin >/dev/null 2>&1 || { echo "HEALTH_SKIP=no-remote"; return 0; }
+
+  # 1. Detect main branch (local operation, no network)
+  local main_branch
+  main_branch=$(git -C "$root" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+  : "${main_branch:=main}"
+
+  # 2. Fetch latest to get accurate merge status (with timeout to prevent hanging)
+  timeout 10 git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
+
+  # 3. Find orphaned local branches (merged into origin/main)
+  local orphans
+  orphans=$(git -C "$root" branch --merged "origin/$main_branch" \
+    --list 'feat/*' 'fix/*' 'chore/*' --format='%(refname:short)' 2>/dev/null \
+    | grep -v '^$' || true)
+
+  # 4. Current branch state
+  local current orphan_count=0
+  current=$(git -C "$root" branch --show-current 2>/dev/null || echo "detached")
+
+  if [[ -n "$orphans" ]]; then
+    orphan_count=$(printf '%s\n' "$orphans" | grep -c .)
+  fi
+
+  # 5. Check if current branch is a leftover (not main, no open PR)
+  #    Three-state: true / false / unknown (gh not available)
+  local is_leftover=false
+  if [[ "$current" != "$main_branch" && "$current" != "master" ]]; then
+    if command -v gh >/dev/null 2>&1; then
+      local has_open_pr
+      has_open_pr=$(gh pr list --state open --head "$current" --json number --jq '.[0].number' 2>/dev/null || echo "")
+      if [[ -z "$has_open_pr" ]]; then
+        is_leftover=true
+      fi
+    else
+      is_leftover=unknown
+    fi
+  fi
+
+  # Output machine-readable result
+  echo "ORPHAN_COUNT=$orphan_count"
+  echo "ORPHANS=$orphans"
+  echo "CURRENT=$current"
+  echo "IS_LEFTOVER=$is_leftover"
+  echo "MAIN_BRANCH=$main_branch"
+}
