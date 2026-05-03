@@ -75,6 +75,15 @@ When this skill triggers:
    ```
    Use the results to disambiguate the user's intent. The principle is: **when the signal could mean multiple things, observed git state breaks the tie.**
    When git status is dirty and the user did not explicitly say to ignore it, prefer a cleanup-first workflow before recommending roadmap-next work.
+   Also run git health check:
+   ```bash
+   (source ~/codesop/lib/detection.sh && check_git_health) || echo "Git 健康检查跳过"
+   ```
+   Parse the output to detect:
+   - `HEALTH_SKIP=*` → skip, no warning (no-git or no-remote)
+   - `ORPHAN_COUNT > 0` → add to `**注意**`: `Git 有 N 个已 merge 的孤立分支（branch list），建议清理`
+   - `IS_LEFTOVER=true` → add to `**注意**`: `当前在 feat/xxx 分支，无 open PR，疑似上次任务残留`
+   - `IS_LEFTOVER=unknown` → add to `**注意**`: `当前在 feat/xxx 分支，无法确认 PR 状态（gh 不可用）`
 8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
    - workflow/tooling/constraints changed → `CLAUDE.md`
    - product state/progress/decisions/scope changed → `PRD.md`
@@ -115,6 +124,12 @@ When this skill triggers:
 - 新功能链路且当前在 main/master 时，在 writing-plans 后、开发前插入
 - 用户说"用 worktree"时改为 worktree
 - 完成后 TaskUpdate(completed)
+
+**衔接任务 — Git 残留清理**：
+- 条件：git 健康检查检测到 ORPHAN_COUNT > 0 或 IS_LEFTOVER=true
+- 插入位置：pipeline 最前面（在创建分支之前）
+- 执行时：先检查工作区是否干净，然后 git checkout $MAIN_BRANCH（使用检测到的默认分支名） → git pull → 删除已 merge 的 feat/*/fix/*/chore/* 分支（排除当前分支） → git fetch --prune
+- 如果工作区脏 → 中止清理，在 **注意** 中提示
 
 **Pipeline Re-entry**: After any routed task completes:
 1. TaskUpdate(taskId, status: "completed") — 标记完成

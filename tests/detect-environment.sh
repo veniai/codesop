@@ -68,4 +68,17 @@ if [[ "$changelog_head" != *"## [Unreleased]"* ]] && [[ "$changelog_head" != *"#
   fail "expected CHANGELOG.md head to be Unreleased or current VERSION heading"
 fi
 
+# Git health check tests
+health_output="$(source "$ROOT_DIR/lib/detection.sh" && check_git_health 2>/dev/null)" || health_output=""
+
+# Function should produce output
+assert_contains "$health_output" "ORPHAN_COUNT="
+assert_contains "$health_output" "CURRENT="
+assert_contains "$health_output" "IS_LEFTOVER="
+assert_contains "$health_output" "MAIN_BRANCH="
+
+# SKILL.md should reference git health check
+assert_contains "$skill_full" "check_git_health"
+assert_contains "$skill_full" "Git 健康检查跳过"
+
 echo "PASS"

@@ -176,3 +176,60 @@ find_superpowers_plugin_path() {
   done
   return 1
 }
+
+# Check git branch health for the codesop workbench.
+# Detects orphaned local branches (merged into main) and leftover feature branches.
+# Outputs machine-readable KEY=VALUE lines; exits cleanly on skip conditions.
+check_git_health() {
+  local root
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "HEALTH_SKIP=no-git"; return 0; }
+
+  git -C "$root" remote get-url origin >/dev/null 2>&1 || { echo "HEALTH_SKIP=no-remote"; return 0; }
+
+  local main_branch
+  main_branch=$(git -C "$root" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+  : "${main_branch:=main}"
+
+  # Fetch latest merge status (timeout prevents hanging on unreachable remotes)
+  timeout 10 git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
+
+  local orphans
+  orphans=$(git -C "$root" branch --merged "origin/$main_branch" \
+    --list 'feat/*' 'fix/*' 'chore/*' --format='%(refname:short)' 2>/dev/null || true)
+
+  local current
+  current=$(git -C "$root" branch --show-current 2>/dev/null || echo "detached")
+
+  local orphan_count=0
+  if [ -n "$orphans" ]; then
+    orphan_count=$(printf '%s\n' "$orphans" | wc -l | tr -d ' ')
+  fi
+
+  # Three-state: true / false / unknown (gh unavailable)
+  local is_leftover=false
+  if [ "$current" != "$main_branch" ] && [ "$current" != "master" ]; then
+    if command -v gh >/dev/null 2>&1; then
+      local has_open_pr
+      has_open_pr=$(gh pr list --state open --head "$current" --json number --jq '.[0].number' 2>/dev/null || echo "_GH_FAIL_")
+      if [ "$has_open_pr" = "_GH_FAIL_" ]; then
+        is_leftover=unknown
+      elif [ -z "$has_open_pr" ]; then
+        is_leftover=true
+      fi
+    else
+      is_leftover=unknown
+    fi
+  fi
+
+  # Flatten orphans to single line (space-separated) for reliable machine parsing
+  local orphans_flat=""
+  if [ -n "$orphans" ]; then
+    orphans_flat=$(printf '%s' "$orphans" | tr '\n' ' ' | sed 's/ $//')
+  fi
+
+  echo "ORPHAN_COUNT=$orphan_count"
+  echo "ORPHANS=$orphans_flat"
+  echo "CURRENT=$current"
+  echo "IS_LEFTOVER=$is_leftover"
+  echo "MAIN_BRANCH=$main_branch"
+}
