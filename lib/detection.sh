@@ -210,8 +210,10 @@ check_git_health() {
   if [ "$current" != "$main_branch" ] && [ "$current" != "master" ]; then
     if command -v gh >/dev/null 2>&1; then
       local has_open_pr
-      has_open_pr=$(gh pr list --state open --head "$current" --json number --jq '.[0].number' 2>/dev/null || echo "")
-      if [ -z "$has_open_pr" ]; then
+      has_open_pr=$(gh pr list --state open --head "$current" --json number --jq '.[0].number' 2>/dev/null || echo "_GH_FAIL_")
+      if [ "$has_open_pr" = "_GH_FAIL_" ]; then
+        is_leftover=unknown
+      elif [ -z "$has_open_pr" ]; then
         is_leftover=true
       fi
     else
@@ -219,8 +221,14 @@ check_git_health() {
     fi
   fi
 
+  # Flatten orphans to single line (space-separated) for reliable machine parsing
+  local orphans_flat=""
+  if [ -n "$orphans" ]; then
+    orphans_flat=$(printf '%s' "$orphans" | tr '\n' ' ' | sed 's/ $//')
+  fi
+
   echo "ORPHAN_COUNT=$orphan_count"
-  echo "ORPHANS=$orphans"
+  echo "ORPHANS=$orphans_flat"
   echo "CURRENT=$current"
   echo "IS_LEFTOVER=$is_leftover"
   echo "MAIN_BRANCH=$main_branch"
