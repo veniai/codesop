@@ -80,7 +80,7 @@ When this skill triggers:
    (source ~/codesop/lib/detection.sh && check_git_health) || echo "Git 健康检查跳过"
    ```
    Parse the output to detect:
-   - `HEALTH_SKIP=*` → skip, no warning
+   - `HEALTH_SKIP=*` → skip, no warning (no-git or no-remote)
    - `ORPHAN_COUNT > 0` → add to `**注意**`: `Git 有 N 个已 merge 的孤立分支（branch list），建议清理`
    - `IS_LEFTOVER=true` → add to `**注意**`: `当前在 feat/xxx 分支，无 open PR，疑似上次任务残留`
    - `IS_LEFTOVER=unknown` → add to `**注意**`: `当前在 feat/xxx 分支，无法确认 PR 状态（gh 不可用）`
