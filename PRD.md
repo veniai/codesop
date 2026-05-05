@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.7.0
-# Last Updated: 2026-05-03
+# Current Version: 3.7.1
+# Last Updated: 2026-05-05
 # Status: active
 
 ---
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.7.0 Git 健康检查
+- **当前里程碑**: v3.7.1 Superpowers v5.1.0 补丁适配
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.7.0 — Git 健康检查（工作台启动时检测孤立分支）
+- **最后更新原因**: v3.7.1 — rebase superpowers 补丁到 v5.1.0
 
 ## 2. 当前进度
 
