@@ -9,6 +9,8 @@ _resync_and_check() {
   source "${ROOT_DIR}/lib/updates.sh"
 
   # Upgrade managed dependencies (plugins, pip, git skills)
+  # Failure is reported in output but does not abort the update cycle —
+  # host resync and dependency report still run after this.
   printf '%s\n' "检查依赖升级..."
   upgrade_managed_deps || true
 

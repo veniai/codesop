@@ -803,6 +803,16 @@ _dep_get_version() {
   esac
 }
 
+# Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
+_run_with_timeout() {
+  local seconds="$1"; shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$seconds" "$@"
+  else
+    "$@"
+  fi
+}
+
 # Upgrade a single managed dependency. Returns 0 on success.
 _dep_upgrade_one() {
   local type="$1" id="$2"
@@ -812,7 +822,7 @@ _dep_upgrade_one() {
         echo "claude CLI not available"
         return 1
       fi
-      timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
+      _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
       return $?
       ;;
     pip)
@@ -822,8 +832,11 @@ _dep_upgrade_one() {
     git)
       local dir="$HOME/.claude/skills/$id"
       if [ -d "$dir/.git" ]; then
-        git -C "$dir" pull --ff-only 2>/dev/null && npm install --prefix "$dir" >/dev/null 2>&1 || true
-        return 0
+        if git -C "$dir" pull --ff-only >/dev/null 2>&1; then
+          npm install --prefix "$dir" >/dev/null 2>&1 || true
+          return 0
+        fi
+        return 1
       fi
       return 1
       ;;
@@ -926,7 +939,7 @@ install_managed_deps() {
           skip+=("$_d_id")
           continue
         fi
-        if timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
+        if _run_with_timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
           printf '%s\n' "✓ installed"
           ok+=("$_d_id")
         else

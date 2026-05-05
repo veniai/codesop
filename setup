@@ -325,7 +325,9 @@ install_cli() {
 install_claude() {
   # Auto-install missing dependencies (plugins, pip packages)
   if [ -f "$SOURCE_DIR/lib/updates.sh" ]; then
-    ROOT_DIR="$SOURCE_DIR" VERSION_FILE="$SOURCE_DIR/VERSION" source "$SOURCE_DIR/lib/updates.sh"
+    ROOT_DIR="$SOURCE_DIR"
+    VERSION_FILE="$SOURCE_DIR/VERSION"
+    source "$SOURCE_DIR/lib/updates.sh"
     printf '%s\n' "检查依赖安装..."
     install_managed_deps || printf '%s\n' "  ⚠ 部分依赖安装失败，请稍后手动安装"
   else
