@@ -92,11 +92,16 @@ Which option?
 
 **Don't add explanation** - keep options concise.
 
+**Detached HEAD mapping:** Detached HEAD option 1 maps to "Push and Create PR" handler (not "Merge Locally"). Option 2 maps to "Keep As-Is". Option 3 maps to "Discard".
+
 ### Step 5: Execute Choice
 
 #### Option 1: Merge Locally
 
 ```bash
+# Capture worktree path BEFORE changing directory
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+
 # Get main repo root for CWD safety
 MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
 cd "$MAIN_ROOT"
@@ -163,6 +168,9 @@ Wait for exact confirmation.
 
 If confirmed:
 ```bash
+# Capture worktree path BEFORE changing directory
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+
 MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
 cd "$MAIN_ROOT"
 ```
@@ -176,19 +184,18 @@ git branch -D <feature-branch>
 
 **Only runs for Options 1 and 4.** Options 2 and 3 always preserve the worktree.
 
+**Note:** `WORKTREE_PATH` was captured in Step 5 before `cd` to MAIN_ROOT. Do NOT re-derive it from current directory.
+
 ```bash
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-WORKTREE_PATH=$(git rev-parse --show-toplevel)
 ```
 
-**If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
+**If `GIT_DIR == GIT_COMMON` and WORKTREE_PATH was not set:** Normal repo, no worktree to clean up. Done.
 
-**If worktree path is under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`:** Superpowers created this worktree -- we own cleanup.
+**If WORKTREE_PATH is set and under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`:** Superpowers created this worktree -- we own cleanup.
 
 ```bash
-MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
-cd "$MAIN_ROOT"
 git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clean up any stale registrations
 ```
