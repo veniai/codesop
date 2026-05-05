@@ -5,11 +5,16 @@
 # Called after every update branch in run_update.
 # Re-sources updates.sh so git-pulled code changes take effect immediately.
 _resync_and_check() {
+  # Re-source updates.sh so git-pulled changes take effect immediately
+  source "${ROOT_DIR}/lib/updates.sh"
+
+  # Upgrade managed dependencies (plugins, pip, git skills)
+  printf '%s\n' "检查依赖升级..."
+  upgrade_managed_deps || true
+
+  # Re-sync host integrations (applies patches to newly upgraded plugins)
   printf '%s\n' "重新同步本机宿主集成..."
   bash "$ROOT_DIR/setup" --host auto
-
-  # Re-source updates.sh so git-pulled changes take effect in this shell
-  source "${ROOT_DIR}/lib/updates.sh"
 
   # Check plugin dependencies
   local host="unknown"

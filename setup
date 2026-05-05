@@ -170,10 +170,36 @@ patch_skills() {
     return 0
   fi
 
+  # --- Compat check: skip patches if installed version is outside tested range ---
+  local installed_version=""
+  installed_version=$(basename "$plugin_dir" 2>/dev/null || true)
+  local dep_min_ver=""
+  if [ -f "$SOURCE_DIR/config/dependencies.sh" ]; then
+    source "$SOURCE_DIR/config/dependencies.sh"
+    local entry
+    for entry in "${DEP_MANIFEST[@]}"; do
+      IFS='|' read -r d_type d_id d_tier d_patched d_min_ver <<< "$entry"
+      if [ "$d_type" = "plugin" ] && [ "$d_id" = "superpowers@claude-plugins-official" ]; then
+        dep_min_ver="$d_min_ver"
+        break
+      fi
+    done
+  fi
+
+  if [ -n "$dep_min_ver" ] && [ -n "$installed_version" ] && [ "$installed_version" != "unknown" ]; then
+    local inst_mm patch_mm
+    inst_mm="${installed_version%%.*}.$(echo "$installed_version" | cut -d. -f2)"
+    patch_mm="${dep_min_ver%%.*}.$(echo "$dep_min_ver" | cut -d. -f2)"
+    if [ "$inst_mm" != "$patch_mm" ]; then
+      echo "  ⚠ superpowers $installed_version (patches target $patch_mm.x) — skipping patches"
+      return 0
+    fi
+  fi
+
   local patches_dir="$SOURCE_DIR/patches/superpowers"
   local patched=0
 
-  # writing-plans: remove Execution Handoff
+  # writing-plans: Pipeline Continuation
   local wp="$plugin_dir/skills/writing-plans/SKILL.md"
   local wp_patch="$patches_dir/writing-plans-SKILL.md"
   if [ -f "$wp" ] && [ -f "$wp_patch" ]; then
@@ -193,7 +219,7 @@ patch_skills() {
     fi
   fi
 
-  # brainstorming: grill enhancement
+  # brainstorming: grill enhancement + domain awareness
   local bs="$plugin_dir/skills/brainstorming/SKILL.md"
   local bs_patch="$patches_dir/brainstorming-SKILL.md"
   if [ -f "$bs" ] && [ -f "$bs_patch" ]; then

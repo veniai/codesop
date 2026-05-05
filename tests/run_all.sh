@@ -13,6 +13,7 @@ suites=(
   codesop-symlink.sh
   codesop-update.sh
   skill-routing-coverage.sh
+  dep-upgrade.sh
   codesop-e2e.sh
 )
 
