@@ -35,7 +35,6 @@ done < <(sed -n '/^DEP_MANIFEST=/,/^[[:space:]]*)/p' "$ROOT_DIR/config/dependenc
 updates_output="$(cat "$ROOT_DIR/lib/updates.sh")"
 assert_contains "$updates_output" "_dep_manifest_load"
 assert_contains "$updates_output" "_dep_parse"
-assert_contains "$updates_output" "_dep_get_version"
 assert_contains "$updates_output" "_dep_upgrade_one"
 assert_contains "$updates_output" "dep_patch_compat"
 assert_contains "$updates_output" "upgrade_managed_deps"

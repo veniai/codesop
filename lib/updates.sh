@@ -777,32 +777,6 @@ _dep_parse() {
   IFS='|' read -r _d_type _d_id _d_tier _d_patched _d_min_ver <<< "$entry"
 }
 
-# Get installed version of a managed dependency
-_dep_get_version() {
-  local type="$1" id="$2"
-  case "$type" in
-    plugin)
-      local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
-      if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
-        jq -r --arg id "$id" '.plugins[$id][0].version // "unknown"' "$plugins_json" 2>/dev/null
-      else
-        echo "unknown"
-      fi
-      ;;
-    pip)
-      pip show "$id" 2>/dev/null | grep -m1 '^Version:' | sed 's/^Version: //' || echo "unknown"
-      ;;
-    git)
-      local dir="$HOME/.claude/skills/$id"
-      if [ -d "$dir/.git" ]; then
-        git -C "$dir" describe --tags --always 2>/dev/null || echo "unknown"
-      else
-        echo "not-installed"
-      fi
-      ;;
-  esac
-}
-
 # Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
 _run_with_timeout() {
   local seconds="$1"; shift
@@ -819,7 +793,7 @@ _dep_upgrade_one() {
   case "$type" in
     plugin)
       if ! command -v claude >/dev/null 2>&1; then
-        echo "claude CLI not available"
+        echo "claude CLI not available" >&2
         return 1
       fi
       _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1

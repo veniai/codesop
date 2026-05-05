@@ -33,7 +33,7 @@ echo "  PASS ($lines lines)"
 echo "Test 4: Setup has new functions..."
 [ "$(grep -c 'install_router_card' "$ROOT_DIR/setup")" -ge 2 ] || fail "install_router_card not found in setup"
 [ "$(grep -c 'configure_hooks' "$ROOT_DIR/setup")" -ge 2 ] || fail "configure_hooks not found in setup"
-[ "$(grep -c 'check_discipline_deps' "$ROOT_DIR/setup")" -ge 2 ] || fail "check_discipline_deps not found in setup"
+[ "$(grep -c 'install_managed_deps' "$ROOT_DIR/setup")" -ge 1 ] || fail "install_managed_deps not found in setup"
 echo "  PASS"
 
 # Test 5: AGENTS.md has discipline section

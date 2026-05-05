@@ -32,12 +32,15 @@
 - 无
 
 ### 2.2 Next Up
-- [x] v3.7.0: Git 健康检查 — 工作台 step 7 检测孤立分支、残留分支，衔接任务自动清理
+- 无
 
 ### 2.3 Blocked
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.9.0: 初次安装自动依赖安装 — install_managed_deps() 幂等安装缺失插件/pip 包，setup 集成替代 warn-only 的 check_discipline_deps
+- [x] v3.8.0: 统一依赖升级 — upgrade_managed_deps() 四阶段升级所有托管依赖，patch_skills() 版本兼容检查
+- [x] v3.7.1: Superpowers v5.1.0 patch rebase — 三补丁重基线（brainstorming/finishing/writing-plans），Codex 审核修复
 - [x] v3.7.0: Git 健康检查 — check_git_health() 检测已 merge 孤立分支和残留分支，SKILL.md step 7 集成，step 10.5 衔接任务自动清理
 - [x] v3.6.0: README 重设计 — AI 安装提示（结构化多步指令）、痛点开场（面向不会用 AI 编程的用户）、核心亮点展示（一键初始化/SOP铁律/Skill路由/长任务编排/循环追问/Context/ADR/文档关卡）、详情折叠化
 - [x] v3.5.0: 领域语言层 + 架构原则增强 — CONTEXT.md 领域词汇表、ADR 架构决策记录、brainstorming grill patch、跨 skill 领域语言规则、路由卡增强、文档 gate 扩展
