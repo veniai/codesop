@@ -756,3 +756,224 @@ print_dependency_report() {
     fi
   fi
 }
+
+# ---------------------------------------------------------------------------
+# Unified dependency upgrade (four-phase)
+# ---------------------------------------------------------------------------
+
+# Load the dependency manifest from config/dependencies.sh
+_dep_manifest_load() {
+  local manifest="${ROOT_DIR:-$HOME/codesop}/config/dependencies.sh"
+  if [ -f "$manifest" ]; then
+    source "$manifest"
+    return 0
+  fi
+  return 1
+}
+
+# Parse a manifest entry: type|id|tier|patched|min_version
+_dep_parse() {
+  local entry="$1"
+  IFS='|' read -r _d_type _d_id _d_tier _d_patched _d_min_ver <<< "$entry"
+}
+
+# Get installed version of a managed dependency
+_dep_get_version() {
+  local type="$1" id="$2"
+  case "$type" in
+    plugin)
+      local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+      if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
+        jq -r --arg id "$id" '.plugins[$id][0].version // "unknown"' "$plugins_json" 2>/dev/null
+      else
+        echo "unknown"
+      fi
+      ;;
+    pip)
+      pip show "$id" 2>/dev/null | grep -m1 '^Version:' | sed 's/^Version: //' || echo "unknown"
+      ;;
+    git)
+      local dir="$HOME/.claude/skills/$id"
+      if [ -d "$dir/.git" ]; then
+        git -C "$dir" describe --tags --always 2>/dev/null || echo "unknown"
+      else
+        echo "not-installed"
+      fi
+      ;;
+  esac
+}
+
+# Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
+_run_with_timeout() {
+  local seconds="$1"; shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$seconds" "$@"
+  else
+    "$@"
+  fi
+}
+
+# Upgrade a single managed dependency. Returns 0 on success.
+_dep_upgrade_one() {
+  local type="$1" id="$2"
+  case "$type" in
+    plugin)
+      if ! command -v claude >/dev/null 2>&1; then
+        echo "claude CLI not available"
+        return 1
+      fi
+      _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
+      return $?
+      ;;
+    pip)
+      pip install --upgrade "$id" >/dev/null 2>&1
+      return $?
+      ;;
+    git)
+      local dir="$HOME/.claude/skills/$id"
+      if [ -d "$dir/.git" ]; then
+        if git -C "$dir" pull --ff-only >/dev/null 2>&1; then
+          npm install --prefix "$dir" >/dev/null 2>&1 || true
+          return 0
+        fi
+        return 1
+      fi
+      return 1
+      ;;
+  esac
+}
+
+# Check if a version is compatible for patching.
+# Compat rule: installed must have same major.minor as min_version.
+# Returns 0 if compatible, 1 if not.
+dep_patch_compat() {
+  local installed_version="$1" min_version="$2"
+
+  [ -z "$min_version" ] && return 0
+  [ "$installed_version" = "unknown" ] && return 0
+
+  local inst_mm patch_mm
+  inst_mm="${installed_version%%.*}.$(echo "$installed_version" | cut -d. -f2)"
+  patch_mm="${min_version%%.*}.$(echo "$min_version" | cut -d. -f2)"
+
+  [ "$inst_mm" = "$patch_mm" ]
+}
+
+# Main entry: upgrade all managed dependencies.
+# Returns 0 if all core/required succeed, 1 otherwise.
+upgrade_managed_deps() {
+  _dep_manifest_load || { printf '%s\n' "  依赖清单不存在，跳过升级"; return 0; }
+
+  local ok=() fail=() skip=()
+  local has_required_fail=false
+
+  for entry in "${DEP_MANIFEST[@]}"; do
+    _dep_parse "$entry"
+
+    # Skip if upgrade tool unavailable
+    case "$_d_type" in
+      plugin) command -v claude >/dev/null 2>&1 || { skip+=("$_d_id"); continue; } ;;
+      pip) command -v pip >/dev/null 2>&1 || { skip+=("$_d_id"); continue; } ;;
+      git) [ -d "$HOME/.claude/skills/$_d_id/.git" ] || { skip+=("$_d_id"); continue; } ;;
+    esac
+
+    printf '  %-45s ' "$_d_id"
+    if _dep_upgrade_one "$_d_type" "$_d_id"; then
+      ok+=("$_d_id")
+      printf '%s\n' "✓"
+    else
+      fail+=("$_d_id [$_d_tier]")
+      printf '%s\n' "✗"
+      [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+    fi
+  done
+
+  [ ${#ok[@]} -gt 0 ] && printf '%s\n' "  已升级: ${ok[*]}"
+  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  已跳过: ${skip[*]}"
+  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败: ${fail[*]}"
+
+  [ "$has_required_fail" = false ]
+}
+
+# Install missing managed dependencies (first-time setup).
+# Reads the same manifest as upgrade_managed_deps().
+# Idempotent — skips already-installed deps.
+# Returns 0 if all core/required succeed, 1 otherwise.
+install_managed_deps() {
+  _dep_manifest_load || { printf '%s\n' "  依赖清单不存在，跳过安装"; return 0; }
+
+  local ok=() fail=() skip=() already=()
+  local has_required_fail=false
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+
+  for entry in "${DEP_MANIFEST[@]}"; do
+    _dep_parse "$entry"
+
+    local is_installed=false
+
+    case "$_d_type" in
+      plugin)
+        if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
+          jq -e --arg id "$_d_id" '.plugins | has($id)' "$plugins_json" 2>/dev/null | grep -q true && is_installed=true
+        fi
+        ;;
+      pip)
+        command -v pip >/dev/null 2>&1 && pip show "$_d_id" >/dev/null 2>&1 && is_installed=true
+        ;;
+      git)
+        [ -d "$HOME/.claude/skills/$_d_id" ] && is_installed=true
+        ;;
+    esac
+
+    if [ "$is_installed" = true ]; then
+      already+=("$_d_id")
+      continue
+    fi
+
+    printf '  %-45s ' "$_d_id"
+
+    case "$_d_type" in
+      plugin)
+        if ! command -v claude >/dev/null 2>&1; then
+          printf '%s\n' "⏭ (claude CLI unavailable)"
+          skip+=("$_d_id")
+          continue
+        fi
+        if _run_with_timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
+          printf '%s\n' "✓ installed"
+          ok+=("$_d_id")
+        else
+          printf '%s\n' "✗ install failed"
+          fail+=("$_d_id [$_d_tier]")
+          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+        fi
+        ;;
+      pip)
+        if ! command -v pip >/dev/null 2>&1; then
+          printf '%s\n' "⏭ (pip unavailable)"
+          skip+=("$_d_id")
+          continue
+        fi
+        if pip install "$_d_id" >/dev/null 2>&1; then
+          printf '%s\n' "✓ installed"
+          ok+=("$_d_id")
+        else
+          printf '%s\n' "✗ install failed"
+          fail+=("$_d_id [$_d_tier]")
+          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+        fi
+        ;;
+      git)
+        printf '%s\n' "⏭ (manual install)"
+        skip+=("$_d_id")
+        ;;
+    esac
+  done
+
+  [ ${#already[@]} -gt 0 ] && printf '%s\n' "  已有: ${already[*]}"
+  [ ${#ok[@]} -gt 0 ] && printf '%s\n' "  新装: ${ok[*]}"
+  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  跳过: ${skip[*]}"
+  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败: ${fail[*]}"
+
+  [ "$has_required_fail" = false ]
+}

@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-05-05
+
+### Added
+- First-time install auto-dependencies: `setup` now auto-installs missing plugins and pip packages
+- `install_managed_deps()` in `lib/updates.sh`: idempotent install using same manifest as upgrades
+- Install paths: `claude plugin install --scope user` (plugins), `pip install` (pip), skip (git)
+
+### Changed
+- `install_claude()` in setup: sources `lib/updates.sh` and calls `install_managed_deps()` before `patch_skills()`
+- Replaces `check_discipline_deps()` (warn-only) with actual auto-install
+
+## [3.8.0] - 2026-05-05
+
+### Added
+- Unified dependency upgrade: `codesop update` now auto-upgrades all managed dependencies
+- `config/dependencies.sh`: dependency manifest defining type, tier, patch status, min version
+- Four-phase upgrade in `lib/updates.sh`: load manifest → compare versions → apply upgrades → verify
+- `patch_skills()` compat check: skips patches when installed version has different major.minor
+- `tests/dep-upgrade.sh`: test coverage for manifest, upgrade functions, and compat check
+
+### Changed
+- `_resync_and_check()` in commands.sh: upgrades deps before setup (so patches target correct version)
+- Supports three upgrade paths: `claude plugin update` (marketplace), `pip install --upgrade` (pip), `git pull` (git)
+
 ## [3.7.1] - 2026-05-05
 
 ### Changed
