@@ -191,14 +191,19 @@ check_git_health() {
   : "${main_branch:=main}"
 
   # Fetch latest merge status (timeout prevents hanging on unreachable remotes)
-  timeout 10 git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 10 git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
+  else
+    git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
+  fi
 
   local orphans
   orphans=$(git -C "$root" branch --merged "origin/$main_branch" \
     --list 'feat/*' 'fix/*' 'chore/*' --format='%(refname:short)' 2>/dev/null || true)
 
   local current
-  current=$(git -C "$root" branch --show-current 2>/dev/null || echo "detached")
+  current=$(git -C "$root" branch --show-current 2>/dev/null)
+  [ -z "$current" ] && current="detached"
 
   local orphan_count=0
   if [ -n "$orphans" ]; then

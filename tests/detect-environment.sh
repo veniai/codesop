@@ -71,11 +71,16 @@ fi
 # Git health check tests
 health_output="$(source "$ROOT_DIR/lib/detection.sh" && check_git_health 2>/dev/null)" || health_output=""
 
-# Function should produce output
-assert_contains "$health_output" "ORPHAN_COUNT="
-assert_contains "$health_output" "CURRENT="
-assert_contains "$health_output" "IS_LEFTOVER="
-assert_contains "$health_output" "MAIN_BRANCH="
+# If HEALTH_SKIP (no git / no remote), skip field assertions
+if [[ "$health_output" == HEALTH_SKIP=* ]]; then
+  : # skip — environment doesn't support git health check
+else
+  # Function should produce output
+  assert_contains "$health_output" "ORPHAN_COUNT="
+  assert_contains "$health_output" "CURRENT="
+  assert_contains "$health_output" "IS_LEFTOVER="
+  assert_contains "$health_output" "MAIN_BRANCH="
+fi
 
 # SKILL.md should reference git health check
 assert_contains "$skill_full" "check_git_health"
