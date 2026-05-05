@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [3.7.1] - 2026-05-05
+
+### Changed
+- Rebase superpowers patches onto v5.1.0 upstream
+- brainstorming patch: v5.1.0 base + CONTEXT.md check, Grill Mode, ADR trigger, Domain Language Delta
+- finishing-branch patch: v5.1.0 base (environment detection, provenance cleanup, 4-option menu) + PR existence check
+- writing-plans patch: v5.1.0 base (updated context line) + Pipeline Continuation
+
+## [3.7.0] - 2026-05-03
+
+### Added
+- Git health check in workbench: detect orphan branches and leftover feature branches
+- `check_git_health()` in lib/detection.sh with ORPHAN_COUNT, IS_LEFTOVER (true/false/unknown), MAIN_BRANCH output
+- SKILL.md step 10.5 "Git 残留清理" transition task for pipeline cleanup
+
+### Changed
+- SKILL.md step 7 integrates git health check alongside existing git context checks
+
 ## [3.6.0] - 2026-04-30
 
 ### Changed
