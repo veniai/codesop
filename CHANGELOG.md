@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-05-05
+
+### Added
+- First-time install auto-dependencies: `setup` now auto-installs missing plugins and pip packages
+- `install_managed_deps()` in `lib/updates.sh`: idempotent install using same manifest as upgrades
+- Install paths: `claude plugin install --scope user` (plugins), `pip install` (pip), skip (git)
+
+### Changed
+- `install_claude()` in setup: sources `lib/updates.sh` and calls `install_managed_deps()` before `patch_skills()`
+- Replaces `check_discipline_deps()` (warn-only) with actual auto-install
+
 ## [3.8.0] - 2026-05-05
 
 ### Added

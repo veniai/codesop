@@ -881,3 +881,86 @@ upgrade_managed_deps() {
 
   [ "$has_required_fail" = false ]
 }
+
+# Install missing managed dependencies (first-time setup).
+# Reads the same manifest as upgrade_managed_deps().
+# Idempotent — skips already-installed deps.
+# Returns 0 if all core/required succeed, 1 otherwise.
+install_managed_deps() {
+  _dep_manifest_load || { printf '%s\n' "  依赖清单不存在，跳过安装"; return 0; }
+
+  local ok=() fail=() skip=() already=()
+  local has_required_fail=false
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+
+  for entry in "${DEP_MANIFEST[@]}"; do
+    _dep_parse "$entry"
+
+    local is_installed=false
+
+    case "$_d_type" in
+      plugin)
+        if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
+          jq -e --arg id "$_d_id" '.plugins | has($id)' "$plugins_json" 2>/dev/null | grep -q true && is_installed=true
+        fi
+        ;;
+      pip)
+        command -v pip >/dev/null 2>&1 && pip show "$_d_id" >/dev/null 2>&1 && is_installed=true
+        ;;
+      git)
+        [ -d "$HOME/.claude/skills/$_d_id" ] && is_installed=true
+        ;;
+    esac
+
+    if [ "$is_installed" = true ]; then
+      already+=("$_d_id")
+      continue
+    fi
+
+    printf '  %-45s ' "$_d_id"
+
+    case "$_d_type" in
+      plugin)
+        if ! command -v claude >/dev/null 2>&1; then
+          printf '%s\n' "⏭ (claude CLI unavailable)"
+          skip+=("$_d_id")
+          continue
+        fi
+        if timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
+          printf '%s\n' "✓ installed"
+          ok+=("$_d_id")
+        else
+          printf '%s\n' "✗ install failed"
+          fail+=("$_d_id [$_d_tier]")
+          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+        fi
+        ;;
+      pip)
+        if ! command -v pip >/dev/null 2>&1; then
+          printf '%s\n' "⏭ (pip unavailable)"
+          skip+=("$_d_id")
+          continue
+        fi
+        if pip install "$_d_id" >/dev/null 2>&1; then
+          printf '%s\n' "✓ installed"
+          ok+=("$_d_id")
+        else
+          printf '%s\n' "✗ install failed"
+          fail+=("$_d_id [$_d_tier]")
+          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+        fi
+        ;;
+      git)
+        printf '%s\n' "⏭ (manual install)"
+        skip+=("$_d_id")
+        ;;
+    esac
+  done
+
+  [ ${#already[@]} -gt 0 ] && printf '%s\n' "  已有: ${already[*]}"
+  [ ${#ok[@]} -gt 0 ] && printf '%s\n' "  新装: ${ok[*]}"
+  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  跳过: ${skip[*]}"
+  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败: ${fail[*]}"
+
+  [ "$has_required_fail" = false ]
+}
