@@ -183,7 +183,7 @@ patch_skills() {
     fi
   fi
 
-  # finishing-a-development-branch: skip options, go straight to PR
+  # finishing-a-development-branch: v5.1.0 options menu + PR existence check
   local fb="$plugin_dir/skills/finishing-a-development-branch/SKILL.md"
   local fb_patch="$patches_dir/finishing-a-development-branch-SKILL.md"
   if [ -f "$fb" ] && [ -f "$fb_patch" ]; then
