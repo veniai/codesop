@@ -1,5 +1,5 @@
 # Product: codesop
-# Current Version: 3.9.0
+# Current Version: 3.9.2
 # Last Updated: 2026-05-05
 # Status: active
 
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.8.0 统一依赖升级
+- **当前里程碑**: v3.9.2 代码精简
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.8.0 — codesop update 自动升级所有托管依赖（插件/pip/git）
+- **最后更新原因**: v3.9.2 — 移除 pip/git 死代码、简化 tier 逻辑、修 test_helpers SIGPIPE bug、压缩 PRD 历史
 
 ## 2. 当前进度
 
@@ -38,31 +38,9 @@
 - 无
 
 ### 2.4 Done Recently
-- [x] v3.9.0: 初次安装自动依赖安装 — install_managed_deps() 幂等安装缺失插件/pip 包，setup 集成替代 warn-only 的 check_discipline_deps
-- [x] v3.8.0: 统一依赖升级 — upgrade_managed_deps() 四阶段升级所有托管依赖，patch_skills() 版本兼容检查
-- [x] v3.7.1: Superpowers v5.1.0 patch rebase — 三补丁重基线（brainstorming/finishing/writing-plans），Codex 审核修复
-- [x] v3.7.0: Git 健康检查 — check_git_health() 检测已 merge 孤立分支和残留分支，SKILL.md step 7 集成，step 10.5 衔接任务自动清理
-- [x] v3.6.0: README 重设计 — AI 安装提示（结构化多步指令）、痛点开场（面向不会用 AI 编程的用户）、核心亮点展示（一键初始化/SOP铁律/Skill路由/长任务编排/循环追问/Context/ADR/文档关卡）、详情折叠化
-- [x] v3.5.0: 领域语言层 + 架构原则增强 — CONTEXT.md 领域词汇表、ADR 架构决策记录、brainstorming grill patch、跨 skill 领域语言规则、路由卡增强、文档 gate 扩展
-- [x] v3.4.1: PR Review 反馈链路补全 — 路由表+SKILL.md+README 三层同步补 receiving-code-review → finishing 反馈路径；含代码库全面清理（删死模块/函数、统一测试、Pipeline 分支衔接）
-- [x] v3.3.3: writing-plans skill patch Pipeline Continuation 触发器 — 补回 skill ending 的 next-step 指导
-- [x] v3.3.2: pipeline auto re-entry — task list 确认后全程自动执行，不逐个询问
-- [x] v3.3.1: skill patch 机制（writing-plans + finishing-branch）、worktree 条件化、setup set -e 修复
-- [x] v3.1.0: 移除子 agent 执行架构——去掉 A/B/C 分类、Sub-agent Dispatch、session-state；保留 statusLine + compact 提醒 + v3.0.1 开源基建
-- [x] v3.0.2: 路由表分类简化——去掉 B/C，只保留 A 标记（已被 v3.1.0 完全取代）
-- [x] v3.0.1: 开源基建补全——tests/run_all.sh、PRD 模板去重、Python→jq、skill.json 补字段、README 国际化
-- [x] v3.0.0: 子 agent 执行架构——已被 v3.1.0 移除（冷启动延迟问题）
-- [x] v2.6.1: 工作台摘要精简——7 字段 → 2 固定（状态+分支）+ 1 条件（注意）
-- [x] v2.6.0: 执行层术语统一为 Claude Code 原生 "task list"（展示层保留 pipeline 概念）
-- [x] v2.5.5: 展示层/执行层分离——(☆/★) 标记只留 dashboard，TaskCreate subject 用干净 skill name
-- [x] v2.5.4: Pipeline task subject 加入显式 "Skill" 标记（`使用 X Skill 做Y`）
-- [x] v2.5.3: Pipeline task subject 指令式格式（`使用 X 做Y`）+ 三层注入 anti-inline 规则
-- [x] v2.5.2: §4 输出格式精简（Case A/B/C 合并为 1 个完整示例 + 3 行场景规则，衔接任务一致化，pipeline 编号+完整 skill 名）
-- [x] v2.5.1: Pipeline TaskCreate 规范化（顺序创建+blockedBy、skill/衔接任务 subject 格式、re-entry 实际 TaskUpdate）
-- [x] v2.5.0: 系统模板加沟通原则，通用约束/铁律去冗余（铁律 6→5 条）
-- [x] v2.4.3: Chrome DevTools MCP 纳入路由表和依赖检测（大类 7 重命名 + REQUIRED_PLUGINS 更新）
-- [x] v2.4.2: pipeline relevance 判断原则替代枚举式 stale 检测 + PRD 审计遗留修复
-- [x] v2.4.1: 链路完整性原则 + 任务卫生铁律 + 调试路径修正（三层同步：路由卡 + AGENTS.md + SKILL.md）
+- [x] v3.9.1: 文档与依赖清理 — README 大改（一键安装亮点+Skill 生态表）、移除 browser-use/claude-to-im 托管依赖、路由表精简、代码审查修复（SKILL.md 死引用、macOS 兼容、死代码）
+- [x] v3.9.0: 初次安装自动依赖安装 — install_managed_deps() 幂等安装缺失插件，setup 集成替代 warn-only 的 check_discipline_deps
+- [x] v3.3.2 ~ v3.8.0: 统一依赖升级、Git 健康检查、README 重设计、pipeline 自动重入、skill patch 机制等（详见 CHANGELOG）
 - [x] v2.4.0: Pipeline-to-todo 链路可视化（SKILL.md step 10.5 + pipeline dashboard + re-entry rule）
 - [x] v2.0: Superpowers-only backbone，移除 GStack 双引擎 (PR #9)
 - [x] 新依赖系统: CORE_PLUGINS / OPTIONAL_PLUGINS / OPTIONAL_SKILLS
@@ -343,7 +321,7 @@
 - `setup` 负责把 `SKILL.md` 安装到 `~/.claude/skills/codesop/SKILL.md`
 
 ### 5.6 版本规划
-- **Now (v3.5.x)**: 稳定维护，按需迭代
+- **Now (v3.9.x)**: 稳定维护，按需迭代
 - **Later**: 反馈回路设计 + 可选 Python 模块验证 bash 是否足够
 
 ### 5.7 目标架构
@@ -385,9 +363,8 @@ setup                       # 宿主安装与同步
 
 ### 5.8 生态依赖
 
-- **Core plugins**: superpowers, code-review
-- **Optional plugins**: skill-creator, frontend-design, context7, code-simplifier, playwright, claude-md-management, codex
-- **Optional skills**: codesop, browser-use, claude-to-im
+- **Core**: superpowers (backbone, patches applied)
+- **Required**: code-review, skill-creator, frontend-design, context7, code-simplifier, playwright, claude-md-management, chrome-devtools-mcp, codex
 - 版本检查: 仅 superpowers 支持 GitHub tags 对比，其他仅检测存在性
 
 ### 5.9 技术实现规范

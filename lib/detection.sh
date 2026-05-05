@@ -145,7 +145,7 @@ detect_project_shape_and_framework() {
 
 # Check if a specific MCP server is configured in Claude Code settings
 # Arguments:
-#   $1 - MCP server name (e.g. "browser-use")
+#   $1 - MCP server name
 # Returns: 0 if configured, 1 if not
 has_mcp_server() {
   local server_name="$1"

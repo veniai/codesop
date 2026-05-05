@@ -271,7 +271,7 @@ _check_changelog() {
   fi
 
   local latest_ver
-  latest_ver=$(grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+' "$tool_dir/CHANGELOG.md" 2>/dev/null | head -1)
+  latest_ver=$(grep -o '\[[0-9]*\.[0-9]*\.[0-9]*\]' "$tool_dir/CHANGELOG.md" 2>/dev/null | sed 's/\[//;s/\]//' | head -1)
   [ -z "$latest_ver" ] && return
 
   if [ "$current_ver" = "$latest_ver" ]; then

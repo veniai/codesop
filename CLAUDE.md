@@ -118,7 +118,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). Used by `install_managed_deps()` and `upgrade_managed_deps()` in updates.sh
 - `patch_skills()` uses `dep_patch_compat()` from updates.sh to check major.minor match before applying patches
 - `_run_with_timeout()` in updates.sh wraps `timeout` with macOS fallback. Use this pattern for any timed command
-- `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback (e.g. browser-use installed via pip, not as skill directory)
+- `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback
 - `patch_skills()` in setup overwrites third-party skill files from `patches/superpowers/` — logic is "different from ours → overwrite, same → skip". Plugin updates will be re-patched on next `setup` run
 - `find` on non-existent directory returns exit 1; under `set -e`, always append `|| true` to `find` in command substitutions
 

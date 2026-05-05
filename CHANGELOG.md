@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [3.9.2] - 2026-05-05
+
+### Changed
+- Removed dead `pip`/`git` code paths from `install_managed_deps()` and `_dep_upgrade_one()` — all 10 deps are plugin type
+- Simplified tier failure logic: unconditional `has_required_fail` since all tiers are core/required
+- Added `*)` fallback to dep type case blocks to catch future manifest errors
+- Fixed `test_helpers.sh` SIGPIPE bug: `printf | grep` under `pipefail` caused flaky test failures on large files
+- Compressed PRD Done Recently history (v3.3.2–v3.8.0 → one summary line)
+- Updated `dependencies.sh` header to reflect current schema (`type: plugin`, no `optional` tier)
+
+## [3.9.1] - 2026-05-05
+
+### Changed
+- README.md major update: added auto-install highlights, removed manual `/plugin install` instructions, added Skill ecosystem table
+- Removed `browser-use` and `claude-to-im` from managed dependency manifest — they remain in routing table as optional user-installed skills
+- Cleaned `OPTIONAL_SKILLS` and routing coverage report to match manifest scope
+
 ## [3.9.0] - 2026-05-05
 
 ### Added

@@ -32,7 +32,6 @@
 | **7. 浏览器工具** | | | | |
 | | | plugin | playwright | 页面交互与自动化测试：导航/截图/填表/点击/E2E 流程 |
 | | | plugin | chrome-devtools-mcp | 浏览器诊断：性能分析(LCP)/a11y 审计/CDP 调试/渲染排查 |
-| | | skill | browser-use | 需要 cloud browser/tunnel/登录态时的补充 |
 | **8. 调试与调查** | | | | |
 | | ★ | sp | superpowers:systematic-debugging | 遇到 bug/测试失败/异常行为时，假设驱动逐步排查（修 bug 必走） |
 | **9. 文档管理** | | | | |
@@ -43,9 +42,7 @@
 | | | sp | superpowers:writing-skills | 轻量备选：创建/编辑 skill 的流程指导 |
 | **11. 项目编排** | | | | |
 | | ★ | skill | codesop | 项目工作台：上下文恢复→路由推荐→fit 验证→完成关卡 |
-| **12. 通讯桥梁** | | | | |
-| | | skill | claude-to-im | Claude Code 桥接到 Telegram/Discord/飞书/QQ/微信 |
-| **13. 应急接管** | | | | |
+| **12. 应急接管** | | | | |
 | | | plugin | codex:rescue | 用户说"让 codex 看看/交给 codex/第二意见"、线程卡住、需要换个智能体时——AI 可自动调用的唯一 codex 执行命令 |
 | | | plugin | codex:review | 需要 OpenAI 第二意见审查代码 diff 时（独立视角）⚠️ 需用户手动输入 |
 | | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |

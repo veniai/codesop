@@ -41,8 +41,6 @@ REQUIRED_PLUGINS=(
 # Independent skills — missing = warning
 OPTIONAL_SKILLS=(
   "codesop"
-  "browser-use"
-  "claude-to-im"
 )
 
 # Stale terms — removed in v2.0, should not appear in active docs
@@ -186,7 +184,7 @@ check_skill_completeness() {
         break
       fi
     done
-    # Fallback: some skills (e.g. browser-use) register as MCP servers, not skill directories
+    # Fallback: some skills register as MCP servers, not skill directories
     if [ "$found" = false ] && type has_mcp_server >/dev/null 2>&1; then
       has_mcp_server "$skill" && found=true
     fi
@@ -203,14 +201,6 @@ check_skill_completeness() {
         codesop)
           printf '    %-20s https://github.com/veniai/codesop\n' "codesop"
           printf '    %-20s git clone https://github.com/veniai/codesop.git ~/codesop && bash ~/codesop/setup --host auto\n' "安装:"
-          ;;
-        browser-use)
-          printf '    %-20s https://github.com/browser-use/browser-use\n' "browser-use"
-          printf '    %-20s pip install browser-use && browser-use doctor\n' "安装:"
-          printf '    %-20s 安装后如有重复 MCP server，检查 ~/.claude/settings.json 移除重复项\n' "注意:"
-          ;;
-        claude-to-im)
-          printf '    %-20s 搜索 claude-to-im 获取最新安装方式\n' "claude-to-im"
           ;;
         *)
           printf '    %-20s 请手动安装到 ~/.claude/skills/%s/\n' "$s" "$s"
@@ -606,7 +596,7 @@ git_update_check() {
   fi
 
   # Fetch latest from remote (quiet, with timeout to avoid hanging)
-  timeout 10 git -C "$repo_dir" fetch --quiet 2>/dev/null || true
+  _run_with_timeout 10 git -C "$repo_dir" fetch --quiet 2>/dev/null || true
 
   # 读取本地版本
   local local_version="unknown"
@@ -696,33 +686,6 @@ EOF
     return
   fi
 
-  # 兜底：分叉状态
-  if [ "${ahead:-0}" != "0" ] || [ "${behind:-0}" != "0" ]; then
-    printf '%s\n' "- $tool_name：本地与上游已分叉（ahead=${ahead}, behind=${behind}），需人工处理"
-    return
-  fi
-
-  # 无法读取 upstream 提交差异时，最后再退回到版本判断
-  if [ "$local_version" != "unknown" ] && [ "$remote_version" != "unknown" ] && [ "$local_version" != "$remote_version" ]; then
-    printf '%s\n' "- $tool_name：$local_version → $remote_version（发现新版本）"
-    if [ -n "$update_cmd" ]; then
-      printf '\n  更新命令：%s\n' "$update_cmd"
-    else
-      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
-    fi
-    return
-  fi
-
-  if [ "$local_version" = "$remote_version" ] && [ "$local_version" != "unknown" ]; then
-    printf '%s\n' "- $tool_name：发现 ${behind} 个待更新提交"
-    if [ -n "$update_cmd" ]; then
-      printf '\n  更新命令：%s\n' "$update_cmd"
-    else
-      printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
-    fi
-    return
-  fi
-
   printf '%s\n' "- $tool_name：无法确认更新状态"
 }
 
@@ -799,19 +762,8 @@ _dep_upgrade_one() {
       _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
       return $?
       ;;
-    pip)
-      pip install --upgrade "$id" >/dev/null 2>&1
-      return $?
-      ;;
-    git)
-      local dir="$HOME/.claude/skills/$id"
-      if [ -d "$dir/.git" ]; then
-        if git -C "$dir" pull --ff-only >/dev/null 2>&1; then
-          npm install --prefix "$dir" >/dev/null 2>&1 || true
-          return 0
-        fi
-        return 1
-      fi
+    *)
+      echo "unsupported dep type: $type" >&2
       return 1
       ;;
   esac
@@ -847,8 +799,7 @@ upgrade_managed_deps() {
     # Skip if upgrade tool unavailable
     case "$_d_type" in
       plugin) command -v claude >/dev/null 2>&1 || { skip+=("$_d_id"); continue; } ;;
-      pip) command -v pip >/dev/null 2>&1 || { skip+=("$_d_id"); continue; } ;;
-      git) [ -d "$HOME/.claude/skills/$_d_id/.git" ] || { skip+=("$_d_id"); continue; } ;;
+      *) skip+=("$_d_id"); continue ;;
     esac
 
     printf '  %-45s ' "$_d_id"
@@ -858,7 +809,7 @@ upgrade_managed_deps() {
     else
       fail+=("$_d_id [$_d_tier]")
       printf '%s\n' "✗"
-      [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
+      has_required_fail=true
     fi
   done
 
@@ -891,11 +842,10 @@ install_managed_deps() {
           jq -e --arg id "$_d_id" '.plugins | has($id)' "$plugins_json" 2>/dev/null | grep -q true && is_installed=true
         fi
         ;;
-      pip)
-        command -v pip >/dev/null 2>&1 && pip show "$_d_id" >/dev/null 2>&1 && is_installed=true
-        ;;
-      git)
-        [ -d "$HOME/.claude/skills/$_d_id" ] && is_installed=true
+      *)
+        printf '  %-45s ⏭ (unsupported type: %s)\n' "$_d_id" "$_d_type"
+        skip+=("$_d_id")
+        continue
         ;;
     esac
 
@@ -906,42 +856,19 @@ install_managed_deps() {
 
     printf '  %-45s ' "$_d_id"
 
-    case "$_d_type" in
-      plugin)
-        if ! command -v claude >/dev/null 2>&1; then
-          printf '%s\n' "⏭ (claude CLI unavailable)"
-          skip+=("$_d_id")
-          continue
-        fi
-        if _run_with_timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
-          printf '%s\n' "✓ installed"
-          ok+=("$_d_id")
-        else
-          printf '%s\n' "✗ install failed"
-          fail+=("$_d_id [$_d_tier]")
-          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
-        fi
-        ;;
-      pip)
-        if ! command -v pip >/dev/null 2>&1; then
-          printf '%s\n' "⏭ (pip unavailable)"
-          skip+=("$_d_id")
-          continue
-        fi
-        if pip install "$_d_id" >/dev/null 2>&1; then
-          printf '%s\n' "✓ installed"
-          ok+=("$_d_id")
-        else
-          printf '%s\n' "✗ install failed"
-          fail+=("$_d_id [$_d_tier]")
-          [ "$_d_tier" = "core" ] || [ "$_d_tier" = "required" ] && has_required_fail=true
-        fi
-        ;;
-      git)
-        printf '%s\n' "⏭ (manual install)"
-        skip+=("$_d_id")
-        ;;
-    esac
+    if ! command -v claude >/dev/null 2>&1; then
+      printf '%s\n' "⏭ (claude CLI unavailable)"
+      skip+=("$_d_id")
+      continue
+    fi
+    if _run_with_timeout 60 claude plugin install "$_d_id" --scope user >/dev/null 2>&1; then
+      printf '%s\n' "✓ installed"
+      ok+=("$_d_id")
+    else
+      printf '%s\n' "✗ install failed"
+      fail+=("$_d_id [$_d_tier]")
+      has_required_fail=true
+    fi
   done
 
   [ ${#already[@]} -gt 0 ] && printf '%s\n' "  已有: ${already[*]}"

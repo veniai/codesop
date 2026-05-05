@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-blue.svg" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-3.6.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.9.2-blue.svg" alt="Version">
 </p>
 
 ---
@@ -39,7 +39,7 @@
 ```
 /codesop init .    # 初始化当前项目
 /codesop           # 打开工作台，开始工作
-/codesop update    # 更新到最新版本（自动升级所有依赖插件）
+/codesop update    # 更新 codesop，并自动升级所有依赖插件
 ```
 
 <details>
@@ -47,7 +47,7 @@
 
 ```bash
 git clone https://github.com/veniai/codesop.git ~/codesop
-cd ~/codesop && bash install.sh    # 自动安装所有依赖插件
+cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 ```
 
 确保 `~/.local/bin` 在你的 `PATH` 中。
@@ -67,7 +67,9 @@ cd ~/codesop && bash install.sh    # 自动安装所有依赖插件
 
 ## 核心亮点
 
-**一键初始化** — 安装后运行 `/codesop init .`，自动生成 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（如缺失则生成）、ADR（架构决策）。同时同步系统级配置到 `~/.claude/CLAUDE.md`。装一次，所有项目 AI-ready
+**一键安装** — `bash install.sh` 自动安装 codesop + 全部 10 个依赖插件。不需要手动 `/plugin install`，装完就是完整工作流，开箱即用
+
+**一键初始化** — 安装后运行 `/codesop init .`，自动生成 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（如缺失则生成）、ADR（架构决策）。装一次，所有项目 AI-ready
 
 **SOP 四条铁律** — 先设计再编码 · 先失败再生产 · 无根因不修 bug · 无证据不完工。AI 不能随便写代码，每一步都有纪律约束
 
@@ -95,19 +97,22 @@ cd ~/codesop && bash install.sh    # 自动安装所有依赖插件
 <details>
 <summary>Skill 生态</summary>
 
-codesop 编排以下 Skill：
+codesop 编排以下 Skill，安装时自动配置，无需手动操作：
 
-- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-dev, verification
-- **code-review** — 5 agent 并行 PR 审查 + 置信度评分
-- **codex** — 双 AI 审查（设计 + 代码审查阶段）
-- **claude-md-management** — 文档漂移检查
-- **code-simplifier** — 代码润色
+| Skill | 能力 |
+|-------|------|
+| superpowers | brainstorming, writing-plans, TDD, systematic-debugging, subagent-dev, verification |
+| code-review | 5 agent 并行 PR 审查 + 置信度评分 |
+| codex | 双 AI 审查（设计 + 代码审查阶段） |
+| frontend-design | 强制设计思维，拒绝通用 AI 审美 |
+| context7 | 第三方库/框架最新文档实时查询 |
+| code-simplifier | 代码润色（可读性 + 结构优化） |
+| playwright | 页面交互与自动化测试 |
+| chrome-devtools-mcp | 浏览器诊断：性能分析 / a11y 审计 |
+| claude-md-management | CLAUDE.md 质量审计与文档漂移检查 |
+| skill-creator | Skill 全生命周期管理 |
 
-```bash
-/plugin install superpowers                      # Claude Code
-/plugin install code-review
-/plugin marketplace add openai/codex-plugin-cc
-```
+运行 `/codesop update` 可一键升级所有已安装 Skill。
 
 </details>
 

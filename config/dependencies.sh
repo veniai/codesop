@@ -2,8 +2,8 @@
 # dependencies.sh - Managed dependency manifest for codesop
 #
 # Each entry: type|qualified_id|tier|patched|min_version
-#   type:        plugin | pip | git
-#   tier:        core | required | optional
+#   type:        plugin
+#   tier:        core | required
 #   patched:     yes | no  (whether patch_skills() overwrites this dep)
 #   min_version: minimum required version (empty = any)
 #
@@ -26,8 +26,4 @@ DEP_MANIFEST=(
 
   # Required — third-party marketplace
   "plugin|codex@openai-codex|required|no|"
-
-  # Optional — local skills
-  "pip|browser-use|optional|no|"
-  "git|claude-to-im|optional|no|"
 )

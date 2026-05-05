@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-blue.svg" alt="Claude Code">
-  <img src="https://img.shields.io/badge/version-3.6.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.9.2-blue.svg" alt="Version">
 </p>
 
 ---
@@ -28,7 +28,7 @@
 ```text
 Install codesop — an AI coding workflow OS. Follow these steps:
 1. git clone https://github.com/veniai/codesop.git ~/codesop
-2. cd ~/codesop && bash install.sh
+2. cd ~/codesop && bash install.sh    # Auto-installs codesop + all dependency plugins
 3. Verify ~/.local/bin/codesop is executable (add ~/.local/bin to PATH in ~/.bashrc or ~/.zshrc if needed)
 4. Run codesop init . in the current project directory to initialize
 After installation, explain how to use the /codesop workbench.
@@ -39,7 +39,7 @@ Once installed (in Claude Code):
 ```
 /codesop init .    # Initialize current project
 /codesop           # Open the workbench
-/codesop update    # Update to latest version
+/codesop update    # Update codesop and auto-upgrade all dependency plugins
 ```
 
 <details>
@@ -47,7 +47,7 @@ Once installed (in Claude Code):
 
 ```bash
 git clone https://github.com/veniai/codesop.git ~/codesop
-cd ~/codesop && bash install.sh
+cd ~/codesop && bash install.sh    # Auto-installs codesop + all dependency plugins
 ```
 
 Make sure `~/.local/bin` is on your `PATH`.
@@ -67,7 +67,9 @@ Cross-tool support: Claude Code (primary) · Codex · OpenCode
 
 ## Key Highlights
 
-**One-Command Init** — Run `/codesop init .` after installing. Auto-generates AI collaboration docs: AGENTS.md (discipline), PRD.md (product progress), README.md (if missing), ADR (architecture decisions). Also syncs system-level config to `~/.claude/CLAUDE.md`. Install once, every project is AI-ready.
+**One-Command Install** — `bash install.sh` auto-installs codesop + all 10 dependency plugins. No manual `/plugin install` needed. Full workflow, ready out of the box.
+
+**One-Command Init** — Run `/codesop init .` after installing. Auto-generates AI collaboration docs: AGENTS.md (discipline), PRD.md (product progress), README.md (if missing), ADR (architecture decisions). Install once, every project is AI-ready.
 
 **Four Iron Laws** — Design before coding · Fail before producing · No fix without root cause · No completion without evidence. AI can't just write code freely — every step is discipline-constrained.
 
@@ -95,19 +97,22 @@ Cross-tool support: Claude Code (primary) · Codex · OpenCode
 <details>
 <summary>Skill Ecosystem</summary>
 
-codesop orchestrates these skills:
+codesop orchestrates these skills, auto-configured during install — no manual setup needed:
 
-- **[superpowers](https://github.com/obra/superpowers)** — brainstorming, writing-plans, TDD, systematic-debugging, subagent-dev, verification
-- **code-review** — 5-agent parallel PR review + confidence scoring
-- **codex** — dual-AI review (design + code review phases)
-- **claude-md-management** — document drift detection
-- **code-simplifier** — code polish
+| Skill | Capabilities |
+|-------|-------------|
+| superpowers | brainstorming, writing-plans, TDD, systematic-debugging, subagent-dev, verification |
+| code-review | 5-agent parallel PR review + confidence scoring |
+| codex | Dual-AI review (design + code review) |
+| frontend-design | Enforced design thinking, unique layouts and aesthetics |
+| context7 | Real-time docs and code examples for third-party libraries |
+| code-simplifier | Code polish (readability + structure optimization) |
+| playwright | Page interaction and automated testing |
+| chrome-devtools-mcp | Browser diagnostics: performance / a11y audits |
+| claude-md-management | CLAUDE.md quality audit and document drift detection |
+| skill-creator | Full skill lifecycle management |
 
-```bash
-/plugin install superpowers                      # Claude Code
-/plugin install code-review
-/plugin marketplace add openai/codex-plugin-cc
-```
+Run `/codesop update` to upgrade all installed skills in one command.
 
 </details>
 
@@ -149,6 +154,8 @@ setup                       # Host integration sync
 ```
 
 `VERSION` is the single source of truth for releases. After skill routing, the last line outputs a natural-language workflow instruction. A document drift scan runs before routing to keep project docs current.
+
+</details>
 
 <details>
 <summary>Testing</summary>

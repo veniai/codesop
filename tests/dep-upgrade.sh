@@ -14,8 +14,6 @@ assert_contains "$manifest_output" "superpowers@claude-plugins-official"
 assert_contains "$manifest_output" "core|yes|5.1.0"
 assert_contains "$manifest_output" "code-review@claude-plugins-official"
 assert_contains "$manifest_output" "codex@openai-codex"
-assert_contains "$manifest_output" "pip|browser-use"
-assert_contains "$manifest_output" "git|claude-to-im"
 
 # Every entry should have 5 pipe-separated fields
 entry_count=0
@@ -28,7 +26,7 @@ while IFS= read -r line; do
   [ "$field_count" -eq 4 ] || fail "Expected 4 pipes in: $line (got $field_count)"
   entry_count=$((entry_count + 1))
 done < <(sed -n '/^DEP_MANIFEST=/,/^[[:space:]]*)/p' "$ROOT_DIR/config/dependencies.sh")
-[ "$entry_count" -ge 10 ] || fail "Expected >= 10 entries in DEP_MANIFEST, got $entry_count"
+[ "$entry_count" -ge 8 ] || fail "Expected >= 8 entries in DEP_MANIFEST, got $entry_count"
 
 # --- updates.sh has upgrade functions ---
 
@@ -41,7 +39,6 @@ assert_contains "$updates_output" "upgrade_managed_deps"
 assert_contains "$updates_output" "install_managed_deps"
 assert_contains "$updates_output" "claude plugin update"
 assert_contains "$updates_output" "claude plugin install"
-assert_contains "$updates_output" "pip install --upgrade"
 assert_contains "$updates_output" "has_required_fail"
 
 # --- patch_skills() compat check in setup ---
