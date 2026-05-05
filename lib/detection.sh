@@ -191,6 +191,8 @@ check_git_health() {
   : "${main_branch:=main}"
 
   # Fetch latest merge status (timeout prevents hanging on unreachable remotes)
+  # Inline timeout guard — same pattern as _run_with_timeout() in updates.sh;
+  # can't reuse it because detection.sh loads before updates.sh
   if command -v timeout >/dev/null 2>&1; then
     timeout 10 git -C "$root" fetch origin "$main_branch" --quiet --prune 2>/dev/null || true
   else

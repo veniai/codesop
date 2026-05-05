@@ -82,7 +82,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 | 1 | CLI | Skip if preferences already set |
 | 2 | — | **User runs `/init`** to generate project CLAUDE.md |
 | 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md |
-| 4 | CLI | Plugin dependency checks (superpowers + optional plugins) |
+| 4 | CLI | Auto-install managed dependencies (`install_managed_deps` from manifest) |
 | 4a | Skill | If `ADAPT_MODE:YES`: template adaptation (PRD/README diff + CLAUDE.md dedup) |
 | 5 | Skill | Prompt user to run `/init` (new mode) or confirm adaptation (adapt mode) |
 
@@ -115,6 +115,9 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `SUPERPOWERS_PLUGIN` and `REQUIRED_PLUGINS` in `lib/updates.sh` define the plugin dependency tiers
+- `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). Used by `install_managed_deps()` and `upgrade_managed_deps()` in updates.sh
+- `patch_skills()` uses `dep_patch_compat()` from updates.sh to check major.minor match before applying patches
+- `_run_with_timeout()` in updates.sh wraps `timeout` with macOS fallback. Use this pattern for any timed command
 - `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback (e.g. browser-use installed via pip, not as skill directory)
 - `patch_skills()` in setup overwrites third-party skill files from `patches/superpowers/` — logic is "different from ours → overwrite, same → skip". Plugin updates will be re-patched on next `setup` run
 - `find` on non-existent directory returns exit 1; under `set -e`, always append `|| true` to `find` in command substitutions

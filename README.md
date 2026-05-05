@@ -39,7 +39,7 @@
 ```
 /codesop init .    # 初始化当前项目
 /codesop           # 打开工作台，开始工作
-/codesop update    # 更新到最新版本
+/codesop update    # 更新到最新版本（自动升级所有依赖插件）
 ```
 
 <details>
@@ -47,7 +47,7 @@
 
 ```bash
 git clone https://github.com/veniai/codesop.git ~/codesop
-cd ~/codesop && bash install.sh
+cd ~/codesop && bash install.sh    # 自动安装所有依赖插件
 ```
 
 确保 `~/.local/bin` 在你的 `PATH` 中。
