@@ -30,14 +30,14 @@ Install codesop — an AI coding workflow OS. Follow these steps:
 1. git clone https://github.com/veniai/codesop.git ~/codesop
 2. cd ~/codesop && bash install.sh    # Auto-installs codesop + all dependency plugins
 3. Verify ~/.local/bin/codesop is executable (add ~/.local/bin to PATH in ~/.bashrc or ~/.zshrc if needed)
-4. Run codesop init . in the current project directory to initialize
+4. Run codesop init in the current project directory to initialize
 After installation, explain how to use the /codesop workbench.
 ```
 
 Once installed (in Claude Code):
 
 ```
-/codesop init .    # Initialize current project
+/codesop init      # Initialize current project
 /codesop           # Open the workbench
 /codesop update    # Update codesop and auto-upgrade all dependency plugins
 ```
@@ -98,7 +98,7 @@ Run `/codesop update` to upgrade all installed Skills in one command.
 <summary>Initialize a project</summary>
 
 ```bash
-/codesop init .
+/codesop init
 ```
 
 Auto-scans project shape and generates the files your AI assistant needs:

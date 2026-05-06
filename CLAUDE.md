@@ -106,7 +106,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 
 - `set -euo pipefail` in the entrypoint. Every pipe command that might fail needs `|| true` or `|| fallback`
 - `bare return` inherits exit status of preceding command. Use `return 0` explicitly
-- `git fetch` can hang. Always wrap with `timeout 10` (with macOS fallback for no GNU coreutils)
+- `git fetch` can hang. Use `_run_with_timeout()` from updates.sh instead of raw `timeout`
 - `wc -l` output has leading whitespace. Pipe through `tr -d ' '` before arithmetic
 - setup's `configure_hooks()` uses jq with nested schema: `{ "matcher": "", "hooks": [{ "type": "command", ... }] }`
 - Product contract is already narrower than the original implementation. Keep cleaning toward the contract instead of reintroducing legacy surfaces
@@ -114,7 +114,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - SKILL.md §3 step 10.5 manages pipeline-to-todo: TaskList check → stale detection → initial confirmation → TaskCreate. Auto re-entry after each task completion (no per-step confirmation)
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
-- `SUPERPOWERS_PLUGIN` and `REQUIRED_PLUGINS` in `lib/updates.sh` define the plugin dependency tiers
+- `config/dependencies.sh` is the managed dependency manifest; `lib/updates.sh` loads it at runtime
 - `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). Used by `install_managed_deps()` and `upgrade_managed_deps()` in updates.sh
 - `patch_skills()` uses `dep_patch_compat()` from updates.sh to check major.minor match before applying patches
 - `_run_with_timeout()` in updates.sh wraps `timeout` with macOS fallback. Use this pattern for any timed command

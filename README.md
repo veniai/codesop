@@ -30,14 +30,14 @@
 1. git clone https://github.com/veniai/codesop.git ~/codesop
 2. cd ~/codesop && bash install.sh
 3. 确认 ~/.local/bin/codesop 可执行（如不在 PATH，帮我加到 ~/.bashrc 或 ~/.zshrc）
-4. 在当前项目目录运行 codesop init . 初始化项目
+4. 在当前项目目录运行 codesop init 初始化项目
 安装完成后，告诉我如何使用 /codesop 工作台。
 ```
 
 安装成功后（在 Claude Code 中）：
 
 ```
-/codesop init .    # 初始化当前项目
+/codesop init      # 初始化当前项目
 /codesop           # 打开工作台，开始工作
 /codesop update    # 更新 codesop，并自动升级所有依赖插件
 ```
@@ -98,7 +98,7 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 <summary>初始化项目</summary>
 
 ```bash
-/codesop init .
+/codesop init
 ```
 
 自动扫描项目形态，生成 AI 助手所需的项目文件：
