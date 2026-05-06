@@ -65,6 +65,10 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_routing_coverage) || echo "生态检查跳过: 模块不可用"
    ```
+5.5. Run update notification check (shows result only when new version available):
+   ```bash
+   (source ~/codesop/lib/updates.sh && ROOT_DIR=~/codesop VERSION_FILE=~/codesop/VERSION check_update_notification) || true
+   ```
 6. Produce a workbench summary (include routing coverage result under `## Skill 生态`)
 7. **Verify git context before routing.** Run lightweight checks to ground the routing decision in observed facts:
    ```bash
@@ -157,10 +161,11 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 ## 工作台摘要
 **状态**: {分支名} — {一句话描述当前在干什么}
 **分支**: {分支名}（{PR 状态}）
+**更新**: codesop X → Y available. Run `codesop update` to upgrade.（仅当有新版本时输出，来自 step 5.5）
 **注意**: {具体内容}（仅在异常时加此行，无异常不输出）
 ```
 
-2 个必显字段（**状态** + **分支**），每行一个 bold key + inline value。摘要反映当前分支上下文。
+2 个必显字段（**状态** + **分支**），每行一个 bold key + inline value。摘要反映当前分支上下文。`**更新**` 和 `**注意**` 为条件字段，仅在对应信号存在时输出。
 
 ### 4.2 Skill Ecosystem
 

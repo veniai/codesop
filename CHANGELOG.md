@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [3.9.4] - 2026-05-06
+
+### Added
+- New version notification: `/codesop` workbench shows update prompt when a newer version is available (`check_update_notification()`)
+- 24h throttled check via `git fetch origin main` + remote VERSION comparison, cached in `~/.cache/codesop/update-cache`
+- `CODESOP_NO_UPDATE_CHECK=1` environment variable to skip the check
+
 ## [3.9.3] - 2026-05-06
 
 ### Fixed

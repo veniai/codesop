@@ -81,6 +81,7 @@ run_update() {
   if [ "$local_hash" = "$remote_hash" ]; then
     printf '%s\n' "已是最新版本。"
     _resync_and_check
+    _write_update_cache
     return 0
   fi
 
@@ -134,6 +135,7 @@ run_update() {
   new_hash="$(git rev-parse HEAD 2>/dev/null || echo "")"
   printf '%s\n' "更新完成：$old_ver → $new_ver"
   _resync_and_check
+  _write_update_cache
 
   local changes
   if [ -n "$old_hash" ] && [ -n "$new_hash" ] && [ "$old_hash" != "$new_hash" ]; then

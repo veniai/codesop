@@ -684,6 +684,69 @@ EOF
   printf '%s\n' "- $tool_name：无法确认更新状态"
 }
 
+# Cache file for update notification: EPOCH|LOCAL|LATEST
+_UPDATE_CACHE_DIR="${HOME}/.cache/codesop"
+_UPDATE_CACHE_FILE="${_UPDATE_CACHE_DIR}/update-cache"
+_UPDATE_CACHE_VERSION=1
+_UPDATE_CHECK_INTERVAL=86400  # 24 hours in seconds
+
+check_update_notification() {
+  [ "${CODESOP_NO_UPDATE_CHECK:-}" = "1" ] && return 0
+
+  local local_ver
+  local_ver=$(cat "${ROOT_DIR:-$HOME/codesop}/VERSION" 2>/dev/null | tr -d '[:space:]') || return 0
+  [ -z "$local_ver" ] && return 0
+
+  local latest_ver=""
+  local now
+  now=$(date +%s)
+
+  # Try cache first
+  if [ -f "$_UPDATE_CACHE_FILE" ]; then
+    local cache_ver cached_epoch cached_local cached_latest
+    cache_ver="" cached_epoch="" cached_local="" cached_latest=""
+    IFS='|' read -r cache_ver cached_epoch cached_local cached_latest < "$_UPDATE_CACHE_FILE" 2>/dev/null || true
+    if [ "$cache_ver" = "$_UPDATE_CACHE_VERSION" ] && [[ "$cached_epoch" =~ ^[0-9]+$ ]]; then
+      local age=$(( now - cached_epoch ))
+      if [ $age -lt $_UPDATE_CHECK_INTERVAL ]; then
+        latest_ver="$cached_latest"
+      fi
+    fi
+  fi
+
+  # Cache miss or expired — do a lightweight fetch
+  if [ -z "$latest_ver" ]; then
+    local codesop_dir="${ROOT_DIR:-$HOME/codesop}"
+    if ! git -C "$codesop_dir" rev-parse --git-dir >/dev/null 2>&1; then
+      return 0
+    fi
+    _run_with_timeout 5 git -C "$codesop_dir" fetch --quiet origin main 2>/dev/null || true
+    latest_ver=$(git -C "$codesop_dir" show origin/main:VERSION 2>/dev/null | tr -d '[:space:]') || true
+    [ -z "$latest_ver" ] && return 0
+
+    # Write cache
+    mkdir -p "$_UPDATE_CACHE_DIR" 2>/dev/null || true
+    printf '%s|%s|%s|%s\n' "$_UPDATE_CACHE_VERSION" "$now" "$local_ver" "$latest_ver" > "$_UPDATE_CACHE_FILE" 2>/dev/null || true
+  fi
+
+  # Compare versions using sort -V (same pattern as plugin_update_check)
+  [ "$local_ver" = "$latest_ver" ] && return 0
+  local sorted
+  sorted=$(printf '%s\n%s' "$local_ver" "$latest_ver" | sort -V | tail -1)
+  [ "$sorted" = "$local_ver" ] && return 0  # local >= latest
+
+  printf '**更新**: codesop %s → %s available. Run `codesop update` to upgrade.\n' "$local_ver" "$latest_ver"
+}
+
+# Write update cache after a successful update (called from _resync_and_check)
+_write_update_cache() {
+  local local_ver
+  local_ver=$(cat "${ROOT_DIR:-$HOME/codesop}/VERSION" 2>/dev/null | tr -d '[:space:]') || return 0
+  [ -z "$local_ver" ] && return 0
+  mkdir -p "$_UPDATE_CACHE_DIR" 2>/dev/null || true
+  printf '%s|%s|%s|%s\n' "$_UPDATE_CACHE_VERSION" "$(date +%s)" "$local_ver" "$local_ver" > "$_UPDATE_CACHE_FILE" 2>/dev/null || true
+}
+
 print_dependency_report() {
   local host="$1"
 
