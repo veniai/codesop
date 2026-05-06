@@ -51,11 +51,6 @@ assert_contains "$readme_output" 'PRD.md'
 assert_contains "$readme_output" 'CLAUDE.md'
 assert_contains "$readme_output" "codesop update"
 assert_contains "$readme_output" "/codesop init"
-assert_contains "$readme_output" '`VERSION` 是发布版本的唯一真相源'
-assert_contains "$readme_output" "最后一行"
-assert_contains "$readme_output" "自然语言工作流指令"
-assert_contains "$readme_output" "文档漂移"
-assert_contains "$readme_output" "活文档"
 
 version_value="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 skill_version="$(sed -n 's/.*"version": "\(.*\)".*/\1/p' "$ROOT_DIR/skill.json" | head -1)"

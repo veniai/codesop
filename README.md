@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <strong>Skill-first 的 AI 编码工作流操作系统</strong><br>
-  让 AI 拥有 SOP 纪律 — 知道用什么 Skill、按什么顺序、什么时候停下来验证
+  <strong>装一个，AI 编码全家桶</strong><br>
+  10 个精选 Skill 一键安装 · AI 自动拥有 SOP 纪律 · 覆盖编码全流程
 </p>
 
 <p align="center">
@@ -17,9 +17,9 @@
 
 ---
 
-> 不知道怎么让 AI 帮你写代码？不知道该给 AI 准备什么文档？长任务做到一半就失控？AI 写完代码你不敢用？
+> Claude Code 插件眼花缭乱，不知道装哪些？AI 写代码没纪律，想改就改？长任务做到一半就失控？
 >
-> codesop 解决这些问题。装一次，所有项目 AI-ready。
+> **codesop 解决这些问题。** 一条命令安装 10 个经过实践验证的核心 Skill，装完直接用。
 
 ## 快速体验
 
@@ -54,36 +54,17 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 
 </details>
 
-## 它能做什么
+## 为什么用 codesop
 
-`/codesop` 是你的 AI 编码工作台。每次进入项目：
+**精选全家桶，不用自己挑** — 10 个核心 Skill 自动安装：需求分析、设计审查、TDD、调试、代码审查、文档管理、前端设计、浏览器测试……全流程覆盖，经过实践验证，不踩坑
 
-1. **恢复上下文** — 自动读取 AGENTS.md 和 PRD.md，理解项目当前状态
-2. **路由推荐** — 根据你的意图，从路由表中选择最佳 Skill 链路
-3. **Pipeline 执行** — 链路转为 task list（☐/☑ 可视化进度），逐步自动执行
-4. **验证关卡** — 每步完成前必须通过验证，不允许跳过
+**AI 自动守纪律** — 四条 SOP 铁律硬约束：先设计再编码、先失败再生产、无根因不修 bug、无证据不完工。AI 不能随便写代码
 
-跨工具支持：Claude Code（主要）· Codex · OpenCode
+**路由自动化** — 不知道该用什么 Skill？路由表自动选择。新功能走 brainstorming → plan → dev → verify，修 bug 走 debugging → verify，不用你自己判断
 
-## 核心亮点
+**长任务不失控** — Pipeline task list 自动拆分、顺序执行、☐/☑ 进度可视化。长时间开发任务也能稳定推进
 
-**一键安装** — `bash install.sh` 自动安装 codesop + 全部 10 个依赖插件。不需要手动 `/plugin install`，装完就是完整工作流，开箱即用
-
-**一键初始化** — 安装后运行 `/codesop init .`，自动生成 AI 协作文档：AGENTS.md（AI 纪律）、PRD.md（产品进度）、README.md（如缺失则生成）、ADR（架构决策）。装一次，所有项目 AI-ready
-
-**SOP 四条铁律** — 先设计再编码 · 先失败再生产 · 无根因不修 bug · 无证据不完工。AI 不能随便写代码，每一步都有纪律约束
-
-**Skill 路由** — 不知道该用什么 Skill？路由表自动选择。新功能走 brainstorming → plan → dev → verify，修 bug 走 debugging → verify，不用你自己判断
-
-**长任务编排** — Pipeline task list 自动拆分、顺序执行、☐/☑ 进度可视化。长时间开发任务也能稳定推进，不会中途失控
-
-**循环追问** — brainstorming Skill 采用迭代式需求澄清：一轮提问 → 理解 → 再追问，逐步逼近真实需求，拒绝拍脑袋开工
-
-**Context 管理** — 每次进入项目，AI 自动读取 AGENTS.md（纪律）+ PRD.md（产品进度），恢复完整上下文。不用担心 AI 忘了之前做了什么
-
-**ADR 架构决策记录** — 自动检测架构决策冲突。涉及跨模块改动时，先读 ADR 再动手，避免重复决策和矛盾
-
-**文档关卡** — 任务完成前自动判定 CLAUDE.md / PRD.md / README.md 是否需要更新，防止文档落后于代码
+**上下文不丢失** — 每次进入项目，AI 自动恢复完整上下文。不用担心 AI 忘了之前做了什么
 
 ## 覆盖场景
 
@@ -94,10 +75,9 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 | 小改动 | 开发 → 验证 → 提交 PR |
 | PR 反馈 | 评估意见 → 修复 → 全量测试 → 提交 |
 
-<details>
-<summary>Skill 生态</summary>
+## Skill 全家桶
 
-codesop 编排以下 Skill，安装时自动配置，无需手动操作：
+以下 Skill 安装时自动配置，无需手动操作：
 
 | Skill | 能力 |
 |-------|------|
@@ -113,8 +93,6 @@ codesop 编排以下 Skill，安装时自动配置，无需手动操作：
 | skill-creator | Skill 全生命周期管理 |
 
 运行 `/codesop update` 可一键升级所有已安装 Skill。
-
-</details>
 
 <details>
 <summary>初始化项目</summary>
@@ -153,22 +131,11 @@ setup                       # 宿主安装与同步
 ├── PRD.md                  # 活文档
 ```
 
-`VERSION` 是发布版本的唯一真相源。Skill 路由完成后，最后一行输出自然语言工作流指令。路由前执行文档漂移扫描，确保项目文档不落后。
-
-</details>
-
-<details>
-<summary>测试</summary>
-
-```bash
-bash tests/run_all.sh
-```
-
 </details>
 
 ## 相关项目
 
-- **[cc-monitor](https://github.com/veniai/cc-monitor)** — Claude Code 远程监控与控制。任务完成自动通知到微信/钉钉/飞书，会话卡死自动恢复，手机远程发命令。搭配 codesop 使用：codesop 编排 workflow，cc-monitor 在手机上帮你盯着
+- **[cc-monitor](https://github.com/veniai/cc-monitor)** — Claude Code 远程监控与控制。任务完成自动通知到微信/钉钉/飞书，会话卡死自动恢复，手机远程发命令
 
 ## License
 
