@@ -75,6 +75,8 @@ Make sure `~/.local/bin` is on your `PATH`.
 | Small change | dev → verify → submit PR |
 | PR feedback | evaluate → fix → full test → submit |
 
+> Optional worktree isolation for parallel development; all chains end with finishing (submit PR).
+
 ## Skill Toolkit
 
 All Skills are auto-configured during install — no manual setup needed:

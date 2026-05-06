@@ -75,6 +75,8 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 | 小改动 | 开发 → 验证 → 提交 PR |
 | PR 反馈 | 评估意见 → 修复 → 全量测试 → 提交 |
 
+> 支持可选 worktree 隔离开发；所有链路均以 finishing（提交 PR）收尾。
+
 ## Skill 全家桶
 
 以下 Skill 安装时自动配置，无需手动操作：
