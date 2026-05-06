@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.9.3] - 2026-05-06
+
+### Fixed
+- Added `_ensure_superpowers_version()` guard after `upgrade_managed_deps` — verifies superpowers reached required version before applying patches; retries once with 60s timeout if not
+
+### Changed
+- Cleaned up orphan git branches (local + remote)
+- Removed stale design artifacts from working tree
+
 ## [3.9.2] - 2026-05-05
 
 ### Changed

@@ -1,6 +1,6 @@
 # Product: codesop
-# Current Version: 3.9.2
-# Last Updated: 2026-05-05
+# Current Version: 3.9.3
+# Last Updated: 2026-05-06
 # Status: active
 
 ---
@@ -20,11 +20,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.9.2 代码精简
+- **当前里程碑**: v3.9.3 升级可靠性
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.9.2 — 移除 pip/git 死代码、简化 tier 逻辑、修 test_helpers SIGPIPE bug、压缩 PRD 历史
+- **最后更新原因**: v3.9.3 — 升级后自动验证 superpowers 版本、清理孤立分支
 
 ## 2. 当前进度
 

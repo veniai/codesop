@@ -14,6 +14,10 @@ _resync_and_check() {
   printf '%s\n' "检查依赖升级..."
   upgrade_managed_deps || true
 
+  # Verify superpowers actually reached the required version.
+  # claude plugin update can silently fail or timeout without upgrading.
+  _ensure_superpowers_version
+
   # Re-sync host integrations (applies patches to newly upgraded plugins)
   printf '%s\n' "重新同步本机宿主集成..."
   bash "$ROOT_DIR/setup" --host auto

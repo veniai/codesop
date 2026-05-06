@@ -820,6 +820,54 @@ upgrade_managed_deps() {
   [ "$has_required_fail" = false ]
 }
 
+# Verify superpowers reached the required min_version after upgrade.
+# If not (silent failure, timeout, network issue), retry once with visible output.
+# Exits 0 regardless — this is a best-effort guard, not a hard gate.
+_ensure_superpowers_version() {
+  # Find the required min_version from manifest
+  local required_ver=""
+  _dep_manifest_load || return 0
+  local entry
+  for entry in "${DEP_MANIFEST[@]}"; do
+    _dep_parse "$entry"
+    if [ "$_d_type" = "plugin" ] && [ "$_d_id" = "superpowers@claude-plugins-official" ] && [ "$_d_patched" = "yes" ]; then
+      required_ver="$_d_min_ver"
+      break
+    fi
+  done
+  [ -z "$required_ver" ] && return 0
+
+  # Read actually installed version from plugin cache
+  local plugin_dir
+  plugin_dir=$(find_superpowers_plugin_path 2>/dev/null || true)
+  [ -z "$plugin_dir" ] && return 0
+  local actual_ver
+  actual_ver=$(basename "$plugin_dir" 2>/dev/null || true)
+  [ -z "$actual_ver" ] && return 0
+
+  # Already at or above required version?
+  if dep_patch_compat "$actual_ver" "$required_ver"; then
+    return 0
+  fi
+
+  # Version mismatch — retry upgrade once with longer timeout and visible output
+  printf '  %s\n' "superpowers $actual_ver < required $required_ver, retrying upgrade..."
+  if command -v claude >/dev/null 2>&1; then
+    _run_with_timeout 60 claude plugin update superpowers@claude-plugins-official --scope user 2>&1 | sed 's/^/  /' || true
+  fi
+
+  # Re-check
+  plugin_dir=$(find_superpowers_plugin_path 2>/dev/null || true)
+  [ -z "$plugin_dir" ] && return 0
+  actual_ver=$(basename "$plugin_dir" 2>/dev/null || true)
+  if dep_patch_compat "$actual_ver" "$required_ver"; then
+    printf '  %s\n' "superpowers upgraded to $actual_ver ✓"
+  else
+    printf '  %s\n' "⚠ superpowers $actual_ver still below $required_ver — patches will be skipped"
+    printf '  %s\n' "手动升级: /plugin update superpowers"
+  fi
+}
+
 # Install missing managed dependencies (first-time setup).
 # Reads the same manifest as upgrade_managed_deps().
 # Idempotent — skips already-installed deps.
