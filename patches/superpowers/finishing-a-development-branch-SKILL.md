@@ -17,7 +17,7 @@ Complete development work by pushing the branch and creating a PR directly, then
 
 ### Step 1: Verify Tests
 
-**Before presenting options, verify tests pass:**
+**Before pushing, verify tests pass:**
 
 ```bash
 # Run project's test suite
@@ -53,7 +53,7 @@ Or ask: "This branch split from main - is that correct?"
 git push -u origin <feature-branch>
 
 # Create PR (skip if one already exists for this branch)
-if gh pr list --state open --head "$(git branch --show-current)" --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
+if gh pr list --state open --head "$(git branch --show-current)" --json number --jq '.[0].number' 2>/dev/null | grep -qE '^[0-9]+$'; then
   echo "PR already exists, skipping creation."
 else
   gh pr create --title "<title>" --body "$(cat <<'EOF'
@@ -73,7 +73,7 @@ Then: Cleanup worktree (Step 4)
 
 Check if in worktree:
 ```bash
-git worktree list | grep $(git branch --show-current)
+git worktree list | grep "$(git branch --show-current)" || true
 ```
 
 If yes:

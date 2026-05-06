@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [3.9.6] - 2026-05-06
+
+### Fixed
+- Restore finishing-branch patch to direct push+PR (skip 4-option menu)
+- Fix PR existence check: `grep -qE '^[0-9]+$'` prevents `null` false positive
+
 ## [3.9.5] - 2026-05-06
 
 ### Fixed

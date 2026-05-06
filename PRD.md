@@ -19,11 +19,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.9.5 新版本通知修复
+- **当前里程碑**: v3.9.6 补丁修复
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.9.5 — 修复 update 缓存写入遗漏 + README 契约对齐
+- **最后更新原因**: v3.9.6 — 恢复 finishing-branch 补丁直接提交 PR、修复 PR 存在性检查
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.9.6: 补丁修复 — 恢复 finishing-branch 直接提交 PR + 修复 PR 存在性检查 null 误判
 - [x] v3.9.5: 新版本通知修复 — update 缓存写入补全所有退出路径 + README 契约别名对齐
 - [x] v3.9.4: 新版本通知 — 工作台 24h throttled 检查 + 缓存机制，`codesop update` 完成后自动清除通知
 - [x] v3.9.3: 升级可靠性 — `_ensure_superpowers_version()` 升级后验证、清理孤立分支
@@ -74,7 +75,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v3.9.5.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v3.9.6.
 
 ## 5. 产品核心规范
 
