@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [3.9.5] - 2026-05-06
+
+### Fixed
+- Write update cache in all `codesop update` exit paths (fork, local-ahead) to prevent stale notifications
+- Add `worktree` and `finishing` mentions to README contract check
+
 ## [3.9.4] - 2026-05-06
 
 ### Added

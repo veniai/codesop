@@ -93,12 +93,14 @@ run_update() {
     printf '%s\n' "本地领先 $ahead 个提交，origin/main 有 $behind 个新提交，存在分叉。"
     printf '%s\n' "请手动处理：cd $repo_dir && git rebase 或 git merge"
     _resync_and_check
+    _write_update_cache
     return 0
   fi
 
   if [ "$ahead" -gt 0 ]; then
     printf '%s\n' "本地领先 origin/main $ahead 个提交，远程无新提交。"
     _resync_and_check
+    _write_update_cache
     return 0
   fi
 
