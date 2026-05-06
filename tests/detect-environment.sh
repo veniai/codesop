@@ -54,11 +54,9 @@ assert_contains "$readme_output" "/codesop init"
 
 version_value="$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")"
 skill_version="$(sed -n 's/.*"version": "\(.*\)".*/\1/p' "$ROOT_DIR/skill.json" | head -1)"
-prd_version="$(sed -n 's/^# Current Version: //p' "$ROOT_DIR/PRD.md" | head -1)"
 changelog_head="$(sed -n '1,10p' "$ROOT_DIR/CHANGELOG.md")"
 
 [ "$skill_version" = "$version_value" ] || fail "expected skill.json version to match VERSION"
-[ "$prd_version" = "$version_value" ] || fail "expected PRD.md version to match VERSION"
 if [[ "$changelog_head" != *"## [Unreleased]"* ]] && [[ "$changelog_head" != *"## [$version_value]"* ]]; then
   fail "expected CHANGELOG.md head to be Unreleased or current VERSION heading"
 fi

@@ -363,8 +363,8 @@ check_codesop_document_consistency() {
   local root="${ROOT_DIR:-$HOME/codesop}"
   local version_file="${VERSION_FILE:-$root/VERSION}"
 
-  # --- A: Version alignment ---
-  local ver_file="" ver_json="" ver_prd=""
+  # --- A: Version alignment (VERSION + skill.json) ---
+  local ver_file="" ver_json=""
 
   if [ -f "$version_file" ]; then
     ver_file="$(tr -d '[:space:]' < "$version_file")" || true
@@ -374,19 +374,14 @@ check_codesop_document_consistency() {
     if command -v jq >/dev/null 2>&1; then
       ver_json="$(jq -r '.version // ""' "$root/skill.json" 2>/dev/null)" || ver_json=""
     else
-      # Fallback: parse version with grep when jq unavailable
       ver_json="$(grep -m1 '"version"' "$root/skill.json" 2>/dev/null | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' | tr -d '[:space:]')" || ver_json=""
     fi
   fi
 
-  if [ -f "$root/PRD.md" ]; then
-    ver_prd="$(grep -m1 '^# Current Version:' "$root/PRD.md" 2>/dev/null | sed 's/^# Current Version: //' | tr -d '[:space:]')" || ver_prd=""
-  fi
-
-  if [ -n "$ver_file" ] && [ "$ver_file" = "$ver_json" ] && [ "$ver_file" = "$ver_prd" ]; then
-    printf '%s\n' "✓ 版本对齐: VERSION=$ver_file skill.json=$ver_json PRD.md=$ver_prd"
+  if [ -n "$ver_file" ] && [ "$ver_file" = "$ver_json" ]; then
+    printf '%s\n' "✓ 版本对齐: VERSION=$ver_file skill.json=$ver_json"
   else
-    printf '%s\n' "⚠️ 版本不一致: VERSION=${ver_file:-<missing>} skill.json=${ver_json:-<missing>} PRD.md=${ver_prd:-<missing>}"
+    printf '%s\n' "⚠️ 版本不一致: VERSION=${ver_file:-<missing>} skill.json=${ver_json:-<missing>}"
   fi
 
   # --- B: Stale reference scan ---
