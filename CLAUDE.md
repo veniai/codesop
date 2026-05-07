@@ -116,6 +116,8 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
 - `config/dependencies.sh` is the managed dependency manifest; `lib/updates.sh` loads it at runtime
 - `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). Used by `install_managed_deps()` and `upgrade_managed_deps()` in updates.sh
+- `_dep_installed_version()` reads plugin version from `installed_plugins.json` via jq; returns empty string if unavailable (jq missing, file missing, plugin not found)
+- `upgrade_managed_deps()` gates `patched=yes` plugins on `dep_patch_compat()` — skips `claude plugin update` when installed version is already compatible with manifest min_version
 - `patch_skills()` uses `dep_patch_compat()` from updates.sh to check major.minor match before applying patches
 - `_run_with_timeout()` in updates.sh wraps `timeout` with macOS fallback. Use this pattern for any timed command
 - `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback

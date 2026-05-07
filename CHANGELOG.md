@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [3.9.7] - 2026-05-07
+
+### Fixed
+- `upgrade_managed_deps` timeout false-positive: non-patched plugins that are already at latest no longer reported as "failed"
+- Patched plugin (superpowers) upgrade gate: skip `claude plugin update` when installed version is already compatible with manifest, preventing accidental major.minor jumps that break patches
+- Clarify superpowers version incompatibility warning message
+
+### Changed
+- `upgrade_managed_deps` reporting now uses 4 categories: 已升级 / 已是最新 / 超时未变 / 失败
+- New `_dep_installed_version()` helper reads plugin version from `installed_plugins.json`
+- `_dep_upgrade_one()` uses before/after version comparison to detect successful upgrades despite non-zero exit codes
+
 ## [3.9.6] - 2026-05-06
 
 ### Fixed

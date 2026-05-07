@@ -103,4 +103,51 @@ local_repo="$(init_repo_fixture "$latest_case")"
 latest_output="$(git_update_check "$local_repo" "codesop" "git pull")"
 assert_contains "$latest_output" "1.1.1（已是最新）"
 
+# Test 4: _dep_installed_version reads from plugins.json
+mock_plugins_dir="$tmpdir/mock-plugins"
+mock_plugins_json_dir="$mock_plugins_dir/.claude/plugins"
+mkdir -p "$mock_plugins_json_dir"
+
+# Override HOME temporarily for this test
+_orig_home="$HOME"
+export HOME="$mock_plugins_dir"
+
+cat >"$mock_plugins_json_dir/installed_plugins.json" <<'JSONEOF'
+{
+  "plugins": {
+    "test-plugin@repo": [
+      {"version": "1.2.3", "installPath": "/tmp/test"}
+    ],
+    "hash-plugin@repo": [
+      {"version": "d6947b6f35ad", "installPath": "/tmp/hash"}
+    ]
+  }
+}
+JSONEOF
+
+ver_result=$(_dep_installed_version "test-plugin@repo")
+assert_contains "$ver_result" "1.2.3"
+
+hash_result=$(_dep_installed_version "hash-plugin@repo")
+assert_contains "$hash_result" "d6947b6f35ad"
+
+missing_result=$(_dep_installed_version "nonexistent@repo")
+assert_not_contains "$missing_result" "."
+
+# Restore HOME
+export HOME="$_orig_home"
+
+# Test 5: dep_patch_compat gates patched plugin upgrade
+# superpowers 5.1.0 vs manifest 5.1.0 → compatible → should skip
+dep_patch_compat "5.1.0" "5.1.0" && compat_result="yes" || compat_result="no"
+assert_contains "$compat_result" "yes"
+
+# superpowers 5.2.0 vs manifest 5.1.0 → incompatible → should NOT skip
+dep_patch_compat "5.2.0" "5.1.0" && compat_result="yes" || compat_result="no"
+assert_contains "$compat_result" "no"
+
+# superpowers 5.1.5 vs manifest 5.1.0 → compatible (same major.minor)
+dep_patch_compat "5.1.5" "5.1.0" && compat_result="yes" || compat_result="no"
+assert_contains "$compat_result" "yes"
+
 echo "PASS"

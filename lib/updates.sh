@@ -798,6 +798,16 @@ _dep_parse() {
   IFS='|' read -r _d_type _d_id _d_tier _d_patched _d_min_ver <<< "$entry"
 }
 
+# Read installed version of a managed dependency from installed_plugins.json.
+# Returns version string (semver or git hash) or empty string if unavailable.
+_dep_installed_version() {
+  local id="$1"
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+  if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
+    jq -r --arg id "$id" '.plugins[$id][0].version // ""' "$plugins_json" 2>/dev/null || true
+  fi
+}
+
 # Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
 _run_with_timeout() {
   local seconds="$1"; shift
@@ -808,7 +818,8 @@ _run_with_timeout() {
   fi
 }
 
-# Upgrade a single managed dependency. Returns 0 on success.
+# Upgrade a single managed dependency.
+# Returns: 0 = upgraded, 1 = failed, 2 = timeout with version unchanged.
 _dep_upgrade_one() {
   local type="$1" id="$2"
   case "$type" in
@@ -817,8 +828,33 @@ _dep_upgrade_one() {
         echo "claude CLI not available" >&2
         return 1
       fi
+
+      # Record pre-upgrade version
+      local pre_ver
+      pre_ver=$(_dep_installed_version "$id")
+
       _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
-      return $?
+      local exit_code=$?
+
+      # Exit 0: upgrade succeeded
+      [ "$exit_code" -eq 0 ] && return 0
+
+      # Non-zero exit: check if version changed despite the error
+      local post_ver
+      post_ver=$(_dep_installed_version "$id")
+
+      # Version changed → upgrade actually completed
+      if [ -n "$pre_ver" ] && [ -n "$post_ver" ] && [ "$pre_ver" != "$post_ver" ]; then
+        return 0
+      fi
+
+      # Timeout (124) with version unchanged → no update needed
+      if [ "$exit_code" -eq 124 ]; then
+        return 2
+      fi
+
+      # Genuine failure
+      return 1
       ;;
     *)
       echo "unsupported dep type: $type" >&2
@@ -844,11 +880,13 @@ dep_patch_compat() {
 }
 
 # Main entry: upgrade all managed dependencies.
+# Patched plugins: skip if already at compatible version (dep_patch_compat).
+# Non-patched plugins: upgrade with version comparison for timeout handling.
 # Returns 0 if all core/required succeed, 1 otherwise.
 upgrade_managed_deps() {
   _dep_manifest_load || { printf '%s\n' "  依赖清单不存在，跳过升级"; return 0; }
 
-  local ok=() fail=() skip=()
+  local upgraded=() uptodate=() timedout=() skip=() fail=()
   local has_required_fail=false
 
   for entry in "${DEP_MANIFEST[@]}"; do
@@ -860,20 +898,43 @@ upgrade_managed_deps() {
       *) skip+=("$_d_id"); continue ;;
     esac
 
-    printf '  %-45s ' "$_d_id"
-    if _dep_upgrade_one "$_d_type" "$_d_id"; then
-      ok+=("$_d_id")
-      printf '%s\n' "✓"
-    else
-      fail+=("$_d_id [$_d_tier]")
-      printf '%s\n' "✗"
-      has_required_fail=true
+    # Patched plugins: skip upgrade if already at compatible version
+    if [ "$_d_patched" = "yes" ]; then
+      local installed_ver
+      installed_ver=$(_dep_installed_version "$_d_id")
+      if [ -n "$installed_ver" ] && dep_patch_compat "$installed_ver" "$_d_min_ver"; then
+        uptodate+=("$_d_id")
+        printf '  %-45s %s\n' "$_d_id" "✓ (已是最新)"
+        continue
+      fi
     fi
+
+    printf '  %-45s ' "$_d_id"
+    local rc=0
+    _dep_upgrade_one "$_d_type" "$_d_id" || rc=$?
+
+    case $rc in
+      0)
+        upgraded+=("$_d_id")
+        printf '%s\n' "✓"
+        ;;
+      2)
+        timedout+=("$_d_id")
+        printf '%s\n' "✓ (超时，版本未变)"
+        ;;
+      *)
+        fail+=("$_d_id [$_d_tier]")
+        printf '%s\n' "✗"
+        has_required_fail=true
+        ;;
+    esac
   done
 
-  [ ${#ok[@]} -gt 0 ] && printf '%s\n' "  已升级: ${ok[*]}"
-  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  已跳过: ${skip[*]}"
-  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败: ${fail[*]}"
+  [ ${#upgraded[@]} -gt 0 ] && printf '%s\n' "  已升级（${#upgraded[@]} 个）：${upgraded[*]}"
+  [ ${#uptodate[@]} -gt 0 ] && printf '%s\n' "  已是最新（${#uptodate[@]} 个）：${uptodate[*]}"
+  [ ${#timedout[@]} -gt 0 ] && printf '%s\n' "  超时未变（${#timedout[@]} 个）：${timedout[*]}"
+  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  已跳过：${skip[*]}"
+  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败（${#fail[@]} 个）：${fail[*]}"
 
   [ "$has_required_fail" = false ]
 }
@@ -921,7 +982,7 @@ _ensure_superpowers_version() {
   if dep_patch_compat "$actual_ver" "$required_ver"; then
     printf '  %s\n' "superpowers upgraded to $actual_ver ✓"
   else
-    printf '  %s\n' "⚠ superpowers $actual_ver still below $required_ver — patches will be skipped"
+    printf '  %s\n' "⚠ superpowers $actual_ver 与当前补丁不兼容（需要 $required_ver 同系列）— 补丁将被跳过"
     printf '  %s\n' "手动升级: /plugin update superpowers"
   fi
 }
