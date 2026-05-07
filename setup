@@ -428,20 +428,17 @@ restore_superpowers_patches() {
   fi
 
   echo "  Restoring superpowers skill patches..."
+  local runner
   if type _run_with_timeout >/dev/null 2>&1; then
-    if _run_with_timeout 30 claude plugin update superpowers@claude-plugins-official --scope user 2>/dev/null; then
-      echo "  ✓ Restored superpowers skill patches"
-    else
-      echo "  ⚠ claude plugin update failed — patches may still be applied"
-      echo "    Manual fix: claude plugin update superpowers@claude-plugins-official --scope user"
-    fi
+    runner="_run_with_timeout 30"
   else
-    if timeout 30 claude plugin update superpowers@claude-plugins-official --scope user 2>/dev/null; then
-      echo "  ✓ Restored superpowers skill patches"
-    else
-      echo "  ⚠ claude plugin update failed — patches may still be applied"
-      echo "    Manual fix: claude plugin update superpowers@claude-plugins-official --scope user"
-    fi
+    runner="timeout 30"
+  fi
+  if $runner claude plugin update superpowers@claude-plugins-official --scope user 2>/dev/null; then
+    echo "  ✓ Restored superpowers skill patches"
+  else
+    echo "  ⚠ claude plugin update failed — patches may still be applied"
+    echo "    Manual fix: claude plugin update superpowers@claude-plugins-official --scope user"
   fi
 }
 
@@ -520,15 +517,7 @@ _uninstall_shared_runtime() {
 }
 
 _uninstall_cli() {
-  if [ ! -L "$HOME/.local/bin/codesop" ] && [ ! -e "$HOME/.local/bin/codesop" ]; then
-    return 0
-  fi
-  if _verify_codesop_symlink "$HOME/.local/bin/codesop"; then
-    rm -f "$HOME/.local/bin/codesop"
-    echo "  ✓ Removed CLI: ~/.local/bin/codesop"
-  else
-    echo "  ⚠ Skipped CLI (symlink does not point to codesop)"
-  fi
+  _safe_rm_symlink "$HOME/.local/bin/codesop" "CLI: ~/.local/bin/codesop"
 }
 
 if [ "$ACTION" = "uninstall" ]; then
