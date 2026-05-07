@@ -4,6 +4,7 @@ set -euo pipefail
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 HOST="auto"
+ACTION="install"
 
 # Template paths - prefer templates/system/AGENTS.md if it exists
 SYSTEM_AGENTS_TEMPLATE="$SOURCE_DIR/templates/system/AGENTS.md"
@@ -36,6 +37,10 @@ while [ $# -gt 0 ]; do
     -h|--help)
       usage
       exit 0
+      ;;
+    --uninstall)
+      ACTION="uninstall"
+      shift
       ;;
     *)
       echo "Unknown argument: $1" >&2
@@ -116,6 +121,35 @@ remove_dir_if_exists() {
   elif [ -d "$target_dir" ]; then
     rm -rf "$target_dir"
   fi
+}
+
+_verify_codesop_symlink() {
+  local path="$1"
+  [ -L "$path" ] || return 1
+  local target
+  target="$(readlink -f "$path")"
+  case "$target" in
+    "$SOURCE_DIR"/*) return 0 ;;
+    "$SOURCE_DIR") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_verify_codesop_copy() {
+  local path="$1"
+  local source="$2"
+  [ -f "$path" ] || return 1
+  cmp -s "$path" "$source"
+}
+
+_verify_codesop_runtime() {
+  local path="$1"
+  [ -d "$path" ] || return 1
+  local marker="$path/.codesop-source"
+  [ -f "$marker" ] || return 1
+  local installed_source
+  installed_source="$(cat "$marker" 2>/dev/null || true)"
+  [ "$installed_source" = "$SOURCE_DIR" ]
 }
 
 write_skill_runtime() {
@@ -310,6 +344,37 @@ STATUSLINE_EOF
   fi
 }
 
+remove_codesop_hook() {
+  local settings="$HOME/.claude/settings.json"
+
+  [ -f "$settings" ] || return 0
+  command -v jq >/dev/null 2>&1 || { echo "  ⚠ jq not found — hook removal skipped"; return 0; }
+  jq '.' "$settings" >/dev/null 2>&1 || { echo "  ⚠ $settings invalid JSON — hook removal skipped"; return 0; }
+
+  local existing
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
+  if [ "$existing" = "0" ]; then
+    return 0
+  fi
+
+  if jq '
+    if .hooks.SessionStart then
+      .hooks.SessionStart |= map(
+        if (.hooks | type) == "array" then
+          .hooks |= map(select(((.command? // "") | tostring | contains("codesop-router.md")) | not))
+        else . end
+      )
+      | .hooks.SessionStart |= map(select((.hooks | type != "array") or ((.hooks | length) > 0)))
+    else . end
+  ' "$settings" > "$settings.tmp"; then
+    mv "$settings.tmp" "$settings"
+    echo "  ✓ Removed SessionStart hook"
+  else
+    rm -f "$settings.tmp"
+    echo "  ⚠ Failed to update $settings — hook not removed"
+  fi
+}
+
 install_cli() {
   ensure_symlink "$SOURCE_DIR/codesop" "$HOME/.local/bin/codesop"
 }
@@ -349,34 +414,183 @@ install_codex() {
   echo "  ✓ Codex: ~/.codex/AGENTS.md + ~/.agents/skills/codesop/"
 }
 
-echo "=== codesop setup ==="
-echo "Source: $SOURCE_DIR"
+restore_superpowers_patches() {
+  local plugin_dir
+  plugin_dir=$(find_superpowers_plugin_path || true)
+  if [ -z "$plugin_dir" ]; then
+    echo "  ⚠ superpowers plugin not found — patch restoration skipped"
+    return 0
+  fi
 
-case "$HOST" in
-  auto)
-    echo "[1/2] Installing host integrations..."
-    install_claude
-    install_codex
-    install_opencode
-    ;;
-  claude)
-    echo "[1/2] Installing Claude Code integration..."
-    install_claude
-    ;;
-  codex)
-    echo "[1/2] Installing Codex integration..."
-    install_codex
-    ;;
-  opencode|openclaw)
-    echo "[1/2] Installing OpenCode/OpenClaw integration..."
-    install_opencode
-    ;;
-esac
+  if ! command -v claude >/dev/null 2>&1; then
+    echo "  ⚠ claude CLI not found — patch restoration skipped"
+    return 0
+  fi
 
-echo "[2/2] Linking CLI..."
-install_cli
-echo "  ✓ CLI: ~/.local/bin/codesop"
+  echo "  Restoring superpowers skill patches..."
+  if type _run_with_timeout >/dev/null 2>&1; then
+    if _run_with_timeout 30 claude plugin update superpowers@claude-plugins-official --scope user 2>/dev/null; then
+      echo "  ✓ Restored superpowers skill patches"
+    else
+      echo "  ⚠ claude plugin update failed — patches may still be applied"
+      echo "    Manual fix: claude plugin update superpowers@claude-plugins-official --scope user"
+    fi
+  else
+    if timeout 30 claude plugin update superpowers@claude-plugins-official --scope user 2>/dev/null; then
+      echo "  ✓ Restored superpowers skill patches"
+    else
+      echo "  ⚠ claude plugin update failed — patches may still be applied"
+      echo "    Manual fix: claude plugin update superpowers@claude-plugins-official --scope user"
+    fi
+  fi
+}
 
-echo
-echo "Done."
-echo "To resync hosts after editing codesop locally: bash setup --host auto"
+_safe_rm_symlink() {
+  local path="$1"
+  local label="$2"
+  if [ ! -e "$path" ] && [ ! -L "$path" ]; then
+    return 0
+  fi
+  if _verify_codesop_symlink "$path"; then
+    rm -f "$path"
+    echo "  ✓ Removed $label"
+  else
+    echo "  ⚠ Skipped $label (symlink does not point to codesop)"
+  fi
+}
+
+_safe_rm_copy() {
+  local path="$1"
+  local source="$2"
+  local label="$3"
+  if [ ! -f "$path" ]; then
+    return 0
+  fi
+  if _verify_codesop_copy "$path" "$source"; then
+    rm -f "$path"
+    echo "  ✓ Removed $label"
+  else
+    echo "  ⚠ Skipped $label (file has been modified)"
+  fi
+}
+
+_safe_rm_runtime() {
+  local path="$1"
+  local label="$2"
+  if [ ! -d "$path" ]; then
+    return 0
+  fi
+  if _verify_codesop_runtime "$path"; then
+    rm -rf "$path"
+    echo "  ✓ Removed $label"
+  else
+    echo "  ⚠ Skipped $label (directory does not belong to this codesop installation)"
+  fi
+}
+
+uninstall_claude() {
+  echo "Removing Claude Code integration..."
+
+  _safe_rm_symlink "$HOME/.claude/CLAUDE.md" "~/.claude/CLAUDE.md"
+  _safe_rm_runtime "$HOME/.claude/skills/codesop" "~/.claude/skills/codesop/"
+  _safe_rm_copy "$HOME/.claude/commands/codesop-init.md" "$SOURCE_DIR/commands/codesop-init.md" "~/.claude/commands/codesop-init.md"
+  _safe_rm_copy "$HOME/.claude/commands/codesop-update.md" "$SOURCE_DIR/commands/codesop-update.md" "~/.claude/commands/codesop-update.md"
+
+  if [ -f "$SOURCE_DIR/commands/codesop-uninstall.md" ]; then
+    _safe_rm_copy "$HOME/.claude/commands/codesop-uninstall.md" "$SOURCE_DIR/commands/codesop-uninstall.md" "~/.claude/commands/codesop-uninstall.md"
+  fi
+
+  _safe_rm_copy "$HOME/.claude/codesop-router.md" "$SOURCE_DIR/config/codesop-router.md" "~/.claude/codesop-router.md"
+  remove_codesop_hook
+  restore_superpowers_patches
+}
+
+uninstall_codex() {
+  echo "Removing Codex integration..."
+  _safe_rm_symlink "$HOME/.codex/AGENTS.md" "~/.codex/AGENTS.md"
+}
+
+uninstall_opencode() {
+  echo "Removing OpenCode integration..."
+  _safe_rm_symlink "$HOME/.config/opencode/AGENTS.md" "~/.config/opencode/AGENTS.md"
+}
+
+_uninstall_shared_runtime() {
+  _safe_rm_runtime "$HOME/.agents/skills/codesop" "~/.agents/skills/codesop/"
+}
+
+_uninstall_cli() {
+  if [ ! -L "$HOME/.local/bin/codesop" ] && [ ! -e "$HOME/.local/bin/codesop" ]; then
+    return 0
+  fi
+  if _verify_codesop_symlink "$HOME/.local/bin/codesop"; then
+    rm -f "$HOME/.local/bin/codesop"
+    echo "  ✓ Removed CLI: ~/.local/bin/codesop"
+  else
+    echo "  ⚠ Skipped CLI (symlink does not point to codesop)"
+  fi
+}
+
+if [ "$ACTION" = "uninstall" ]; then
+  echo "=== codesop uninstall ==="
+  echo "Source: $SOURCE_DIR"
+
+  case "$HOST" in
+    auto)
+      uninstall_claude
+      uninstall_codex
+      uninstall_opencode
+      _uninstall_shared_runtime
+      ;;
+    claude)
+      uninstall_claude
+      ;;
+    codex)
+      uninstall_codex
+      ;;
+    opencode|openclaw)
+      uninstall_opencode
+      ;;
+  esac
+
+  echo "Removing CLI..."
+  _uninstall_cli
+
+  echo
+  echo "Done. codesop has been uninstalled."
+  echo "Installed plugins (superpowers, code-review, etc.) were NOT removed."
+  echo "Source repository at $SOURCE_DIR was NOT deleted."
+  echo "Note: statusLine in ~/.claude/settings.json was NOT restored (no pre-install backup)."
+else
+  echo "=== codesop setup ==="
+  echo "Source: $SOURCE_DIR"
+
+  case "$HOST" in
+    auto)
+      echo "[1/2] Installing host integrations..."
+      install_claude
+      install_codex
+      install_opencode
+      ;;
+    claude)
+      echo "[1/2] Installing Claude Code integration..."
+      install_claude
+      ;;
+    codex)
+      echo "[1/2] Installing Codex integration..."
+      install_codex
+      ;;
+    opencode|openclaw)
+      echo "[1/2] Installing OpenCode/OpenClaw integration..."
+      install_opencode
+      ;;
+  esac
+
+  echo "[2/2] Linking CLI..."
+  install_cli
+  echo "  ✓ CLI: ~/.local/bin/codesop"
+
+  echo
+  echo "Done."
+  echo "To resync hosts after editing codesop locally: bash setup --host auto"
+fi
