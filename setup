@@ -540,6 +540,7 @@ if [ "$ACTION" = "uninstall" ]; then
       uninstall_claude
       uninstall_codex
       uninstall_opencode
+      echo "Removing shared runtime..."
       _uninstall_shared_runtime
       ;;
     claude)

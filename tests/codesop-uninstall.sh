@@ -168,3 +168,74 @@ codesop_count=$(jq '[.hooks.SessionStart[]?.hooks[]?.command | select(test("code
 [ "$keep_count" = "1" ] || fail "keep-me hook not preserved in mixed entry"
 [ "$codesop_count" = "0" ] || fail "codesop hook not removed from mixed entry"
 echo "PASS: mixed hook entry handled correctly"
+
+echo "--- uninstall guard: copied file modified by user ---"
+fake_home7="$tmpdir/modified-copy-home"
+mkdir -p "$fake_home7/.claude/skills/codesop" "$fake_home7/.claude/commands" "$fake_home7/.local/bin"
+mkdir -p "$fake_home7/.codex" "$fake_home7/.config/opencode" "$fake_home7/.agents/skills/codesop"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home7/.claude/CLAUDE.md"
+ln -sfn "$ROOT_DIR/codesop" "$fake_home7/.local/bin/codesop"
+printf '%s\n' "$ROOT_DIR" > "$fake_home7/.claude/skills/codesop/.codesop-source"
+printf '%s\n' "$ROOT_DIR" > "$fake_home7/.agents/skills/codesop/.codesop-source"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home7/.codex/AGENTS.md"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home7/.config/opencode/AGENTS.md"
+cat > "$fake_home7/.claude/settings.json" <<'EOF'
+{}
+EOF
+
+# Copy init command then modify it
+cp "$ROOT_DIR/commands/codesop-init.md" "$fake_home7/.claude/commands/codesop-init.md"
+echo "# user modification" >> "$fake_home7/.claude/commands/codesop-init.md"
+cp "$ROOT_DIR/commands/codesop-update.md" "$fake_home7/.claude/commands/codesop-update.md"
+cp "$ROOT_DIR/config/codesop-router.md" "$fake_home7/.claude/codesop-router.md"
+
+output7="$(HOME="$fake_home7" bash "$ROOT_DIR/codesop" uninstall 2>&1)" || true
+
+# Modified copy should be preserved
+[ -f "$fake_home7/.claude/commands/codesop-init.md" ] || fail "user-modified codesop-init.md was deleted"
+assert_contains "$output7" "Skipped"
+echo "PASS: user-modified copied file preserved"
+
+echo "--- uninstall guard: overlapping path prefix ---"
+fake_home8="$tmpdir/prefix-home"
+mkdir -p "$fake_home8/.claude" "$fake_home8/.local/bin"
+mkdir -p "$fake_home8/.codex" "$fake_home8/.config/opencode" "$fake_home8/.agents/skills/codesop"
+cat > "$fake_home8/.claude/settings.json" <<'EOF'
+{}
+EOF
+# Create a symlink that starts with the codesop source path but is NOT inside it
+# e.g. /home/claw/codesop-backup/something
+parent_dir="$(dirname "$ROOT_DIR")"
+ln -sfn "${parent_dir}/codesop-backup/foo" "$fake_home8/.claude/CLAUDE.md"
+ln -sfn "${parent_dir}/codesop-backup/bin/codesop" "$fake_home8/.local/bin/codesop"
+
+output8="$(HOME="$fake_home8" bash "$ROOT_DIR/codesop" uninstall 2>&1)" || true
+
+# Overlapping prefix symlink should be preserved
+[ -L "$fake_home8/.claude/CLAUDE.md" ] || fail "overlapping-prefix CLAUDE.md was deleted"
+[ -L "$fake_home8/.local/bin/codesop" ] || fail "overlapping-prefix CLI was deleted"
+echo "PASS: overlapping path prefix symlink preserved"
+
+echo "--- uninstall: CLI survives after host uninstall errors ---"
+fake_home9="$tmpdir/cli-last-home"
+mkdir -p "$fake_home9/.claude/skills/codesop" "$fake_home9/.claude/commands" "$fake_home9/.local/bin"
+mkdir -p "$fake_home9/.codex" "$fake_home9/.config/opencode" "$fake_home9/.agents/skills/codesop"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home9/.claude/CLAUDE.md"
+printf '%s\n' "$ROOT_DIR" > "$fake_home9/.claude/skills/codesop/.codesop-source"
+printf '%s\n' "$ROOT_DIR" > "$fake_home9/.agents/skills/codesop/.codesop-source"
+cp "$ROOT_DIR/commands/codesop-init.md" "$fake_home9/.claude/commands/codesop-init.md"
+cp "$ROOT_DIR/commands/codesop-update.md" "$fake_home9/.claude/commands/codesop-update.md"
+cp "$ROOT_DIR/config/codesop-router.md" "$fake_home9/.claude/codesop-router.md"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home9/.codex/AGENTS.md"
+ln -sfn "$ROOT_DIR/templates/system/AGENTS.md" "$fake_home9/.config/opencode/AGENTS.md"
+cat > "$fake_home9/.claude/settings.json" <<'EOF'
+{}
+EOF
+# CLI symlink is valid codesop
+ln -sfn "$ROOT_DIR/codesop" "$fake_home9/.local/bin/codesop"
+
+HOME="$fake_home9" bash "$ROOT_DIR/codesop" uninstall 2>&1 || true
+
+# After full uninstall, CLI should also be gone (it succeeded)
+[ ! -L "$fake_home9/.local/bin/codesop" ] || fail "CLI should be removed after successful uninstall"
+echo "PASS: CLI removed last after successful uninstall"
