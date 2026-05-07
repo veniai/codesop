@@ -798,6 +798,16 @@ _dep_parse() {
   IFS='|' read -r _d_type _d_id _d_tier _d_patched _d_min_ver <<< "$entry"
 }
 
+# Read installed version of a managed dependency from installed_plugins.json.
+# Returns version string (semver or git hash) or empty string if unavailable.
+_dep_installed_version() {
+  local id="$1"
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+  if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
+    jq -r --arg id "$id" '.plugins[$id][0].version // ""' "$plugins_json" 2>/dev/null || true
+  fi
+}
+
 # Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
 _run_with_timeout() {
   local seconds="$1"; shift
@@ -808,7 +818,8 @@ _run_with_timeout() {
   fi
 }
 
-# Upgrade a single managed dependency. Returns 0 on success.
+# Upgrade a single managed dependency.
+# Returns: 0 = upgraded, 1 = failed, 2 = timeout with version unchanged.
 _dep_upgrade_one() {
   local type="$1" id="$2"
   case "$type" in
@@ -817,8 +828,33 @@ _dep_upgrade_one() {
         echo "claude CLI not available" >&2
         return 1
       fi
+
+      # Record pre-upgrade version
+      local pre_ver
+      pre_ver=$(_dep_installed_version "$id")
+
       _run_with_timeout 30 claude plugin update "$id" --scope user >/dev/null 2>&1
-      return $?
+      local exit_code=$?
+
+      # Exit 0: upgrade succeeded
+      [ "$exit_code" -eq 0 ] && return 0
+
+      # Non-zero exit: check if version changed despite the error
+      local post_ver
+      post_ver=$(_dep_installed_version "$id")
+
+      # Version changed → upgrade actually completed
+      if [ -n "$pre_ver" ] && [ -n "$post_ver" ] && [ "$pre_ver" != "$post_ver" ]; then
+        return 0
+      fi
+
+      # Timeout (124) with version unchanged → no update needed
+      if [ "$exit_code" -eq 124 ]; then
+        return 2
+      fi
+
+      # Genuine failure
+      return 1
       ;;
     *)
       echo "unsupported dep type: $type" >&2
