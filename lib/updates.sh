@@ -880,11 +880,13 @@ dep_patch_compat() {
 }
 
 # Main entry: upgrade all managed dependencies.
+# Patched plugins: skip if already at compatible version (dep_patch_compat).
+# Non-patched plugins: upgrade with version comparison for timeout handling.
 # Returns 0 if all core/required succeed, 1 otherwise.
 upgrade_managed_deps() {
   _dep_manifest_load || { printf '%s\n' "  依赖清单不存在，跳过升级"; return 0; }
 
-  local ok=() fail=() skip=()
+  local upgraded=() uptodate=() timedout=() skip=() fail=()
   local has_required_fail=false
 
   for entry in "${DEP_MANIFEST[@]}"; do
@@ -896,20 +898,43 @@ upgrade_managed_deps() {
       *) skip+=("$_d_id"); continue ;;
     esac
 
-    printf '  %-45s ' "$_d_id"
-    if _dep_upgrade_one "$_d_type" "$_d_id"; then
-      ok+=("$_d_id")
-      printf '%s\n' "✓"
-    else
-      fail+=("$_d_id [$_d_tier]")
-      printf '%s\n' "✗"
-      has_required_fail=true
+    # Patched plugins: skip upgrade if already at compatible version
+    if [ "$_d_patched" = "yes" ]; then
+      local installed_ver
+      installed_ver=$(_dep_installed_version "$_d_id")
+      if [ -n "$installed_ver" ] && dep_patch_compat "$installed_ver" "$_d_min_ver"; then
+        uptodate+=("$_d_id")
+        printf '  %-45s %s\n' "$_d_id" "✓ (已是最新)"
+        continue
+      fi
     fi
+
+    printf '  %-45s ' "$_d_id"
+    local rc=0
+    _dep_upgrade_one "$_d_type" "$_d_id" || rc=$?
+
+    case $rc in
+      0)
+        upgraded+=("$_d_id")
+        printf '%s\n' "✓"
+        ;;
+      2)
+        timedout+=("$_d_id")
+        printf '%s\n' "✓ (超时，版本未变)"
+        ;;
+      *)
+        fail+=("$_d_id [$_d_tier]")
+        printf '%s\n' "✗"
+        has_required_fail=true
+        ;;
+    esac
   done
 
-  [ ${#ok[@]} -gt 0 ] && printf '%s\n' "  已升级: ${ok[*]}"
-  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  已跳过: ${skip[*]}"
-  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败: ${fail[*]}"
+  [ ${#upgraded[@]} -gt 0 ] && printf '%s\n' "  已升级（${#upgraded[@]} 个）：${upgraded[*]}"
+  [ ${#uptodate[@]} -gt 0 ] && printf '%s\n' "  已是最新（${#uptodate[@]} 个）：${uptodate[*]}"
+  [ ${#timedout[@]} -gt 0 ] && printf '%s\n' "  超时未变（${#timedout[@]} 个）：${timedout[*]}"
+  [ ${#skip[@]} -gt 0 ] && printf '%s\n' "  已跳过：${skip[*]}"
+  [ ${#fail[@]} -gt 0 ] && printf '%s\n' "  失败（${#fail[@]} 个）：${fail[*]}"
 
   [ "$has_required_fail" = false ]
 }
