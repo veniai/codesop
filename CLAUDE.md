@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-codesop is a skill-first operating system for AI-assisted coding work. The current product contract keeps one main flow, `/codesop`, plus two mechanical commands: `init` and `update`.
+codesop is a skill-first operating system for AI-assisted coding work. The current product contract keeps one main flow, `/codesop`, plus three mechanical commands: `init`, `update`, and `uninstall`.
 
 ## Commands
 
@@ -12,6 +12,7 @@ codesop is a skill-first operating system for AI-assisted coding work. The curre
 # Core contract
 bash codesop init [path]        # Initialize project: AGENTS.md + PRD.md + README.md
 bash codesop update             # Update via git pull + setup sync
+bash codesop uninstall          # Remove codesop artifacts (keeps installed plugins)
 
 # Core tests
 bash tests/run_all.sh                 # All tests (unified runner)
@@ -20,6 +21,7 @@ bash tests/codesop-init-interview.sh  # Init interview tests
 bash tests/detect-environment.sh      # Documentation consistency tests
 bash tests/codesop-e2e.sh             # End-to-end test
 bash tests/codesop-init.sh            # Init command tests
+bash tests/codesop-uninstall.sh       # Uninstall command tests
 bash tests/setup.sh                   # Host setup tests
 bash tests/codesop-symlink.sh         # Symlink tests
 bash tests/codesop-update.sh          # Update command tests
@@ -32,7 +34,7 @@ bash setup --host claude
 ## Product Contract
 
 - Supported user-facing flow: `/codesop`
-- Supported user-facing commands: `codesop init`, `codesop update`
+- Supported user-facing commands: `codesop init`, `codesop update`, `codesop uninstall`
 - During cleanup, do not add new features outside this contract
 
 ## Architecture
@@ -42,11 +44,12 @@ codesop                     # CLI entrypoint, sources lib modules in order
 ├── lib/
 │   ├── detection.sh        # Project detection, find_superpowers_plugin_path(), has_mcp_server()
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
-│   ├── commands.sh         # Subcommands; target contract keeps init/update only
+│   ├── commands.sh         # Subcommands; target contract keeps init/update/uninstall
 │   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files
 ├── commands/               # Sub-command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
-│   └── codesop-update.md   # /codesop-update
+│   ├── codesop-update.md   # /codesop-update
+│   └── codesop-uninstall.md # /codesop-uninstall
 ├── config/
 │   └── codesop-router.md   # Router card
 ├── templates/

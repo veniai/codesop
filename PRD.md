@@ -19,16 +19,16 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.9.7 升级可靠性修复
+- **当前里程碑**: v3.10.0 uninstall 子命令
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.9.7 — 修复 upgrade_managed_deps 超时误报 + 补丁兼容性门禁
+- **最后更新原因**: 新增 codesop uninstall 子命令
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- 无
+- [ ] v3.10.0: `codesop uninstall` 子命令 — 移除 codesop 安装产物（symlink/hook/commands/runtime），恢复 superpowers 补丁，不动已装插件
 
 ### 2.2 Next Up
 - 无
@@ -76,7 +76,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v3.9.6.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v3.10.0.
 
 ## 5. 产品核心规范
 
@@ -113,13 +113,15 @@ See [GitHub Releases](https://github.com/veniai/codesop/releases) for full versi
 - **Router card**: SessionStart hook 注入纪律表，强制 AI 遵循必走 skill pipeline
 - **`codesop init`**: 检测项目技术栈，生成 `AGENTS.md` / `PRD.md` / `README.md`；已有项目自动进入适配模式，对比模板差异由用户确认
 - **`codesop update`**: git pull + 自动重同步宿主集成
+- **`codesop uninstall`**: 移除 codesop 安装产物（symlink/hook/commands/runtime），恢复 superpowers 补丁，不动已装插件
 
 ### 5.5 产品合同
 
-#### 对外只承诺这 3 个入口
+#### 对外只承诺这 3+1 个入口
 - `/codesop`
 - `codesop init`
 - `codesop update`
+- `codesop uninstall`
 
 #### 真相源策略
 - `/codesop` 内容只保留一个真相源：`SKILL.md`
@@ -132,8 +134,8 @@ See [GitHub Releases](https://github.com/veniai/codesop/releases) for full versi
 ### 5.7 目标架构
 
 ```
-codesop                     # CLI 入口，只暴露 init / update
-setup                       # 宿主安装与同步
+codesop                     # CLI 入口，暴露 init / update / uninstall
+setup                       # 宿主安装、同步与卸载
 ├── lib/
 │   ├── detection.sh        # 项目与宿主检测
 │   ├── updates.sh          # 版本管理与依赖检查
@@ -142,7 +144,8 @@ setup                       # 宿主安装与同步
 ├── SKILL.md                # /codesop 唯一真相源
 ├── commands/               # Slash command 文件
 │   ├── codesop-init.md
-│   └── codesop-update.md
+│   ├── codesop-update.md
+│   └── codesop-uninstall.md
 ├── config/
 │   └── codesop-router.md   # Router card
 ├── templates/
