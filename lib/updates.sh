@@ -982,7 +982,7 @@ _ensure_superpowers_version() {
   if dep_patch_compat "$actual_ver" "$required_ver"; then
     printf '  %s\n' "superpowers upgraded to $actual_ver ✓"
   else
-    printf '  %s\n' "⚠ superpowers $actual_ver still below $required_ver — patches will be skipped"
+    printf '  %s\n' "⚠ superpowers $actual_ver 与当前补丁不兼容（需要 $required_ver 同系列）— 补丁将被跳过"
     printf '  %s\n' "手动升级: /plugin update superpowers"
   fi
 }
