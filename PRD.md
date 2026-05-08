@@ -1,5 +1,5 @@
 # Product: codesop
-# Last Updated: 2026-05-06
+# Last Updated: 2026-05-08
 # Status: active
 
 ---
@@ -23,12 +23,12 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: 新增 codesop uninstall 子命令
+- **最后更新原因**: v3.10.0 — 新增 codesop uninstall + 补丁文件头注释
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- [ ] v3.10.0: `codesop uninstall` 子命令 — 移除 codesop 安装产物（symlink/hook/commands/runtime），恢复 superpowers 补丁，不动已装插件
+- 无
 
 ### 2.2 Next Up
 - 无
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v3.10.0: uninstall 子命令 — 安全移除 codesop 安装产物、guard 函数、robust hook 移除、补丁恢复、补丁文件头注释
 - [x] v3.9.7: 升级可靠性 — patched 插件门禁（防补丁失效）、非 patched 版本对比（消超时误报）、4 类报告
 - [x] v3.9.6: 补丁修复 — 恢复 finishing-branch 直接提交 PR + 修复 PR 存在性检查 null 误判
 - [x] v3.9.5: 新版本通知修复 — update 缓存写入补全所有退出路径 + README 契约别名对齐

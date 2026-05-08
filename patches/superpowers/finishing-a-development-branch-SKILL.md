@@ -1,3 +1,15 @@
+<!--
+  codesop patch: finishing-a-development-branch
+  Based on: superpowers v5.1.0
+  Changes vs upstream:
+    1. Removed 4-option interactive menu (direct push / draft PR / squash merge / manual)
+    2. Goes straight to push + PR creation
+    3. Added PR existence check — skips `gh pr create` if one already exists for the branch
+  Why: codesop pipelines have already decided the finishing strategy; the menu adds a decision
+  point that breaks autonomous execution. PR existence check prevents duplicate PRs when
+  finishing is retried after a push failure.
+  Revert: delete this file and run `bash setup --host claude` to restore upstream version.
+-->
 ---
 name: finishing-a-development-branch
 description: Use when implementation is complete, all tests pass, and you need to push and create a PR - handles branch push, PR creation, and worktree cleanup

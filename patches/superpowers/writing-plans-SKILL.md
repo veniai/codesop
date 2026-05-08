@@ -1,3 +1,14 @@
+<!--
+  codesop patch: writing-plans
+  Based on: superpowers v5.1.0
+  Changes vs upstream:
+    1. Removed Execution Handoff section (asked user to choose next skill manually)
+    2. Added Pipeline Continuation — after self-review, auto-complete task and execute next
+       pending pipeline task without pausing for user confirmation
+  Why: codesop pipelines are pre-approved task lists; stopping to ask "what's next" after each
+  plan breaks the autonomous execution flow. Pipeline re-entry in SKILL.md §3 handles routing.
+  Revert: delete this file and run `bash setup --host claude` to restore upstream version.
+-->
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code

@@ -1,3 +1,15 @@
+<!--
+  codesop patch: brainstorming
+  Based on: superpowers v5.1.0
+  Changes vs upstream:
+    1. Added Grill Mode (code-first answers, decision tree tracking, domain vocabulary alignment)
+    2. Added ADR trigger — suggests writing ADR when design involves architectural decisions
+    3. Added User Review Gate — user must review written spec before proceeding
+  Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
+  exploration before design. ADR trigger and review gate prevent underspecified specs from
+  reaching implementation, which is the #1 cause of rework in codesop pipelines.
+  Revert: delete this file and run `bash setup --host claude` to restore upstream version.
+-->
 ---
 name: brainstorming
 description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
