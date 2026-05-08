@@ -114,6 +114,17 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 </details>
 
 <details>
+<summary>卸载</summary>
+
+```bash
+codesop uninstall
+```
+
+移除 codesop 安装的所有本机产物（symlink、hook、commands、skill runtime、superpowers 补丁恢复）。**已安装的插件不受影响**（superpowers、code-review 等保留）。源码仓库不会删除。
+
+</details>
+
+<details>
 <summary>架构</summary>
 
 ```
