@@ -395,6 +395,7 @@ install_claude() {
   rm -f "$HOME/.claude/commands/codesop.md"
   copy_file "$SOURCE_DIR/commands/codesop-init.md" "$HOME/.claude/commands/codesop-init.md"
   copy_file "$SOURCE_DIR/commands/codesop-update.md" "$HOME/.claude/commands/codesop-update.md"
+  copy_file "$SOURCE_DIR/commands/codesop-uninstall.md" "$HOME/.claude/commands/codesop-uninstall.md"
   echo "  ✓ Claude Code: ~/.claude/CLAUDE.md + ~/.claude/skills/codesop/"
   install_router_card
   configure_hooks
@@ -425,6 +426,11 @@ restore_superpowers_patches() {
   if ! command -v claude >/dev/null 2>&1; then
     echo "  ⚠ claude CLI not found — patch restoration skipped"
     return 0
+  fi
+
+  # Source updates.sh for _run_with_timeout (not available when run via setup --uninstall)
+  if ! type _run_with_timeout >/dev/null 2>&1 && [ -f "$SOURCE_DIR/lib/updates.sh" ]; then
+    source "$SOURCE_DIR/lib/updates.sh"
   fi
 
   echo "  Restoring superpowers skill patches..."
