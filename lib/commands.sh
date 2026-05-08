@@ -1,6 +1,10 @@
 #!/bin/bash
 # commands.sh - Command implementations for the supported codesop CLI surface
 
+run_uninstall() {
+  bash "$ROOT_DIR/setup" --uninstall --host auto
+}
+
 # Resync host integration and run skill routing coverage check.
 # Called after every update branch in run_update.
 # Re-sources updates.sh so git-pulled code changes take effect immediately.

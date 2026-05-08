@@ -11,6 +11,7 @@
   "bugs": "https://github.com/veniai/codesop/issues",
   "commands": [
     "init",
-    "update"
+    "update",
+    "uninstall"
   ]
 }

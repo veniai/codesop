@@ -40,6 +40,7 @@
 /codesop init      # 初始化当前项目
 /codesop           # 打开工作台，开始工作
 /codesop update    # 更新 codesop，并自动升级所有依赖插件
+/codesop uninstall # 卸载 codesop（已安装的插件不受影响）
 ```
 
 <details>

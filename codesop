@@ -22,6 +22,7 @@ usage() {
 Usage:
   codesop init [path]
   codesop update
+  codesop uninstall
 EOF
 }
 
@@ -34,6 +35,9 @@ case "$subcommand" in
     ;;
   update)
     run_update
+    ;;
+  uninstall)
+    run_uninstall
     ;;
   ""|-h|--help|help)
     usage
