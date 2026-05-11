@@ -117,7 +117,7 @@ run_update() {
     fi
 
     printf '%s\n' "存在未提交改动，尝试 stash 后更新..."
-    git stash push -m "codesop-update-$(date +%s)" 2>/dev/null || {
+    git stash push -u -m "codesop-update-$(date +%s)" 2>/dev/null || {
       printf '%s\n' "stash 失败，请手动处理：cd $repo_dir && git pull" >&2
       exit 1
     }
