@@ -417,6 +417,7 @@ confirm_and_backup() {
 
 _escape_sed_replacement() {
   local s="$1"
+  s="${s//\\/\\\\}"
   s="${s//&/\\&}"
   s="${s//\//\\/}"
   printf '%s' "$s"
