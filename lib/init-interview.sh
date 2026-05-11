@@ -426,7 +426,11 @@ generate_prd_template() {
   local template_file="${source_dir:-.}/templates/project/PRD.md"
 
   if [ -f "$template_file" ]; then
-    sed "s/{PROJECT_NAME}/$project_name/g; s/{DATE}/$date_today/g" "$template_file"
+    local escaped_name
+    escaped_name=$(printf '%s' "$project_name" | sed 's/[&/\]/\\&/g')
+    local escaped_date
+    escaped_date=$(printf '%s' "$date_today" | sed 's/[&/\]/\\&/g')
+    sed "s/{PROJECT_NAME}/$escaped_name/g; s/{DATE}/$escaped_date/g" "$template_file"
   else
     echo "Error: PRD template not found: $template_file" >&2
     return 1
@@ -442,7 +446,9 @@ generate_readme_template() {
   local template_file="${source_dir:-.}/templates/project/README.md"
 
   if [ -f "$template_file" ]; then
-    sed "s/{PROJECT_NAME}/$project_name/g" "$template_file"
+    local escaped_name
+    escaped_name=$(printf '%s' "$project_name" | sed 's/[&/\]/\\&/g')
+    sed "s/{PROJECT_NAME}/$escaped_name/g" "$template_file"
   else
     echo "Error: README template not found: $template_file" >&2
     return 1
