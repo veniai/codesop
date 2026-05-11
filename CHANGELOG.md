@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-05-11
+
+### Added
+- Completion Gate 文档管理增强：SKILL.md §5 从 3 文档扩展为 5 文档审计（CLAUDE.md / PRD.md / README.md / CONTEXT.md / docs/adr/）
+- 结构化审计维度：P1-P5（进度/决策/范围/风险/里程碑）、R1-R4（安装/运行/配置/接口）、C1-C2（术语/冲突）、A1-A2（新增/影响 ADR）
+- ADR 模板补全 Status 生命周期字段、Notes 追加段、可变性规则注释
+- AGENTS.md 模板输出格式改为 ☐/☑ 可视化 + 维度交叉引用
+- `codesop uninstall` 子命令：移除 codesop 集成（保留已安装插件）
+
+### Changed
+- AGENTS.md 文档判定输出块去重，改为交叉引用 SKILL.md §5
+
+### Fixed
+- 测试断言用表格行格式精确匹配维度标识符，防止裸字符串误匹配
+- CLAUDE.md 合并重复的 dependencies.sh 说明行
+
 ## [3.9.7] - 2026-05-07
 
 ### Fixed
