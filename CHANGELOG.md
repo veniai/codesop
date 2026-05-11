@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [3.10.1] - 2026-05-11
+
+### Fixed
+- Dependency check: skip superpowers per-host gap for inactive hosts (no more "Codex: 未安装" for Claude-only users)
+- Finishing skill patch: add `git fetch --prune` after PR creation to clean stale remote tracking refs
+
 ## [3.10.0] - 2026-05-11
 
 ### Added
