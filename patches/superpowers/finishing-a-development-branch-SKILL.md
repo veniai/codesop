@@ -5,9 +5,11 @@
     1. Removed 4-option interactive menu (direct push / draft PR / squash merge / manual)
     2. Goes straight to push + PR creation
     3. Added PR existence check — skips `gh pr create` if one already exists for the branch
+    4. Added `git fetch --prune` after PR creation to clean stale remote tracking refs
   Why: codesop pipelines have already decided the finishing strategy; the menu adds a decision
   point that breaks autonomous execution. PR existence check prevents duplicate PRs when
-  finishing is retried after a push failure.
+  finishing is retried after a push failure. Remote ref pruning prevents stale origin/feat/xxx
+  refs from accumulating after GitHub deletes merged branches.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
 -->
 ---
@@ -79,9 +81,16 @@ EOF
 fi
 ```
 
-Then: Cleanup worktree (Step 4)
+Then: Post-PR Cleanup (Step 4)
 
-### Step 4: Cleanup Worktree
+### Step 4: Post-PR Cleanup
+
+After the PR is created (or already exists), clean up local refs:
+
+```bash
+# Prune stale remote tracking refs (origin/feat/xxx after GitHub deletes the branch)
+git fetch --prune 2>/dev/null || true
+```
 
 Check if in worktree:
 ```bash
