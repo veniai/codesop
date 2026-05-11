@@ -415,10 +415,13 @@ confirm_and_backup() {
   return 1
 }
 
-# Generate PRD template content from external template file
-# Arguments:
-#   $1 - Project name (optional, defaults to "项目")
-# Returns: PRD template content on stdout
+_escape_sed_replacement() {
+  local s="$1"
+  s="${s//&/\\&}"
+  s="${s//\//\\/}"
+  printf '%s' "$s"
+}
+
 generate_prd_template() {
   local project_name="${1:-项目}"
   local date_today
@@ -427,27 +430,21 @@ generate_prd_template() {
 
   if [ -f "$template_file" ]; then
     local escaped_name
-    escaped_name=$(printf '%s' "$project_name" | sed 's/[&/\]/\\&/g')
-    local escaped_date
-    escaped_date=$(printf '%s' "$date_today" | sed 's/[&/\]/\\&/g')
-    sed "s/{PROJECT_NAME}/$escaped_name/g; s/{DATE}/$escaped_date/g" "$template_file"
+    escaped_name=$(_escape_sed_replacement "$project_name")
+    sed "s/{PROJECT_NAME}/$escaped_name/g; s/{DATE}/$date_today/g" "$template_file"
   else
     echo "Error: PRD template not found: $template_file" >&2
     return 1
   fi
 }
 
-# Generate README template content from external template file
-# Arguments:
-#   $1 - Project name (optional, defaults to "项目")
-# Returns: README template content on stdout
 generate_readme_template() {
   local project_name="${1:-项目}"
   local template_file="${source_dir:-.}/templates/project/README.md"
 
   if [ -f "$template_file" ]; then
     local escaped_name
-    escaped_name=$(printf '%s' "$project_name" | sed 's/[&/\]/\\&/g')
+    escaped_name=$(_escape_sed_replacement "$project_name")
     sed "s/{PROJECT_NAME}/$escaped_name/g" "$template_file"
   else
     echo "Error: README template not found: $template_file" >&2
