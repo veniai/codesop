@@ -129,3 +129,15 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 ## File References
 
 When modifying skill content or commands, run `bash setup --host claude` to sync to all host runtimes.
+
+## Release Checklist
+
+每次 feat/fix 合并到 main 后，按顺序执行：
+
+1. **VERSION** — `echo "X.Y.Z" > VERSION`，bump 对应版本号
+2. **skill.json** — 更新 `"version": "X.Y.Z"` 与 VERSION 保持一致
+3. **CHANGELOG.md** — 在 `[Unreleased]` 下方添加 `## [X.Y.Z] - YYYY-MM-DD` 条目（Added / Changed / Fixed）
+4. **提交** — `git add VERSION skill.json CHANGELOG.md && git commit -m "chore: bump vX.Y.Z"`
+5. **Tag** — `git tag vX.Y.Z && git push && git push origin vX.Y.Z`
+6. **GitHub Release** — `gh release create vX.Y.Z --title "vX.Y.Z" --notes "..."`
+7. **分支清理** — 删除已合并的远程分支 + `git remote prune origin`
