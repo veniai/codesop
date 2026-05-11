@@ -117,8 +117,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - SKILL.md §3 step 10.5 manages pipeline-to-todo: TaskList check → stale detection → initial confirmation → TaskCreate. Auto re-entry after each task completion (no per-step confirmation)
 - jq `test()` can fail on null values. Always guard with `type == "string" and test(...)`
 - `git stash pop` conflict is a real failure. Exit 1, don't just warn
-- `config/dependencies.sh` is the managed dependency manifest; `lib/updates.sh` loads it at runtime
-- `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). Used by `install_managed_deps()` and `upgrade_managed_deps()` in updates.sh
+- `config/dependencies.sh` is the managed dependency manifest (type|id|tier|patched|min_version). `lib/updates.sh` loads it at runtime for `install_managed_deps()` and `upgrade_managed_deps()`
 - `_dep_installed_version()` reads plugin version from `installed_plugins.json` via jq; returns empty string if unavailable (jq missing, file missing, plugin not found)
 - `upgrade_managed_deps()` gates `patched=yes` plugins on `dep_patch_compat()` — skips `claude plugin update` when installed version is already compatible with manifest min_version
 - `patch_skills()` uses `dep_patch_compat()` from updates.sh to check major.minor match before applying patches
