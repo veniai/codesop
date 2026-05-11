@@ -19,7 +19,7 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v3.10.0 uninstall 子命令
+- **当前里程碑**: v3.10.1 稳定维护
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
@@ -94,7 +94,7 @@ See [GitHub Releases](https://github.com/veniai/codesop/releases) for full versi
 ### 5.3 范围定义
 #### In Scope
 - 一套主流程：`/codesop` 工作台摘要 + workflow 路由
-- 两个机械命令：`codesop init`、`codesop update`
+- 三个机械命令：`codesop init`、`codesop update`、`codesop uninstall`
 - Router card + SessionStart hook 的纪律注入
 - 项目初始化（AGENTS.md / PRD.md / README.md）
 - 宿主集成同步与版本更新
@@ -190,12 +190,7 @@ setup                       # 宿主安装、同步与卸载
 - `AGENTS.md` 保持薄包装 `@CLAUDE.md`
 - `CHANGELOG.md` 不纳入默认强制集合（版本历史见 GitHub Releases）
 - 任一文档需更新时，优先用 `claude-md-management`；若不可用，手动更新
-- 输出格式:
-  ```
-  - CLAUDE.md: 已更新 / 未更新，原因：...
-  - PRD.md: 已更新 / 未更新，原因：...
-  - README.md: 已更新 / 未更新，原因：...
-  ```
+- 输出格式见 SKILL.md §5 Completion Gate（☐/☑ 可视化格式，含 CONTEXT.md 和 ADR 条件行）
 
 ## 6. 当前风险与假设
 

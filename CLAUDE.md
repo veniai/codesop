@@ -61,7 +61,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │       ├── specs/          # Approved design documents
 │       └── plans/          # Implementation plans
 ├── patches/                # Skill patches applied by setup on sync
-│   └── superpowers/        # Modified superpowers skill files (writing-plans, finishing-branch, brainstorming)
+│   └── superpowers/        # Modified superpowers skill files (writing-plans, finishing-a-development-branch, brainstorming)
 ├── setup                   # Host-aware installation script (router card + hook config + skill patches)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)
@@ -85,7 +85,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 | 1 | CLI | Skip if preferences already set |
 | 2 | — | **User runs `/init`** to generate project CLAUDE.md |
 | 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md |
-| 4 | CLI | Auto-install managed dependencies (`install_managed_deps` from manifest) |
+| 4 | CLI | Check skill dependencies (`check_skill_dependencies`) |
 | 4a | Skill | If `ADAPT_MODE:YES`: template adaptation (PRD/README diff + CLAUDE.md dedup) |
 | 5 | Skill | Prompt user to run `/init` (new mode) or confirm adaptation (adapt mode) |
 

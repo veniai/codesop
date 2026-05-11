@@ -37,9 +37,10 @@ After installation, explain how to use the /codesop workbench.
 Once installed (in Claude Code):
 
 ```
-/codesop init      # Initialize current project
-/codesop           # Open the workbench
-/codesop update    # Update codesop and auto-upgrade all dependency plugins
+/codesop init        # Initialize current project
+/codesop             # Open the workbench
+/codesop update      # Update codesop and auto-upgrade all dependency plugins
+/codesop uninstall   # Remove codesop integration (keeps installed plugins)
 ```
 
 <details>
