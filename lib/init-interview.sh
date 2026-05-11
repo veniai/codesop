@@ -244,16 +244,16 @@ _check_skills_all() {
   if [ $sp_found -eq 0 ]; then
     echo "⚠ superpowers 未安装"
     echo "  Claude Code：/plugin install superpowers"
-    echo "  Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+    [ -d "$HOME/.codex" ] && echo "  Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
   else
-    # Suggest missing per-host installations
+    # Suggest missing per-host installations — only for hosts that are actually present
     local sp_missing=""
-    [ $sp_cc_found -eq 0 ] && sp_missing="$sp_missing Claude Code"
-    [ $sp_codex_found -eq 0 ] && sp_missing="$sp_missing Codex"
+    [ $sp_cc_found -eq 0 ] && [ -d "$HOME/.claude" ] && sp_missing="$sp_missing Claude Code"
+    [ $sp_codex_found -eq 0 ] && [ -d "$HOME/.codex" ] && sp_missing="$sp_missing Codex"
     if [ -n "$sp_missing" ]; then
       echo "  ⚠ superpowers 未安装于：$sp_missing"
-      [ $sp_cc_found -eq 0 ] && echo "    Claude Code：/plugin install superpowers"
-      [ $sp_codex_found -eq 0 ] && echo "    Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+      [ $sp_cc_found -eq 0 ] && [ -d "$HOME/.claude" ] && echo "    Claude Code：/plugin install superpowers"
+      [ $sp_codex_found -eq 0 ] && [ -d "$HOME/.codex" ] && echo "    Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
     fi
   fi
 
