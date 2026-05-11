@@ -17,3 +17,10 @@ Status: {Proposed | Accepted | Deprecated | Superseded by ADR-XXXX}
 ## Notes（可选，后续追加）
 
 {实施后发现的新信息，不修改上方已有内容}
+
+<!-- 可变性规则：
+- Decision + Context + Consequences：不可变（决策时的历史事实）
+- Status：可变（生命周期：Proposed → Accepted → Deprecated / Superseded）
+- Notes：可追加（后续发现的新信息），不修改已有段落
+- 被 supersede 时：旧 ADR 只改 Status 行，新 ADR 正文注明 Supersedes ADR-XXXX
+-->
