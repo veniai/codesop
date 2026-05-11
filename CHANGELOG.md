@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.10.2] - 2026-05-11
+
+### Fixed
+- Sed injection vulnerability: escape `&`, `\`, `/` in project name during template substitution (`_escape_sed_replacement` helper)
+- `codesop update` stash now includes untracked files (`-u` flag)
+- Remove dead `executing-plans` reference from writing-plans patch
+- Extract `_escape_sed_replacement()` using pure bash parameter expansion (zero forks)
+- Document drift fixes: SKILL.md, PRD.md, CLAUDE.md, README.en.md synced
+
 ## [3.10.1] - 2026-05-11
 
 ### Fixed
