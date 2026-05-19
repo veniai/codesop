@@ -315,7 +315,7 @@ configure_hooks() {
         .hooks.SessionStart |= map(
           if (.hooks | type) == "array" then
             .hooks |= map(
-              if ((.command? // "") | tostring | test("codesop-router.md")) then
+              if ((.command? // "") | tostring | test("^cat [\"']?~/.claude/codesop-router.md[\"']?$|^cat [\"']?\\$HOME/.claude/codesop-router.md[\"']?$|^cat /[^ ]*/codesop-router.md$")) then
                 .command = $cmd
               else . end
             )
