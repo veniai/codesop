@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Guard: HOME may be unset in hook/IDE launch environments
+export HOME="${HOME:-$(echo ~)}"
+
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 HOST="auto"
 ACTION="install"
@@ -287,7 +290,7 @@ configure_hooks() {
   if ! command -v jq >/dev/null 2>&1; then
     echo "  ⚠ jq not found — hook auto-config skipped"
     echo "    Manual step: add to $settings:"
-    echo '    "hooks":{"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]}'
+    echo "    \"hooks\":{\"SessionStart\":[{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"cat $HOME/.claude/codesop-router.md\"}]}]}"
     return 0
   fi
 
@@ -298,15 +301,35 @@ configure_hooks() {
     return 0
   fi
 
-  # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME)
+  # Use absolute path to avoid ~ expansion failure in sh/dash when HOME is unset
+  local router_hook_cmd="cat $HOME/.claude/codesop-router.md"
+
+  # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME vs absolute)
   local existing
   existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" != "0" ]; then
+    # Migration: replace old ~ or $HOME variants with absolute path
+    local migrated
+    migrated=$(jq --arg cmd "$router_hook_cmd" '
+      if .hooks.SessionStart then
+        .hooks.SessionStart |= map(
+          if (.hooks | type) == "array" then
+            .hooks |= map(
+              if ((.command? // "") | tostring | test("^cat [\"']?~/.claude/codesop-router.md[\"']?$|^cat [\"']?\\$HOME/.claude/codesop-router.md[\"']?$|^cat /[^ ]*/codesop-router.md$")) then
+                .command = $cmd
+              else . end
+            )
+          else . end
+        )
+      else . end
+    ' "$settings" 2>/dev/null) || true
+    if [ -n "$migrated" ]; then
+      echo "$migrated" > "$settings"
+    fi
     echo "  ✓ codesop-router hook already configured"
   else
     # Ensure hooks.SessionStart array exists, then append
-    # Use $HOME instead of ~ for cross-shell compatibility
-    if jq 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":"cat $HOME/.claude/codesop-router.md"}]}]' \
+    if jq --arg cmd "$router_hook_cmd" 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":$cmd}]}]' \
       "$settings" > "$settings.tmp"; then
       mv "$settings.tmp" "$settings"
       echo "  ✓ SessionStart hook configured"

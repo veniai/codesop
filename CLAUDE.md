@@ -112,6 +112,8 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `git fetch` can hang. Use `_run_with_timeout()` from updates.sh instead of raw `timeout`
 - `wc -l` output has leading whitespace. Pipe through `tr -d ' '` before arithmetic
 - setup's `configure_hooks()` uses jq with nested schema: `{ "matcher": "", "hooks": [{ "type": "command", ... }] }`
+- Hook command uses absolute path (not `~` or `$HOME`) — `sh -c` (dash) doesn't expand `~` when HOME is unset
+- Entry points (`codesop`, `setup`) and `lib/updates.sh` guard HOME with `${HOME:-$(echo ~)}` for hook/IDE environments
 - Product contract is already narrower than the original implementation. Keep cleaning toward the contract instead of reintroducing legacy surfaces
 - `SKILL.md` is the single source of truth for `/codesop`. `setup` installs it into `~/.claude/skills/codesop/SKILL.md`
 - SKILL.md §3 step 10.5 manages pipeline-to-todo: TaskList check → stale detection → initial confirmation → TaskCreate. Auto re-entry after each task completion (no per-step confirmation)
