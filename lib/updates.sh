@@ -1,5 +1,8 @@
 #!/bin/bash
 # updates.sh - Version checking and dependency utilities for codesop v2
+
+# Guard: HOME may be unset when sourced by tests or external scripts
+HOME="${HOME:-$(echo ~)}"
 #
 # This module provides functions for:
 # - Checking plugin completeness (REQUIRED)

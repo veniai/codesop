@@ -3,6 +3,9 @@
 
 set -euo pipefail
 
+# Guard: HOME may be unset in hook/IDE launch environments
+export HOME="${HOME:-$(echo ~)}"
+
 SOURCE_PATH="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE_PATH" ]; do
   SOURCE_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
