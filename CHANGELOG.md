@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [3.11.0] - 2026-05-27
+
+### Added
+- writing-plans spec coverage gate: requirement extraction (R1..RN enumeration) before plan review
+- Subagent-based spec coverage check with Traceability Matrix, replacing subjective self-review "skim"
+- Calibration examples for ❌/⚠️ coverage assessment in reviewer prompt
+- Bounded re-dispatch (max 2 rounds) when coverage gaps are found
+
 ## [3.10.2] - 2026-05-11
 
 ### Fixed

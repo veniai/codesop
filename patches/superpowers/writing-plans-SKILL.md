@@ -5,8 +5,11 @@
     1. Removed Execution Handoff section (asked user to choose next skill manually)
     2. Added Pipeline Continuation — after self-review, auto-complete task and execute next
        pending pipeline task without pausing for user confirmation
-  Why: codesop pipelines are pre-approved task lists; stopping to ask "what's next" after each
-  plan breaks the autonomous execution flow. Pipeline re-entry in SKILL.md §3 handles routing.
+    3. Added Requirement Extraction — enumerate all spec requirements (R1..RN) before review
+    4. Replaced self-review with subagent-based spec coverage check using Traceability Matrix
+  Why: self-review's "skim" missed secondary requirements (conditional rules, edge cases,
+  test specs) because it was section-level not requirement-level, and self-assessment has
+  cognitive bias. Independent subagent + structured enumeration closes the gap.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
 -->
 ---
@@ -130,17 +133,97 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Exact commands with expected output
 - DRY, YAGNI, TDD, frequent commits
 
+## Requirement Extraction
+
+Before self-review, extract all discrete requirements from the spec:
+
+1. Read the spec document
+2. Enumerate every discrete requirement as a numbered list (R1, R2, R3...)
+   - A "discrete requirement" is any independently verifiable behavior, rule, constraint, output format, or edge case
+   - One spec section may contain multiple discrete requirements
+   - Exclude "What NOT to change" / negative constraints — these are boundaries, not tasks
+3. Write the enumeration into a `## Requirement Traceability` section at the end of the plan document, as its final section
+
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself -- not a subagent dispatch.
+After writing the complete plan and extracting requirements:
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+**1. Spec Coverage (subagent dispatch):**
 
-**2. Placeholder scan:** Search your plan for red flags -- any of the patterns from the "No Placeholders" section above. Fix them.
+Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
 
-**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+> You are a plan coverage reviewer. Your job is to verify that every requirement
+> from the spec is covered by the plan.
+>
+> **Plan to review:** [PLAN_FILE_PATH]
+> **Spec for reference:** [SPEC_FILE_PATH]
+>
+> ## What to Check
+>
+> Read the plan's `## Requirement Traceability` section to get the enumerated
+> requirements (R1, R2, ...).
+>
+> For each requirement:
+> 1. Find it in the spec to confirm the enumeration is accurate
+> 2. Find which plan task/step covers it (use `+` for cross-task coverage)
+> 3. Assess coverage: ✅ fully covered, ⚠️ partial, ❌ missing
+>
+> Additionally:
+> - Scan the full spec independently for requirements NOT in the traceability list.
+>   For any spec requirement you find that has no corresponding R-number, add a row
+>   to the Traceability Matrix with Req marked "UNENUMERATED-§X.X" and Status ❌.
+> - Scan the plan for placeholders (TBD, TODO, "implement later", vague descriptions)
+>
+> ## Calibration
+>
+> You are a thorough reviewer, not a rubber stamp. The plan author has cognitive
+> bias toward their own work. Your job is to find what they missed.
+>
+> Flag as ❌ any requirement with no corresponding plan task.
+> Flag as ⚠️ any requirement where the plan task exists but doesn't fully address
+> the spec's detail.
+>
+> Do NOT approve if any ❌ exists.
+>
+> Example ❌: Spec says "output must include error code and message" but plan
+> only has a task for "output error message" — error code is missing.
+>
+> Example ⚠️: Spec says "validate email, phone, and address" but plan task only
+> shows validation code for email and phone — address validation is implied but
+> not shown.
+>
+> ## Output Format
+>
+> ## Plan Coverage Review
+>
+> **Status:** Approved | Issues Found
+>
+> **Traceability Matrix:**
+> | Req | Spec Section | Plan Task | Status |
+> |-----|-------------|-----------|--------|
+> | R1  | §X.X        | Task N Step M | ✅/⚠️/❌ |
+>
+> **Issues (if any):**
+> - R? (§X.X): [what's missing]
+>
+> **Recommendations (advisory):**
+> - [non-blocking suggestions]
 
-If you find issues, fix them inline. No need to re-review -- just fix and move on. If you find a spec requirement with no task, add the task.
+- Agent description: "Review plan spec coverage"
+- Inputs: replace [PLAN_FILE_PATH] and [SPEC_FILE_PATH] with actual paths
+
+If the subagent finds ❌ issues: fix them inline by adding or modifying tasks, then
+re-dispatch. Maximum 2 rounds. Fixing ⚠️ only does not require re-dispatch.
+
+**2. Placeholder scan (self-check):**
+
+Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+
+**3. Type consistency (self-check):**
+
+Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks?
+
+If you find issues, fix them inline. No need to re-review.
 
 ## Pipeline Continuation
 
