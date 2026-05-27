@@ -169,7 +169,9 @@ Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
 > 3. Assess coverage: ✅ fully covered, ⚠️ partial, ❌ missing
 >
 > Additionally:
-> - Optionally scan the spec for requirements NOT in the traceability list
+> - Scan the full spec independently for requirements NOT in the traceability list.
+>   For any spec requirement you find that has no corresponding R-number, add a row
+>   to the Traceability Matrix with Req marked "UNENUMERATED-§X.X" and Status ❌.
 > - Scan the plan for placeholders (TBD, TODO, "implement later", vague descriptions)
 >
 > ## Calibration

@@ -37,7 +37,7 @@ Patch writing-plans 自审步骤，两处改动（reviewer prompt 内联到 SKIL
 **subagent 职责**：
 1. 需求覆盖检查：逐行验证 R1..RN 每个需求是否被 plan 的某个 task/step 覆盖
 2. Placeholder 扫描：检查 plan 中是否有 TBD、TODO、"implement later"等占位符
-3. Optionally 扫描 spec，发现 Requirement Traceability 中遗漏的需求（advisory，不阻塞）
+3. 扫描 spec，发现 Requirement Traceability 中遗漏的需求（标记为 UNENUMERATED，按 ❌ 规则处理）
 4. 输出 traceability matrix + issues list
 
 **subagent 不负责**：类型一致性检查（需要上下文连续性，保留为 self-check）
@@ -213,7 +213,7 @@ If you find issues, fix them inline. No need to re-review.
 | 不阻塞 ⚠️ | 部分覆盖是正常的（plan 可能合并非核心需求），强制阻塞会产生大量 false positive |
 | 保留类型一致性为 self-check | 跨 task 签名一致性需要完整的 plan 上下文，subagent 不持有 |
 | Re-dispatch 上限 2 轮 | 有界收敛；实际中 1 轮修复后 re-dispatch 确认即可，2 轮是安全上限 |
-| Spec 二次枚举标为 advisory | 主要依赖 plan 作者的枚举；reviewer 的二次扫描是兜底，不是 hard requirement |
+| Spec 二次枚举为必需步骤 | reviewer 必须独立扫描 spec，发现的遗漏需求标记 UNENUMERATED 并按 ❌ 规则处理。主要枚举仍由 plan 作者完成，reviewer 扫描是兜底 |
 | 不做"约束合规性检查" | 覆盖检查和约束验证是不同关注点，本次不改 reviewer 职责范围 |
 
 ## 7. Codex 审查记录
