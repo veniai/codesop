@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-05-29
+
+### Added
+- Spec reviewer step compliance: mandatory sub-step enumeration (S1..SN) + Step Compliance Matrix
+- Anti-stub detection: disabled UI, empty handlers, hardcoded returns, swallowed exceptions (frontend + backend)
+- Complexity proportionality check: >3 sub-steps but <20 lines → flag
+- Monolithic step self-decomposition: reviewer breaks complex steps into atomic requirements
+- Code quality reviewer implementation depth check: verifies substance not just structure
+- setup patch_skills() extended to sync subagent-driven-development reviewer prompt files
+
 ## [3.11.0] - 2026-05-27
 
 ### Added
