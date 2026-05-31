@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [3.12.1] - 2026-05-31
+
+### Added
+- Git worktree discipline rules in system AGENTS.md: no auto-deleting worktree-bound branches, sync main before rebase, force-with-lease after rebase
+
 ## [3.12.0] - 2026-05-29
 
 ### Added
