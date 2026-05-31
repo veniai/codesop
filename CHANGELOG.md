@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [3.12.2] - 2026-05-31
+
+### Changed
+- Router: using-git-worktrees re-enabled as default (was "仅用户明确要求时插入")
+- System AGENTS.md: git discipline simplified to branch cleanup + rebase rules (worktree lifecycle managed by Claude Code)
+
 ## [3.12.1] - 2026-05-31
 
 ### Added
