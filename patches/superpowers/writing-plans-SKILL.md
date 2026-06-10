@@ -7,9 +7,17 @@
        pending pipeline task without pausing for user confirmation
     3. Added Requirement Extraction — enumerate all spec requirements (R1..RN) before review
     4. Replaced self-review with subagent-based spec coverage check using Traceability Matrix
-  Why: self-review's "skim" missed secondary requirements (conditional rules, edge cases,
-  test specs) because it was section-level not requirement-level, and self-assessment has
-  cognitive bias. Independent subagent + structured enumeration closes the gap.
+    5. Added Acceptance Criteria phase — write verifiable G1..GN with Given/When/Then or
+       simplified format, adversarial self-check, Coverage Matrix (Gn↔Rn M:N), Gap Scan,
+       and Complexity Assessment
+    6. Added Phase Split — simple/moderate tasks generate lightweight plan (unified schema,
+       brief guidance, no step-level decomposition); complex tasks continue to full Phase B
+    7. Enhanced Self-Review with Acceptance Coverage Matrix for complex tasks
+  Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
+  "define what done looks like" step between spec and task decomposition. Acceptance criteria
+  as intermediate artifact closes this gap. Adversarial self-check catches vacuous criteria
+  at zero token cost. Phase split avoids over-planning simple tasks while keeping rigor for
+  complex ones.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
 -->
 ---
@@ -144,9 +152,144 @@ Before self-review, extract all discrete requirements from the spec:
    - Exclude "What NOT to change" / negative constraints — these are boundaries, not tasks
 3. Write the enumeration into a `## Requirement Traceability` section at the end of the plan document, as its final section
 
+## Acceptance Criteria
+
+After extracting requirements (R1..RN), write acceptance criteria before writing any tasks.
+
+**Two formats based on change type:**
+
+**Behavior changes** (new features, interface changes, user-observable behavior) — full format:
+
+    G{n}: [one sentence describing verifiable behavior]
+        Given: [precondition / input state]
+        When: [trigger action]
+        Then: [expected result]
+        Verify: [specific verification command or check method]
+        Boundary: [at least one boundary or error path]
+        Covers: R{n}, R{n}...
+
+**Mechanical edits** (bug fixes, config tweaks, text replacements, static content) — simplified format:
+
+    G{n}: [what changes]
+        Verify: [verification command]
+        Failure prevented: [what error this prevents]
+        Covers: R{n}
+
+**Adversarial self-check** (apply to every Gn, no subagent needed):
+For each criterion, answer honestly:
+> "If I implemented this in the laziest way possible (hardcoded returns, happy-path-only,
+> skipping boundary checks), would this criterion still catch me?"
+If no → the criterion is too weak → rewrite it.
+
+**Quality dimensions** — every Gn must satisfy all five:
+- Specific: describes an observable behavior or verifiable state
+- Verifiable: includes a concrete command or check method
+- Non-vacuous: cannot be trivially satisfied (e.g. "code compiles" is vacuous)
+- Complete: covers normal path + at least one boundary or error path (behavior changes only)
+- Unambiguous: admits only one reasonable interpretation
+
+Write all criteria into a `## Acceptance Criteria` section in the plan document, BEFORE `## Requirement Traceability`.
+
+**Coverage Matrix** (required for all tasks):
+
+| Gn | Covers Rn | Verification |
+|----|-----------|-------------|
+| G1 | R1, R3    | test        |
+| G2 | R2        | command     |
+
+Each Rn must be covered by at least one Gn. Each Gn must cover at least one Rn.
+
+## Gap Scan
+
+After the Coverage Matrix, scan for categories the matrix may miss. Check each category that applies (skip irrelevant ones):
+
+- [ ] **Negative cases**: error paths, invalid input, permission denied
+- [ ] **Boundary conditions**: empty values, extremes, concurrency
+- [ ] **Regression risk**: does this change break existing functionality?
+- [ ] **Config/environment**: env vars, config files, platform differences
+- [ ] **Docs/API**: do public interface changes need doc updates?
+- [ ] **Migration/compat**: do data format changes need migration?
+
+Found gaps → add new Gn to cover them.
+
+## Complexity Assessment
+
+After acceptance criteria and gap scan, assess task complexity.
+
+**Primary classification (observable metrics):**
+- simple: 1-2 files, no cross-module dependency
+- moderate: 3-5 files, or involves 2 modules
+- complex: >5 files, or involves 3+ modules
+
+**Override rules** (any hit → upgrade to complex regardless of file count):
+- Public API change
+- Data migration or format change
+- Security-related logic (auth, encryption)
+- Build/deploy pipeline change
+
+Output:
+
+    ## Complexity Assessment
+    **Level:** simple | moderate | complex
+    **File estimate:** N (basis: [what in the spec tells you this])
+    **Modules:** [list]
+    **Override:** [if any, list triggered items; otherwise "none"]
+
+**Rollback triggers** (checked during Phase B if applicable):
+- Actual file count exceeds estimate and crosses tier threshold
+- Cross-layer, cross-package, or cross-skill changes discovered
+- New public interfaces or pipeline behavior changes discovered
+- AC cannot map directly to discovered file structure
+
+On rollback: AC is frozen by default. Phase B only adds decomposition.
+Exception: Phase B discovers AC was based on wrong assumptions → AC may be revised,
+recorded as "AC revision: [reason]".
+
+## Phase Split
+
+Based on complexity assessment:
+
+**simple / moderate:**
+Generate a Lightweight Plan (next section). Then Pipeline Continuation.
+Skip File Structure, Task Decomposition, and full Self-Review.
+
+**complex:**
+Continue to File Structure → Task Decomposition → Self-Review (enhanced).
+Then Pipeline Continuation.
+
+## Lightweight Plan
+
+For simple/moderate tasks only. Uses the same schema as full plans, but with reduced depth.
+
+Each task follows **implementation cohesion**, not one-task-per-Gn. A task may reference multiple Gn via `Acceptance IDs`.
+
+Schema (shared with full plans — execution skill sees the same structure):
+
+    ### Task N: [description]
+
+    **Scope:** [what this task does]
+    **Acceptance IDs:** G1, G3
+    **Likely files:** `path/to/file.sh`
+    **Implementation guidance:** brief
+    **Key direction:** [one sentence on approach — implementer decides details]
+    **Validation:** [Gn Verify commands for this task's acceptance IDs]
+    **Out of scope:** [what this task does NOT do]
+
+Difference from full plan:
+
+| Field | Lightweight (simple/moderate) | Full (complex) |
+|-------|------------------------------|----------------|
+| Implementation guidance | `brief` — key direction, implementer decides | `detailed` — complete code blocks |
+| Steps | None — implementer self-decomposes | Checkbox steps with code |
+| Acceptance IDs | Required | Required |
+| File paths | `Likely` — estimate | Exact with line numbers |
+
+Write the lightweight plan into the plan document. Include Plan Document Header as usual.
+
 ## Self-Review
 
-After writing the complete plan and extracting requirements:
+After writing the complete plan and extracting requirements.
+Only complex tasks reach this section (simple/moderate skip to Pipeline Continuation).
 
 **1. Spec Coverage (subagent dispatch):**
 
@@ -208,6 +351,15 @@ Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
 >
 > **Recommendations (advisory):**
 > - [non-blocking suggestions]
+>
+> **Acceptance Coverage Matrix:**
+> | Gn | Spec Req | Plan Task | Status |
+> |----|----------|-----------|--------|
+> | G1 | R1       | Task 2 Step 3 | ✅/⚠️/❌ |
+>
+> For each acceptance criterion, verify that the plan's implementation steps
+> can actually achieve the criterion's Verify condition. If a plan task exists
+> but cannot pass Gn's Verify → mark ⚠️.
 
 - Agent description: "Review plan spec coverage"
 - Inputs: replace [PLAN_FILE_PATH] and [SPEC_FILE_PATH] with actual paths
@@ -227,8 +379,12 @@ If you find issues, fix them inline. No need to re-review.
 
 ## Pipeline Continuation
 
-**Do not stop.** After self-review:
+**Do not stop.** After the appropriate completion point:
 1. TaskUpdate(current task, completed)
 2. TaskList → find next pending task (source: codesop-pipeline) → execute immediately
+
+Completion points by tier:
+- simple/moderate: after Lightweight Plan is written
+- complex: after Self-Review passes
 
 The task list was already approved. Proceed without asking.
