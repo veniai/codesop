@@ -164,6 +164,20 @@ subagent reviewer prompt 的 Output Format 增加第二张表：
 | Patch 正确应用 | ✅ `bash setup --host claude` 成功，1 file patched |
 | 全量测试 | ✅ 10/10 passed |
 | Patched SKILL.md 包含所有新 section | ✅ Acceptance Criteria + Gap Scan + Complexity Assessment + Phase Split + Lightweight Plan + Acceptance Coverage Matrix |
+| 用新流程重写 execution-reviewer plan | ✅ 产出 v2 plan，11 条 Gn，4 个 lightweight task |
+| Question 2 有效性验证 | ✅ 第一轮 7/11 验证命令有假阳性，加 Q2 后第二轮 3/3 命令下意识用 sed 跳注释 |
+
+## 5.1 迭代优化（实测后第 2 轮）
+
+用新流程写 plan 时发现的问题及修正：
+
+| 问题 | 证据 | 修正 |
+|------|------|------|
+| Coverage Matrix 冗余 | 每个 Gn 已有 `Covers: Rn` 字段，矩阵只是重排成表，实测 11 行全部 1:1，0 新信息 | 删除强制表格，改为一句覆盖检查规则 |
+| Gap Scan 6 项 0 产出 | 测试 plan 扫描 6 项，4 项"已覆盖"2 项"不涉及"，0 个新 Gn | 合并为 3 项（边缘情况、回归风险、集成） |
+| 行为/机械分类模糊 | G4（monolithic step 自拆分）是新功能行为但用了机械编辑格式，丢失 Boundary 信息 | 加"When in doubt, use full format"指导 |
+| Lightweight plan 无 rollback | rollback triggers 写"Phase B 检查"，但 simple/moderate 跳过 Phase B | 加实现者 escalate 机制 |
+| 验证命令假阳性 | adversarial self-check 只问"偷懒能过吗"，7/11 条 grep 命中 HTML 注释 | 加 Question 2：验证命令会骗人吗？ |
 
 ## 6. 权衡
 
@@ -173,11 +187,14 @@ subagent reviewer prompt 的 Output Format 增加第二张表：
 | 两种 AC 格式（行为/机械） | 行为变更需要 Given/When/Then 的强制思维结构；bug fix 不需要，强行套用是噪音 |
 | Adversarial self-check 替代 subagent | 零 token 成本，抓住大部分空虚标准 |
 | Gn↔Rn M:N 关系 | 一个 Gn 可覆盖多个 Rn，一个 Rn 可被多个 Gn 覆盖。1:1 在实测中被推翻（Pair 1 的 5 个需求被 1 个 Step 覆盖，或拆成 5 个 task 都改同一段代码——两种都不合理） |
-| Gap Scan 补充 Coverage Matrix | 矩阵证明可追溯性，不证明正确性。Pair 1 全部 ✅ 但实际有缩窄/吞没。Gap Scan 从维度角度抓遗漏 |
+| Gap Scan 补充覆盖检查 | 覆盖检查证明可追溯性，不证明正确性。Pair 1 全部 ✅ 但实际有缩窄/吞没。Gap Scan 从维度角度抓遗漏 |
 | 统一 plan schema + `implementation_guidance: brief \| detailed` | execution skill 不需要两套解析逻辑。区别只在填充深度 |
 | Task 按实现内聚性拆，不按 Gn 拆 | "每个 Gn 一个 task" 在实测中不合理（一个文件改动满足 3 个 Gn，不应拆成 3 个 task） |
 | 回退时 AC 默认冻结 | AC 是稳定契约，decomposition 是执行策略。策略可变，契约不变 |
-| Coverage Matrix + Verification 列 | 防止"覆盖了但不可验证"的假安全感（Codex 审查第 3 轮意见） |
+| Coverage Matrix → 覆盖检查规则 | 原设计要求强制表格，实测发现每个 Gn 已有 Covers 字段，矩阵纯冗余。改为一句规则：每个 Rn 至少被一个 Gn 覆盖 |
+| Adversarial self-check Question 2 | 实测 7/11 验证命令有假阳性（grep 命中 HTML 注释、head -5 截太短）。Q1 只查"偷懒能过吗"，不查"命令本身对吗"。Q2 补上验证命令自检 |
+| Gap Scan 6→3 项 | 实测 6 项扫描 0 产出。合并为 3 项（边缘情况、回归风险、集成），减少形式负担 |
+| Lightweight plan 加 escalate | rollback triggers 只在 Phase B 生效，但 simple/moderate 跳过 Phase B。加实现者主动 escalate 机制 |
 
 ## 7. 审查记录
 

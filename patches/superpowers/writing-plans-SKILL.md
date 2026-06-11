@@ -156,7 +156,8 @@ Before self-review, extract all discrete requirements from the spec:
 
 After extracting requirements (R1..RN), write acceptance criteria before writing any tasks.
 
-**Two formats based on change type:**
+**Two formats based on change type.** When in doubt, use the full format. The simplified format is only for changes
+where Given/When/Then adds no information (e.g., replacing a string, changing a config value, updating a version number).
 
 **Behavior changes** (new features, interface changes, user-observable behavior) — full format:
 
@@ -176,10 +177,19 @@ After extracting requirements (R1..RN), write acceptance criteria before writing
         Covers: R{n}
 
 **Adversarial self-check** (apply to every Gn, no subagent needed):
-For each criterion, answer honestly:
+For each criterion, answer TWO questions honestly:
+
+Question 1 — implementation laziness:
 > "If I implemented this in the laziest way possible (hardcoded returns, happy-path-only,
 > skipping boundary checks), would this criterion still catch me?"
-If no → the criterion is too weak → rewrite it.
+
+Question 2 — verify command reliability:
+> "Can this verify command give a wrong answer? Can it pass when it shouldn't (false positive)
+> or fail when it shouldn't (false negative)?"
+Common traps: grep hits comments/docs instead of code; `head -N` cuts too short; pattern matches
+unrelated content in the same file; command checks file exists but not content correctness.
+
+If answer to either question is "yes" → rewrite the criterion or its verify command.
 
 **Quality dimensions** — every Gn must satisfy all five:
 - Specific: describes an observable behavior or verifiable state
@@ -188,27 +198,19 @@ If no → the criterion is too weak → rewrite it.
 - Complete: covers normal path + at least one boundary or error path (behavior changes only)
 - Unambiguous: admits only one reasonable interpretation
 
+**Coverage check** (required for all tasks):
+After writing all Gn, verify: each Rn from the Requirement Extraction appears in at least one Gn's Covers field.
+If any Rn is uncovered → write additional Gn.
+
 Write all criteria into a `## Acceptance Criteria` section in the plan document, BEFORE `## Requirement Traceability`.
-
-**Coverage Matrix** (required for all tasks):
-
-| Gn | Covers Rn | Verification |
-|----|-----------|-------------|
-| G1 | R1, R3    | test        |
-| G2 | R2        | command     |
-
-Each Rn must be covered by at least one Gn. Each Gn must cover at least one Rn.
 
 ## Gap Scan
 
-After the Coverage Matrix, scan for categories the matrix may miss. Check each category that applies (skip irrelevant ones):
+After the coverage check, scan for categories the Gn list may miss. Check each that applies (skip irrelevant ones):
 
-- [ ] **Negative cases**: error paths, invalid input, permission denied
-- [ ] **Boundary conditions**: empty values, extremes, concurrency
+- [ ] **Edge cases**: error paths, invalid input, empty values, extremes, concurrency
 - [ ] **Regression risk**: does this change break existing functionality?
-- [ ] **Config/environment**: env vars, config files, platform differences
-- [ ] **Docs/API**: do public interface changes need doc updates?
-- [ ] **Migration/compat**: do data format changes need migration?
+- [ ] **Integration**: env vars, config files, public API changes, data format changes
 
 Found gaps → add new Gn to cover them.
 
@@ -252,6 +254,8 @@ Based on complexity assessment:
 **simple / moderate:**
 Generate a Lightweight Plan (next section). Then Pipeline Continuation.
 Skip File Structure, Task Decomposition, and full Self-Review.
+If implementation discovers actual scope significantly exceeds the estimate (e.g., file count
+crosses the complex threshold), the implementer should flag this and escalate to full planning.
 
 **complex:**
 Continue to File Structure → Task Decomposition → Self-Review (enhanced).
