@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-06-11
+
+### Added
+- writing-plans acceptance criteria phase: write verifiable G1..GN before task decomposition
+- Two AC formats: full Given/When/Then (behavior changes) and simplified (mechanical edits)
+- Adversarial self-check with two questions: implementation laziness + verify command reliability
+- Complexity assessment with file/module metrics and override rules (public API, security, etc.)
+- Phase split: simple/moderate → lightweight plan (brief guidance); complex → full plan with self-review
+- Lightweight plan schema (unified with full plan, implementation_guidance depth field)
+- Enhanced self-review with acceptance coverage matrix for complex tasks
+- Gap scan (edge cases, regression risk, integration)
+- Lightweight plan escalate mechanism for underestimated complexity
+- Format classification guidance ("when in doubt, use full format")
+
+### Changed
+- Coverage Matrix simplified from mandatory table to one-sentence coverage check rule
+- Gap Scan reduced from 6 items to 3 (merged related categories)
+- Pipeline Continuation now has tiered completion points by complexity level
+
 ## [3.12.2] - 2026-05-31
 
 ### Changed
