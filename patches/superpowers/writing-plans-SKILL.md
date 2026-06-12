@@ -13,6 +13,9 @@
     6. Added Phase Split — simple/moderate tasks generate lightweight plan (unified schema,
        brief guidance, no step-level decomposition); complex tasks continue to full Phase B
     7. Enhanced Self-Review with Acceptance Coverage Matrix for complex tasks
+    8. Staged checkpoint flow for complex plans — three-stage output (skeleton → task
+       expansion with implementation briefs → traceability + self-review), save-and-reread
+       checkpoints between stages, resume from last checkpoint if interrupted
   Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
   "define what done looks like" step between spec and task decomposition. Acceptance criteria
   as intermediate artifact closes this gap. Adversarial self-check catches vacuous criteria
@@ -84,6 +87,9 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ## Task Structure
 
+This is the reference step format. Complex tasks use implementation briefs instead (see Staged Output).
+Lightweight tasks use the Lightweight Plan schema.
+
 ````markdown
 ### Task N: [Component Name]
 
@@ -135,9 +141,15 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
 
+**Implementation briefs** (used in complex task staged output) are not placeholders. They specify:
+interface signatures, design constraints, edge cases to handle, and test obligations.
+"Edge cases: handle empty input, null return from X" is specific guidance.
+"Handle edge cases" without specifics is a placeholder.
+
 ## Remember
 - Exact file paths always
-- Complete code in every step -- if a step changes code, show the code
+- Complex tasks: implementation briefs (interface signatures, constraints, edge cases, test obligations) — NOT full code blocks
+- Lightweight tasks: brief guidance, implementer decides details
 - Exact commands with expected output
 - DRY, YAGNI, TDD, frequent commits
 
@@ -258,7 +270,7 @@ If implementation discovers actual scope significantly exceeds the estimate (e.g
 crosses the complex threshold), the implementer should flag this and escalate to full planning.
 
 **complex:**
-Continue to File Structure → Task Decomposition → Self-Review (enhanced).
+Continue to Staged Output for Complex Tasks (Stage 1 → Stage 2 → Stage 3).
 Then Pipeline Continuation.
 
 ## Lightweight Plan
@@ -283,16 +295,97 @@ Difference from full plan:
 
 | Field | Lightweight (simple/moderate) | Full (complex) |
 |-------|------------------------------|----------------|
-| Implementation guidance | `brief` — key direction, implementer decides | `detailed` — complete code blocks |
-| Steps | None — implementer self-decomposes | Checkbox steps with code |
+| Implementation guidance | `brief` — key direction, implementer decides | `implementation brief` — constraints, interfaces, edge cases |
+| Steps | None — implementer self-decomposes | Implementation briefs (no checkbox steps) |
 | Acceptance IDs | Required | Required |
 | File paths | `Likely` — estimate | Exact with line numbers |
 
 Write the lightweight plan into the plan document. Include Plan Document Header as usual.
 
-## Self-Review
+## Staged Output for Complex Tasks
 
-After writing the complete plan and extracting requirements.
+Complex plans use three stages with explicit checkpoints. Each stage saves the plan file
+before proceeding, enabling resume if the session is interrupted.
+
+### Stage 1: Plan Skeleton
+
+Write the initial plan file with structure but NO implementation details.
+
+**Include:**
+1. Plan Document Header (goal, architecture, tech stack)
+2. File Structure (files to create/modify, one-line responsibility each)
+3. Acceptance Criteria (G1..GN — copy from Phase A output)
+4. Complexity Assessment (copy from Phase A output)
+5. Task Outline — for each task T1..TN, ONLY:
+   - Title and one-line goal
+   - Acceptance IDs (Gn references)
+   - Dependencies (other T-IDs, or "none")
+   - Linked requirements (Rn references)
+   - Files involved
+6. Requirement Traceability table
+
+**Do NOT include:** implementation code, interface sketches, test code, edge case details, step-level decomposition.
+
+**Checkpoint 1:** Write the file.
+Announce: "Stage 1/3 complete: plan skeleton saved to [path]."
+
+### Stage 2: Task Expansion
+
+Re-read the skeleton from file. Expand each task ONE AT A TIME with implementation briefs.
+Save after each task expansion — this prevents loss if the session times out.
+
+**Implementation brief format** (replaces complete code blocks):
+
+    ### Task N: [Title]
+
+    **Goal:** [what this task achieves]
+    **Acceptance IDs:** G1, G3
+    **Dependencies:** [T-IDs that must complete first, or "none"]
+    **Files:**
+    - Create: `exact/path/to/file.py`
+    - Modify: `exact/path/to/existing.py:123-145`
+    - Test: `tests/exact/path/to/test.py`
+
+    **Implementation brief:**
+    - **Design constraint:** [key constraint from spec or architecture]
+    - **Interface:** function_name(param: Type) -> ReturnType
+    - **Edge cases:** [specific cases to handle]
+    - **Test obligations:** [behaviors to test — what, not how]
+    - **Critical snippet:** [only the tricky/ambiguous part — skip for straightforward logic]
+
+    **Validation:** [Gn Verify commands for this task's acceptance IDs]
+
+**Rules:**
+- Expand tasks sequentially (T1 first, then T2)
+- Each task expansion is a separate Edit operation — save progress incrementally
+- Interface sketches show signatures only, not implementations
+- Critical snippets are for tricky parts only — skip for straightforward logic
+- Test obligations describe WHAT to test, not the test code itself
+- If expansion reveals new files/dependencies: update the skeleton's File Structure inline
+- Stable IDs (R1/G1/T1): append only, never renumber. Update by ID reference
+
+**Checkpoint 2:** After all tasks expanded. File saved.
+Announce: "Stage 2/3 complete: all tasks expanded."
+
+### Stage 3: Traceability + Self-Review
+
+Re-read the expanded plan from file. Run Self-Review (next section) as a SEPARATE operation —
+do not attempt review from memory alone.
+
+### Resume Protocol
+
+If the session is interrupted at any point:
+1. Read the plan file from disk
+2. Determine the last completed stage:
+   - Task outline present with title + IDs → Stage 1 done
+   - All tasks have Implementation brief sections → Stage 2 done
+   - Self-Review output present → Stage 3 done
+3. Resume from the first incomplete stage
+4. Announce: "Resuming plan from Stage N: [description]"
+
+## Self-Review (Stage 3 for Complex Tasks)
+
+Re-read the expanded plan from file before starting this section.
 Only complex tasks reach this section (simple/moderate skip to Pipeline Continuation).
 
 **1. Spec Coverage (subagent dispatch):**
@@ -348,7 +441,7 @@ Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
 > **Traceability Matrix:**
 > | Req | Spec Section | Plan Task | Status |
 > |-----|-------------|-----------|--------|
-> | R1  | §X.X        | Task N Step M | ✅/⚠️/❌ |
+> | R1  | §X.X        | Task N | ✅/⚠️/❌ |
 >
 > **Issues (if any):**
 > - R? (§X.X): [what's missing]
@@ -359,9 +452,9 @@ Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
 > **Acceptance Coverage Matrix:**
 > | Gn | Spec Req | Plan Task | Status |
 > |----|----------|-----------|--------|
-> | G1 | R1       | Task 2 Step 3 | ✅/⚠️/❌ |
+> | G1 | R1       | Task 2 | ✅/⚠️/❌ |
 >
-> For each acceptance criterion, verify that the plan's implementation steps
+> For each acceptance criterion, verify that the plan's implementation briefs
 > can actually achieve the criterion's Verify condition. If a plan task exists
 > but cannot pass Gn's Verify → mark ⚠️.
 
@@ -389,6 +482,6 @@ If you find issues, fix them inline. No need to re-review.
 
 Completion points by tier:
 - simple/moderate: after Lightweight Plan is written
-- complex: after Self-Review passes
+- complex: after all three stages complete (skeleton → expansion → self-review)
 
 The task list was already approved. Proceed without asking.

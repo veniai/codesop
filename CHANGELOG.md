@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [3.14.0] - 2026-06-12
+
+### Added
+- Staged checkpoint flow for complex plans: three-stage output (skeleton → task expansion → self-review)
+- Stage 1 writes plan skeleton (AC + task outline, NO code) and saves to file
+- Stage 2 expands tasks one at a time with implementation briefs (not full code blocks)
+- Stage 3 runs traceability + self-review as a separate re-read operation
+- Resume protocol: interrupted sessions can detect last completed stage and continue
+- Implementation brief format: design constraints, interface signatures, edge cases, test obligations, critical snippets
+- Checkpoint announcements between stages (Stage 1/3, Stage 2/3)
+- Implementation briefs are explicitly distinguished from placeholders in No Placeholders section
+
+### Changed
+- Complex tasks no longer use full code blocks in plans — replaced with implementation briefs
+- Task Structure section labeled as reference format (not used by either complex or lightweight paths)
+- Self-Review subagent prompt updated to reference implementation briefs instead of steps
+- Lightweight plan comparison table updated to reflect implementation brief format
+- Remember section updated: complex tasks use briefs, not complete code
+- Pipeline Continuation completion points updated for staged flow
+
 ## [3.13.0] - 2026-06-11
 
 ### Added

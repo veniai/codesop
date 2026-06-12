@@ -196,6 +196,51 @@ subagent reviewer prompt 的 Output Format 增加第二张表：
 | Gap Scan 6→3 项 | 实测 6 项扫描 0 产出。合并为 3 项（边缘情况、回归风险、集成），减少形式负担 |
 | Lightweight plan 加 escalate | rollback triggers 只在 Phase B 生效，但 simple/moderate 跳过 Phase B。加实现者主动 escalate 机制 |
 
+## 8. Staged Checkpoint Flow（v3.14.0）
+
+### 8.1 问题
+
+复杂 plan 的 writing-plans skill 尝试单次 Write 输出完整 plan（header + AC + task decomposition + self-review），当 task 数量多时触发 API timeout。实测观察到 LLM 没有分段输出，因为没有 instruction 告诉它分阶段写。
+
+### 8.2 方案
+
+将 complex 路径从 "File Structure → Task Decomposition → Self-Review" 改为三阶段 checkpoint flow：
+
+1. **Stage 1: Skeleton** — 写 plan 骨架（header + file structure + AC + task outline），NO code
+2. **Checkpoint** — 保存到文件，announce
+3. **Stage 2: Task Expansion** — 逐个 task 扩展为 implementation brief（interface signatures, design constraints, edge cases, test obligations），每个 task 单独 Edit 操作
+4. **Stage 3: Traceability + Self-Review** — 重新从文件读取，独立运行 review
+
+关键变更：
+- **Implementation briefs 替代 complete code blocks**：complex plan 不再要求完整代码，改为 interface signatures + design constraints + edge cases + test obligations + critical snippets
+- **Resume protocol**：中断后可检测最后完成的阶段并继续
+- **Stable IDs (R1/G1/T1)**：跨阶段引用，只追加不重编号
+
+### 8.3 改动范围
+
+| 文件 | 操作 | 改什么 |
+|------|------|--------|
+| `patches/superpowers/writing-plans-SKILL.md` | 修改 | 新增 Staged Output section + Resume Protocol，更新 Phase Split/Task Structure/No Placeholders/Remember/Self-Review/Pipeline Continuation |
+
+### 8.4 权衡
+
+| 决策 | 理由 |
+|------|------|
+| Implementation briefs 替代 code blocks | 完整代码块是 timeout 的主因（生成时间长 + 单次输出大）。Briefs 提供足够指导而不要求生成完整实现 |
+| 逐 task Edit 而非批量 Write | 每个 task 独立保存，timeout 只丢失当前 task 的进度，不丢全部 |
+| Stage 1 不含任何 code | Skeleton 足够短，几乎不可能 timeout；为 Stage 2 提供结构锚点 |
+| Resume 从文件读取而非 memory | 跨 session 恢复需要持久化状态 |
+| Task Structure 保留为参考格式 | 上游 skill 的原始格式仍有参考价值，加标注说明不再用于 complex/lightweight 路径 |
+| Briefs 不是 placeholders | 显式区分：interface signatures + specific edge cases 是具体指导；"handle edge cases" 是 placeholder |
+
+### 8.5 测试
+
+| 测试 | 结果 |
+|------|------|
+| Patch 正确应用 | ✅ `bash setup --host claude` 成功，1 file patched |
+| 全量测试 | ✅ 10/10 passed |
+| Patched SKILL.md 包含 Staged Output | ✅ Stage 1/2/3 + Resume Protocol + Implementation brief format |
+
 ## 7. 审查记录
 
 ### Codex 审查第 1 轮（方案方向）
