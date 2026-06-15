@@ -56,6 +56,7 @@ agents_template="$(cat "$ROOT_DIR/templates/system/AGENTS.md")"
 assert_contains "$agents_template" "减法纪律"
 assert_contains "$agents_template" "净涨幅警戒"
 assert_contains "$agents_template" "反膨胀清理清单"
+assert_contains "$agents_template" "总尺寸警戒"
 
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "superpowers"
