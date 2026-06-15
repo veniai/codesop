@@ -51,6 +51,12 @@ assert_contains "$skill_full" "提议 Pipeline"
 assert_contains "$skill_full" "工作区有未提交改动"
 assert_contains "$skill_output" "Defaults to 中文"
 
+# AGENTS.md template (global CLAUDE.md source) — document gate anti-bloat discipline
+agents_template="$(cat "$ROOT_DIR/templates/system/AGENTS.md")"
+assert_contains "$agents_template" "减法纪律"
+assert_contains "$agents_template" "净涨幅警戒"
+assert_contains "$agents_template" "反膨胀清理清单"
+
 readme_output="$(sed -n '1,260p' "$ROOT_DIR/README.md")"
 assert_contains "$readme_output" "superpowers"
 assert_contains "$readme_output" 'AGENTS.md'
