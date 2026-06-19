@@ -5,7 +5,7 @@
 ## [3.15.0] - 2026-06-18
 
 ### Changed
-- Re-based superpowers patches onto v6.0.2 (brainstorming, writing-plans, finishing); preserves whole-file-overwrite delivery.
+- Re-based superpowers patches onto v6.0.3 (brainstorming, writing-plans, finishing); preserves whole-file-overwrite delivery.
 - finishing: PR operations now forge-neutral (no hardcoded `gh`); worktree kept after PR for review iteration (adopts upstream Option 2 behavior).
 - writing-plans: retains upstream Global Constraints / per-task Interfaces / Task Right-Sizing alongside codesop acceptance-criteria + staged-checkpoint flow.
 
