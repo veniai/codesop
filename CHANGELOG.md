@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [3.15.0] - 2026-06-18
+
+### Changed
+- Re-based superpowers patches onto v6.0.3 (brainstorming, writing-plans, finishing); preserves whole-file-overwrite delivery.
+- finishing: PR operations now forge-neutral (no hardcoded `gh`); worktree kept after PR for review iteration (adopts upstream Option 2 behavior).
+- writing-plans: retains upstream Global Constraints / per-task Interfaces / Task Right-Sizing alongside codesop acceptance-criteria + staged-checkpoint flow.
+
+### Removed
+- subagent-driven-development reviewer patches (`spec-reviewer-prompt.md`, `code-quality-reviewer-prompt.md`) — absorbed by superpowers 6.0's merged `task-reviewer-prompt.md`.
+
+### Added
+- Re-base checklist doc (docs/superpowers/playbooks/rebase-superpowers-patches.md) — anti-regression + drift handling.
+
+### Fixed
+- superpowers `min_version` 5.1.0 → 6.0.3; patches re-apply on 6.0 installs (were silently skipped). v6.0.3 verified compatible — the 3 patched skills are unchanged 6.0.2→6.0.3.
+
 ## [3.14.2] - 2026-06-15
 
 ### Fixed

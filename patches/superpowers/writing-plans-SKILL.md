@@ -1,26 +1,19 @@
 <!--
   codesop patch: writing-plans
-  Based on: superpowers v5.1.0
+  Based on: superpowers v6.0.3
   Changes vs upstream:
-    1. Removed Execution Handoff section (asked user to choose next skill manually)
-    2. Added Pipeline Continuation — after self-review, auto-complete task and execute next
-       pending pipeline task without pausing for user confirmation
-    3. Added Requirement Extraction — enumerate all spec requirements (R1..RN) before review
-    4. Replaced self-review with subagent-based spec coverage check using Traceability Matrix
-    5. Added Acceptance Criteria phase — write verifiable G1..GN with Given/When/Then or
-       simplified format, adversarial self-check, Coverage Matrix (Gn↔Rn M:N), Gap Scan,
-       and Complexity Assessment
-    6. Added Phase Split — simple/moderate tasks generate lightweight plan (unified schema,
-       brief guidance, no step-level decomposition); complex tasks continue to full Phase B
-    7. Enhanced Self-Review with Acceptance Coverage Matrix for complex tasks
-    8. Staged checkpoint flow for complex plans — three-stage output (skeleton → task
-       expansion with implementation briefs → traceability + self-review), save-and-reread
-       checkpoints between stages, resume from last checkpoint if interrupted
+    1. Removed Execution Handoff menu (Pipeline Continuation replaces — autonomous re-entry)
+    2. Added Requirement Extraction (R1..RN) before review
+    3. Added Acceptance Criteria phase (G1..GN Given/When/Then, adversarial self-check, Coverage Matrix, Gap Scan)
+    4. Added Complexity Assessment (simple/moderate/complex → plan-depth routing)
+    5. Added Phase Split + Lightweight Plan (simple/moderate avoid over-planning)
+    6. Added Staged checkpoint flow + Resume Protocol (skeleton → per-task save → self-review)
+    7. Replaced self-checklist Self-Review with subagent spec-coverage review (complex path)
+    8. Switched complex tasks from complete-code to implementation-brief
+  Retained from upstream v6.0.3: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
   Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
-  "define what done looks like" step between spec and task decomposition. Acceptance criteria
-  as intermediate artifact closes this gap. Adversarial self-check catches vacuous criteria
-  at zero token cost. Phase split avoids over-planning simple tasks while keeping rigor for
-  complex ones.
+    "define what done looks like" step. Acceptance criteria + traceability close it; staged
+    checkpoints prevent truncation on long plans. Phase split keeps rigor for complex, light for simple.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
 -->
 ---
@@ -45,7 +38,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 ## Scope Check
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans -- one per subsystem. Each plan should produce working, testable software on its own.
+If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
 ## File Structure
 
@@ -57,6 +50,15 @@ Before defining tasks, map out which files will be created or modified and what 
 - In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
+
+## Task Right-Sizing
+
+A task is the smallest unit that carries its own test cycle and is worth a
+fresh reviewer's gate. When drawing task boundaries: fold setup,
+configuration, scaffolding, and documentation steps into the task whose
+deliverable needs them; split only where a reviewer could meaningfully
+reject one task while approving its neighbor. Each task ends with an
+independently testable deliverable.
 
 ## Bite-Sized Task Granularity
 
@@ -74,7 +76,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -82,13 +84,19 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Tech Stack:** [Key technologies/libraries]
 
+## Global Constraints
+
+[The spec's project-wide requirements — version floors, dependency limits,
+naming and copy rules, platform requirements — one line each, with exact
+values copied verbatim from the spec. Every task's requirements implicitly
+include this section.]
+
 ---
 ```
 
 ## Task Structure
 
-This is the reference step format. Complex tasks use implementation briefs instead (see Staged Output).
-Lightweight tasks use the Lightweight Plan schema.
+This is the reference step format. Complex tasks use **implementation briefs** instead of full code blocks (see Staged Output). Lightweight tasks use the Lightweight Plan schema. Each task ends with an independently testable deliverable; prefer interface signatures + design constraints + edge cases + test obligations over pasting full code for complex work.
 
 ````markdown
 ### Task N: [Component Name]
@@ -97,6 +105,12 @@ Lightweight tasks use the Lightweight Plan schema.
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
+
+**Interfaces:**
+- Consumes: [what this task uses from earlier tasks — exact signatures]
+- Produces: [what later tasks rely on — exact function names, parameter
+  and return types. A task's implementer sees only their own task; this
+  block is how they learn the names and types neighboring tasks use.]
 
 - [ ] **Step 1: Write the failing test**
 
@@ -133,11 +147,11 @@ git commit -m "feat: add specific feature"
 
 ## No Placeholders
 
-Every step must contain the actual content an engineer needs. These are **plan failures** -- never write them:
+Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code -- the engineer may be reading tasks out of order)
+- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
 

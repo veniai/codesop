@@ -253,7 +253,7 @@ patch_skills() {
     fi
   fi
 
-  # finishing-a-development-branch: v5.1.0 options menu + PR existence check
+  # finishing-a-development-branch: skip menu, direct push + PR, forge-neutral, keep worktree
   local fb="$plugin_dir/skills/finishing-a-development-branch/SKILL.md"
   local fb_patch="$patches_dir/finishing-a-development-branch-SKILL.md"
   if [ -f "$fb" ] && [ -f "$fb_patch" ]; then
@@ -271,29 +271,6 @@ patch_skills() {
       cp "$bs_patch" "$bs"
       patched=$((patched + 1))
     fi
-  fi
-
-  # subagent-driven-development: step compliance reviewer prompts
-  local sdd_spec="$plugin_dir/skills/subagent-driven-development/spec-reviewer-prompt.md"
-  local sdd_spec_patch="$patches_dir/subagent-driven-development-spec-reviewer-prompt.md"
-  if [ -f "$sdd_spec" ] && [ -f "$sdd_spec_patch" ]; then
-    if ! diff -q "$sdd_spec" "$sdd_spec_patch" >/dev/null 2>&1; then
-      cp "$sdd_spec_patch" "$sdd_spec"
-      patched=$((patched + 1))
-    fi
-  elif [ ! -f "$sdd_spec" ]; then
-    echo "  ⚠ subagent-driven-development spec-reviewer-prompt.md not found in plugin, skipping patch"
-  fi
-
-  local sdd_cq="$plugin_dir/skills/subagent-driven-development/code-quality-reviewer-prompt.md"
-  local sdd_cq_patch="$patches_dir/subagent-driven-development-code-quality-reviewer-prompt.md"
-  if [ -f "$sdd_cq" ] && [ -f "$sdd_cq_patch" ]; then
-    if ! diff -q "$sdd_cq" "$sdd_cq_patch" >/dev/null 2>&1; then
-      cp "$sdd_cq_patch" "$sdd_cq"
-      patched=$((patched + 1))
-    fi
-  elif [ ! -f "$sdd_cq" ]; then
-    echo "  ⚠ subagent-driven-development code-quality-reviewer-prompt.md not found in plugin, skipping patch"
   fi
 
   if [ "$patched" -gt 0 ]; then
