@@ -8,3 +8,6 @@ codex-review-output.txt
 
 # Session state (local, never committed)
 .codesop/session-state.md
+
+# Local tool config (machine-specific, never commit)
+.config/
