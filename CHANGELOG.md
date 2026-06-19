@@ -16,7 +16,7 @@
 - Re-base checklist doc (docs/superpowers/playbooks/rebase-superpowers-patches.md) — anti-regression + drift handling.
 
 ### Fixed
-- superpowers `min_version` 5.1.0 → 6.0.2; patches re-apply on 6.0 installs (were silently skipped).
+- superpowers `min_version` 5.1.0 → 6.0.3; patches re-apply on 6.0 installs (were silently skipped). v6.0.3 verified compatible — the 3 patched skills are unchanged 6.0.2→6.0.3.
 
 ## [3.14.2] - 2026-06-15
 

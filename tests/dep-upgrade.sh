@@ -11,7 +11,7 @@ source "$(dirname "$0")/test_helpers.sh"
 manifest_output="$(cat "$ROOT_DIR/config/dependencies.sh")"
 assert_contains "$manifest_output" "DEP_MANIFEST"
 assert_contains "$manifest_output" "superpowers@claude-plugins-official"
-assert_contains "$manifest_output" "core|yes|6.0.2"
+assert_contains "$manifest_output" "core|yes|6.0.3"
 assert_contains "$manifest_output" "code-review@claude-plugins-official"
 assert_contains "$manifest_output" "codex@openai-codex"
 

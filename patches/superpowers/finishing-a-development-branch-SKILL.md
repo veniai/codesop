@@ -1,6 +1,6 @@
 <!--
   codesop patch: finishing-a-development-branch
-  Based on: superpowers v6.0.2
+  Based on: superpowers v6.0.3
   Changes vs upstream:
     1. Removed 4-option interactive menu — goes straight to push + PR (autonomous flow)
     2. forge-neutral PR operations — no hardcoded `gh`; model uses its forge tooling

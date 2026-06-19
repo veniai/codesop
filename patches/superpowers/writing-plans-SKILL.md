@@ -1,6 +1,6 @@
 <!--
   codesop patch: writing-plans
-  Based on: superpowers v6.0.2
+  Based on: superpowers v6.0.3
   Changes vs upstream:
     1. Removed Execution Handoff menu (Pipeline Continuation replaces — autonomous re-entry)
     2. Added Requirement Extraction (R1..RN) before review
@@ -10,7 +10,7 @@
     6. Added Staged checkpoint flow + Resume Protocol (skeleton → per-task save → self-review)
     7. Replaced self-checklist Self-Review with subagent spec-coverage review (complex path)
     8. Switched complex tasks from complete-code to implementation-brief
-  Retained from upstream v6.0.2: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
+  Retained from upstream v6.0.3: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
   Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
     "define what done looks like" step. Acceptance criteria + traceability close it; staged
     checkpoints prevent truncation on long plans. Phase split keeps rigor for complex, light for simple.

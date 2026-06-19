@@ -1,6 +1,6 @@
 <!--
   codesop patch: brainstorming
-  Based on: superpowers v6.0.2
+  Based on: superpowers v6.0.3
   Changes vs upstream:
     1. Added Grill Mode (code-first answers, decision tree tracking, domain vocabulary alignment)
     2. Added ADR trigger — suggests writing ADR when design involves architectural decisions
