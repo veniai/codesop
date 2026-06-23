@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [3.16.0] - 2026-06-23
+
+### Added
+- 路由表新增「0. 项目理解与导航」大类（understand-chat/diff/explain/onboard）+ 链路组装条件插入规则——接入 [understand-anything](https://github.com/Egonex-AI/Understand-Anything) 作为项目理解/架构认知环节（spec `docs/superpowers/specs/2026-06-22-understand-anything-integration-design.md`）。
+- `lib/detection.sh` `check_understand_usability`——7 状态图谱可用性检测（absent/corrupt/unknown_head/stale_on/stale_off/fresh_on/fresh_degraded），含 worktree 重定向、子目录 `show-toplevel`、JSON parser（`autoUpdate===true` 严格）、fingerprints 检查、node 兜底。
+- `SKILL.md` §2 Read Order 第 5 条（图谱可用作上下文）+ §3 step 7 detection 调用 + §4.1 7 状态分级提示（stale_on 事实性文案，不断言 hook 坏了）。
+- `tests/detect-understand.sh`——21+ 断言真跑（7 状态 + corrupt 变体 + config 字符串 + worktree + 子目录 + 无 node）。
+- README 中英「兼容生态：understand-anything」段。
+- `lib/updates.sh` `check_routing_coverage` understand-anything marketplace 特判（修路由覆盖误报）。
+
+### Fixed
+- 无 node 环境 `check_understand_usability` 不再误判 `corrupt`（node 兜底 → `unknown_head`）。
+
 ## [3.15.0] - 2026-06-18
 
 ### Changed
