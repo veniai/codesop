@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [3.16.1] - 2026-06-23
+
+### Fixed
+- `check_understand_usability` 5 处 `node` 调用包 `_ua_to` timeout 前缀（仿 `check_git_health`，`command -v timeout` macOS fallback）——防 NFS/大文件 `require()` 挂起（CLAUDE.md Key Gotcha #113/#127 + 历史 `ada2445`）。code-review（5-agent）B1 发现。
+- `meta_hash` 加 `|| meta_hash=""` 兜底——防 `set -euo pipefail` 下命令替换失败终止进程（latent）。code-review I2。
+- `SKILL.md` §3 step 7 注释更正——M1 fix 后"无 node 误判 corrupt"已不成立（函数自兜底 `unknown_head`）+ 提 node timeout。code-review 3-agent 交叉确认。
+
 ## [3.16.0] - 2026-06-23
 
 ### Added

@@ -94,7 +94,7 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/detection.sh && check_understand_usability) || echo "UA 检查跳过"
    ```
-   注：`check_understand_usability` 依赖 `node` 解析 JSON，无 node 时会误判 corrupt。建议加兜底：`command -v node >/dev/null || echo "UA 检查跳过（无 node）"`
+   注：`check_understand_usability` 内部已加 node 兜底（无 node → `unknown_head`，不误判 corrupt）+ node 调用包 timeout（防 NFS/大文件挂起）；调用方无需再加 node/timeout 守卫
    Parse the output `UA_STATE=...` to decide graph usability (see §4.1 注意行 for per-state warning text):
    - `UA_STATE=absent` → 静默跳过（无图谱，不提示）
    - `UA_STATE=fresh_on` → 不提示（理想状态）

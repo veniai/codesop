@@ -267,16 +267,19 @@ check_understand_usability() {
   [ -f "$graph" ] && [ -f "$meta" ] || { echo "UA_STATE=absent"; return; }
   # node 兜底：无 node 无法 JSON 解析（M1），归 unknown_head（无法判定新鲜度），不误判 corrupt
   command -v node >/dev/null 2>&1 || { echo "UA_STATE=unknown_head"; return; }
+  # node 调用 timeout 前缀（防 NFS/大文件 require 挂起，仿 check_git_health；macOS 无 timeout 则不包）
+  local _ua_to=""
+  command -v timeout >/dev/null 2>&1 && _ua_to="timeout 10"
 
   # 2. 完整性：graph 必须可解析且含 nodes 数组
-  if ! node -e "const g=require(process.argv[1]); if(!Array.isArray(g.nodes))process.exit(1)" "$graph" 2>/dev/null; then
+  if ! $_ua_to node -e "const g=require(process.argv[1]); if(!Array.isArray(g.nodes))process.exit(1)" "$graph" 2>/dev/null; then
     echo "UA_STATE=corrupt"; return
   fi
 
   # 3. 完整性：meta 必须可解析且 gitCommitHash 是有效字符串（拒绝 undefined/空/<8字符）
   local meta_hash
-  meta_hash=$(node -e "const m=require(process.argv[1]); const h=m.gitCommitHash; if(typeof h!=='string'||h==='undefined'||h.length<8)process.exit(1)" "$meta" 2>/dev/null \
-    && node -p "require(process.argv[1]).gitCommitHash" "$meta" 2>/dev/null)
+  meta_hash=$($_ua_to node -e "const m=require(process.argv[1]); const h=m.gitCommitHash; if(typeof h!=='string'||h==='undefined'||h.length<8)process.exit(1)" "$meta" 2>/dev/null \
+    && $_ua_to node -p "require(process.argv[1]).gitCommitHash" "$meta" 2>/dev/null) || meta_hash=""
   [ -n "$meta_hash" ] || { echo "UA_STATE=corrupt"; return; }
 
   # 4. HEAD 可读
@@ -285,14 +288,14 @@ check_understand_usability() {
 
   # 5. config：用 JSON parser 严格判 autoUpdate===true（拒绝字符串 "true" / missing / corrupt）
   local cfg_on="false"
-  if node -e "const c=require(process.argv[1]); if(c.autoUpdate!==true)process.exit(1)" "$cfg" 2>/dev/null; then
+  if $_ua_to node -e "const c=require(process.argv[1]); if(c.autoUpdate!==true)process.exit(1)" "$cfg" 2>/dev/null; then
     cfg_on="true"
   fi
 
   # 6. fingerprints：autoUpdate=true 时必须存在且可解析（缺失则下次增量会 FULL_UPDATE 爆炸）
   local fp_ok="yes"
   if [ "$cfg_on" = "true" ]; then
-    if ! { [ -f "$fp" ] && node -e "require(process.argv[1])" "$fp" 2>/dev/null; }; then fp_ok="no"; fi
+    if ! { [ -f "$fp" ] && $_ua_to node -e "require(process.argv[1])" "$fp" 2>/dev/null; }; then fp_ok="no"; fi
   fi
 
   # 7. 新鲜度 + 配置 + fingerprints 组合
