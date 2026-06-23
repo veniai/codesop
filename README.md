@@ -147,6 +147,18 @@ setup                       # 宿主安装与同步
 
 </details>
 
+## 兼容生态：understand-anything
+
+[understand-anything](https://github.com/Egonex-AI/Understand-Anything) 是一个代码库知识图谱插件，可将项目解析为结构化的节点+依赖边图谱，提供全局架构导航与影响面分析。
+
+**定位**：`/understand` 是 **init 级功能性补充** — `codesop init` 建立文本上下文基座（AGENTS.md / PRD.md），`/understand` 建立结构上下文基座（knowledge-graph.json），两者同档。codesop **不自动运行** `/understand`，不纳入产品合同 3+1 入口。
+
+**自动更新注意事项**：
+
+- 仅设置 `config.autoUpdate = true` **不等于**自动更新已激活 — 务必确认 understand 插件已 reload、Claude PostToolUse 钩子在最近一次会话内 commit 触发了增量更新
+- **understand 钩子仅覆盖 Claude Code 会话内 commit** — 终端或 IDE 直接执行 commit **不会触发**自动更新，需定期手动运行 `/understand` 同步图谱
+- 大项目首次接入建议手动跑一次 `/understand` 建图
+
 ## 相关项目
 
 - **[cc-monitor](https://github.com/veniai/cc-monitor)** — Claude Code 远程监控与控制。任务完成自动通知到微信/钉钉/飞书，会话卡死自动恢复，手机远程发命令

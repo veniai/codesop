@@ -23,7 +23,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v3.10.0 — 新增 codesop uninstall + 补丁文件头注释
+- **最后更新原因**: understand-anything 接入（路由表大类 0 + check_understand_usability 7 状态可用性检测）
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] understand-anything 接入（feat/understand-anything-integration）— 路由表新增「0. 项目理解与导航」大类 + `lib/detection.sh` `check_understand_usability`（7 状态可用性检测）+ SKILL §2/§4.1 工作台注意行 + README 兼容生态段 + `tests/detect-understand.sh`；spec 经 codex 三审 + detection 实测（bash -n + 7 状态 + worktree + 子目录）
 - [x] v3.10.0: uninstall 子命令 — 安全移除 codesop 安装产物、guard 函数、robust hook 移除、补丁恢复、补丁文件头注释
 - [x] v3.9.7: 升级可靠性 — patched 插件门禁（防补丁失效）、非 patched 版本对比（消超时误报）、4 类报告
 - [x] v3.9.6: 补丁修复 — 恢复 finishing-branch 直接提交 PR + 修复 PR 存在性检查 null 误判
@@ -52,6 +53,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-06-22 | 接入 understand-anything 作为「0. 项目理解与导航」路由环节 + 7 状态可用性检测 | 12 大类缺"项目理解"环节（靠 brainstorming 兜底且兜不好）；图谱过期/损坏会误导 AI（codex 实证 AIGIS-V5 drift） | 路由表大类 0 + `lib/detection.sh` `check_understand_usability`（absent/corrupt/unknown_head/stale_on/stale_off/fresh_on/fresh_degraded）+ SKILL §2/§4.1 + tests；**stale 降级使用非跳过**；spec 三审 + detection 实测驱动 |
 | 2026-04-30 | README 重设计：AI 安装提示 + 痛点开场 + 亮点展示 | 首页无法传达核心价值，AI 安装提示太模糊 | README 中英文全面重写，参考 oh-my-opencode 模式 |
 | 2026-05-03 | Git 健康检查：工作台检测孤立分支 + 衔接任务自动清理 | 远程开发后分支残留导致 Git 混乱 | lib/detection.sh + SKILL.md step 7 + step 10.5 |
 | 2026-04-29 | 新增领域语言层 + 架构原则增强 | Matt Pocock skills 研究后提取行为，不搬文件 | CONTEXT.md + ADR + grill patch + 深模块原则 |

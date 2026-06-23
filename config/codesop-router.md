@@ -7,6 +7,11 @@
 
 | 大类 | 优选 | 来源 | Skill | 什么时候用 |
 |------|------|------|-------|-----------|
+| **0. 项目理解与导航** | | | understand-anything | |
+| | ★ | plugin | understand-anything:understand-chat | 跨模块改动 / 大仓库 / 陌生项目动手前：若图谱可用（§1.5 状态 ∈ {fresh_on, fresh_degraded, stale_on, stale_off}），基于图谱建立全局架构认知（brainstorming 前置输入）。图谱不可用（absent/corrupt/unknown_head）则跳过回退读 CONTEXT.md/ADR；**stale（过期）降级使用——AI 须警惕结构滞后**，工作台注意行同步提示更新 |
+| | ★ | plugin | understand-anything:understand-diff | 跨模块改动开发完成后、验证前：若图谱可用，基于图谱**辅助**复核影响面（定位为辅助非权威——机制有盲区，见 §4）。不可用则跳过；stale 同样降级使用（AI 警惕）。触发锚点：改动涉及 ≥2 个路由模块 / 跨 client-server / 改公共接口 |
+| | | plugin | understand-anything:understand-explain | 需深度理解某文件/函数的上下游或在架构中的位置时（调试、接手陌生模块） |
+| | | plugin | understand-anything:understand-onboard | 新会话接手陌生项目 / 新人 onboarding：生成架构学习路径 |
 | **1. 需求分析与设计** | | | | |
 | | ★ | sp | superpowers:brainstorming | 任何新功能/改动前：理解需求→grill 式术语对齐→澄清问题→出设计方案→写 spec→spec 自审→用户审阅；架构审查/重构/模块边界 |
 | | ★ | plugin | codex:rescue | spec 完成后的独立设计审查（双 AI 设计审查，必走） |
@@ -50,6 +55,7 @@
 ### 链路组装（路由表是链路唯一真相源）
 所有链路必须应用以下插入规则（☆=有插件时走）：
 开发前 → 如在 main/master 上则插入 using-git-worktrees（优先 EnterWorktree 隔离工作区）| 开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue
+跨模块改动 / 大仓库（锚点：≥2 个路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（建立全局上下文；图谱不可用则跳过回退读 CONTEXT.md/ADR；stale 则降级使用并提示更新）| 同锚点场景开发后 → 验证前条件插入 understand-anything:understand-diff（辅助影响面复核；不可用跳过；stale 降级并提示）
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 

@@ -7,6 +7,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 suites=(
   codesop-router.sh
   detect-environment.sh
+  detect-understand.sh
   setup.sh
   codesop-init.sh
   codesop-init-interview.sh

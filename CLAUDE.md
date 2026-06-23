@@ -19,6 +19,7 @@ bash tests/run_all.sh                 # All tests (unified runner)
 bash tests/codesop-router.sh          # Router card consistency + setup integration
 bash tests/codesop-init-interview.sh  # Init interview tests
 bash tests/detect-environment.sh      # Documentation consistency tests
+bash tests/detect-understand.sh       # understand-anything 可用性检测（7 状态）
 bash tests/codesop-e2e.sh             # End-to-end test
 bash tests/codesop-init.sh            # Init command tests
 bash tests/codesop-uninstall.sh       # Uninstall command tests
@@ -42,7 +43,7 @@ bash setup --host claude
 ```
 codesop                     # CLI entrypoint, sources lib modules in order
 ├── lib/
-│   ├── detection.sh        # Project detection, find_superpowers_plugin_path(), has_mcp_server()
+│   ├── detection.sh        # Project detection, find_superpowers_plugin_path(), has_mcp_server(), check_understand_usability()
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
 │   ├── commands.sh         # Subcommands; target contract keeps init/update/uninstall
 │   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files
