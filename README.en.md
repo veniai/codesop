@@ -136,6 +136,18 @@ setup                       # Host integration sync
 
 </details>
 
+## Compatible Ecosystem: understand-anything
+
+[understand-anything](https://github.com/Egonex-AI/Understand-Anything) is a codebase knowledge graph plugin that parses projects into structured node + dependency-edge graphs, providing global architecture navigation and impact analysis.
+
+**Positioning**: `/understand` is an **init-level functional complement** — `codesop init` establishes the textual context foundation (AGENTS.md / PRD.md), `/understand` establishes the structural context foundation (knowledge-graph.json). Both are at the same tier. codesop **does not auto-run** `/understand` and it is not part of the product contract 3+1 entry points.
+
+**Auto-update caveats**:
+
+- Simply setting `config.autoUpdate = true` **does not guarantee** auto-update is active — you must confirm the understand plugin has been reloaded and that the Claude PostToolUse hook triggered an incremental update on a commit within the most recent session
+- **The understand hook only covers commits made inside Claude Code sessions** — Commits made directly from a terminal or IDE **will not trigger** auto-update. Run `/understand` periodically to keep the graph in sync
+- For large projects, it is recommended to run `/understand` once manually to build the initial graph
+
 ## Related Projects
 
 - **[cc-monitor](https://github.com/veniai/cc-monitor)** — Remote monitoring and control for Claude Code. Get notified on WeChat/DingTalk/Feishu when tasks complete, auto-recover stuck sessions, send commands from your phone
