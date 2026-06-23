@@ -247,4 +247,14 @@ assert_state "$(run_check "$WT/sub")" "UA_STATE=fresh_on" "G9 worktree-subdir re
 # 清理 worktree（避免影响后续 mktemp 清理）
 git -C "$MAIN" worktree remove "$WT" --force >/dev/null 2>&1 || true
 
+# M1: 无 node（空 PATH，command -v node 失败）→ node 兜底触发 → unknown_head（不误判 corrupt）
+M1_DIR="$(mktemp -d)"
+M1_H="$(make_git_repo "$M1_DIR")"
+write_ua "$M1_DIR" meta "{\"gitCommitHash\":\"$M1_H\"}"
+write_ua "$M1_DIR" graph '{"nodes":[]}'
+write_ua "$M1_DIR" config '{"autoUpdate":true}'
+write_ua "$M1_DIR" fp '{"f":1}'
+assert_state "$(cd "$M1_DIR" && PATH= && source "$ROOT_DIR/lib/detection.sh" && check_understand_usability)" "UA_STATE=unknown_head" "M1 empty-PATH (no node) → unknown_head (not corrupt)"
+rm -rf "$M1_DIR"
+
 echo "PASS"

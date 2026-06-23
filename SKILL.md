@@ -102,7 +102,7 @@ When this skill triggers:
    - `UA_STATE=stale_off` → add to `**注意**`: `图谱已过期（落后 HEAD）且未开自动更新。建议 /understand --auto-update`
    - `UA_STATE=stale_on` → add to `**注意**`（事实性，**严禁断言钩子未生效**——understand 用 Claude PostToolUse hook，会话外 commit 天然不触发 ≠ hook 坏了）: `图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是**会话外 commit 未触发**（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 /understand 增量更新`（分级提示规则详见 §4.1，本处与之同源）
    - `UA_STATE=corrupt` → add to `**注意**`: `知识图谱损坏（graph/meta JSON 无效或缺关键字段），无法使用。建议重跑 /understand`
-   - `UA_STATE=unknown_head` → add to `**注意**`: `非 git 仓库或 HEAD 不可读，无法判断图谱新鲜度`
+   - `UA_STATE=unknown_head` → add to `**注意**`: `非 git 仓库 / HEAD 不可读 / node 不可用，无法判断图谱新鲜度`
 8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
    - workflow/tooling/constraints changed → `CLAUDE.md`
    - product state/progress/decisions/scope changed → `PRD.md`
@@ -189,7 +189,7 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 - `UA_STATE=stale_off` → 加 `**注意**`: 图谱已过期（落后 HEAD）且未开自动更新。建议 `/understand --auto-update`
 - `UA_STATE=stale_on` → 加 `**注意**`（事实性，**严禁断言钩子未生效**——understand 用 Claude PostToolUse hook，会话外 commit 天然不触发 ≠ hook 坏了）: 图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是**会话外 commit 未触发**（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 `/understand` 增量更新
 - `UA_STATE=corrupt` → 加 `**注意**`: 知识图谱损坏（graph/meta JSON 无效或缺关键字段），无法使用。建议重跑 `/understand`
-- `UA_STATE=unknown_head` → 加 `**注意**`: 非 git 仓库或 HEAD 不可读，无法判断图谱新鲜度
+- `UA_STATE=unknown_head` → 加 `**注意**`: 非 git 仓库 / HEAD 不可读 / node 不可用，无法判断图谱新鲜度
 
 ### 4.2 Skill Ecosystem
 

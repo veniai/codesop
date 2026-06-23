@@ -265,6 +265,8 @@ check_understand_usability() {
 
   # 1. 存在性
   [ -f "$graph" ] && [ -f "$meta" ] || { echo "UA_STATE=absent"; return; }
+  # node 兜底：无 node 无法 JSON 解析（M1），归 unknown_head（无法判定新鲜度），不误判 corrupt
+  command -v node >/dev/null 2>&1 || { echo "UA_STATE=unknown_head"; return; }
 
   # 2. 完整性：graph 必须可解析且含 nodes 数组
   if ! node -e "const g=require(process.argv[1]); if(!Array.isArray(g.nodes))process.exit(1)" "$graph" 2>/dev/null; then
