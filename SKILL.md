@@ -53,6 +53,8 @@ When fresh mechanical facts are needed (version, plugin status, document drift),
 
 Use `PRD.md` for long-term orientation and direct git/file commands for mechanical facts.
 
+5. 若图谱**可用**（`check_understand_usability` 返回 fresh_on/fresh_degraded/stale_on/stale_off，见 §4.1 step 7），作为项目结构认知输入。fresh_* 为可信输入；stale_* 为参考性输入（AI 须警惕结构滞后，工作台已提示更新）；absent/corrupt/unknown_head 跳过。codesop 不负责触发建图
+
 ## 3. Default Behavior
 
 When this skill triggers:
@@ -88,6 +90,18 @@ When this skill triggers:
    - `ORPHAN_COUNT > 0` → add to `**注意**`: `Git 有 N 个已 merge 的孤立分支（branch list），建议清理`
    - `IS_LEFTOVER=true` → add to `**注意**`: `当前在 feat/xxx 分支，无 open PR，疑似上次任务残留`
    - `IS_LEFTOVER=unknown` → add to `**注意**`: `当前在 feat/xxx 分支，无法确认 PR 状态（gh 不可用）`
+   Also run understand-anything knowledge graph usability check:
+   ```bash
+   (source ~/codesop/lib/detection.sh && check_understand_usability) || echo "UA 检查跳过"
+   ```
+   Parse the output `UA_STATE=...` to decide graph usability (see §4.1 注意行 for per-state warning text):
+   - `UA_STATE=absent` → 静默跳过（无图谱，不提示）
+   - `UA_STATE=fresh_on` → 不提示（理想状态）
+   - `UA_STATE=fresh_degraded` → add to `**注意**`: `图谱新鲜但有隐患（未开 auto-update 或 fingerprints 缺失，下次增量可能 FULL_UPDATE）。建议 /understand --auto-update`
+   - `UA_STATE=stale_off` → add to `**注意**`: `图谱已过期（落后 HEAD）且未开自动更新。建议 /understand --auto-update`
+   - `UA_STATE=stale_on` → add to `**注意**`（事实性，**不断言 hook 坏了**）: `图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是会话外 commit 未触发（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 /understand 增量更新`
+   - `UA_STATE=corrupt` → add to `**注意**`: `知识图谱损坏（graph/meta JSON 无效或缺关键字段），无法使用。建议重跑 /understand`
+   - `UA_STATE=unknown_head` → add to `**注意**`: `非 git 仓库或 HEAD 不可读，无法判断图谱新鲜度`
 8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.
    - workflow/tooling/constraints changed → `CLAUDE.md`
    - product state/progress/decisions/scope changed → `PRD.md`
@@ -166,6 +180,15 @@ NEVER add `---` dividers between sections. NEVER add extra headings. NEVER chang
 ```
 
 2 个必显字段（**状态** + **分支**），每行一个 bold key + inline value。摘要反映当前分支上下文。`**更新**` 和 `**注意**` 为条件字段，仅在对应信号存在时输出。
+
+**`UA_STATE` 分级提示规则**（来自 step 7 `check_understand_usability` 检测，按状态决定是否加 `**注意**` 行）：
+- `UA_STATE=absent` → 静默（无图谱，不输出注意行）
+- `UA_STATE=fresh_on` → 不提示（理想状态）
+- `UA_STATE=fresh_degraded` → 加 `**注意**`: 图谱新鲜但有隐患（未开 auto-update 或 fingerprints 缺失，下次增量可能 FULL_UPDATE）。建议 `/understand --auto-update`
+- `UA_STATE=stale_off` → 加 `**注意**`: 图谱已过期（落后 HEAD）且未开自动更新。建议 `/understand --auto-update`
+- `UA_STATE=stale_on` → 加 `**注意**`（事实性，**严禁断言钩子未生效**——understand 用 Claude PostToolUse hook，会话外 commit 天然不触发 ≠ hook 坏了）: 图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是**会话外 commit 未触发**（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 `/understand` 增量更新
+- `UA_STATE=corrupt` → 加 `**注意**`: 知识图谱损坏（graph/meta JSON 无效或缺关键字段），无法使用。建议重跑 `/understand`
+- `UA_STATE=unknown_head` → 加 `**注意**`: 非 git 仓库或 HEAD 不可读，无法判断图谱新鲜度
 
 ### 4.2 Skill Ecosystem
 
