@@ -240,3 +240,63 @@ check_git_health() {
   echo "IS_LEFTOVER=$is_leftover"
   echo "MAIN_BRANCH=$main_branch"
 }
+
+# Check understand-anything knowledge graph usability (7 states).
+# Output: UA_STATE=<state>
+# States: absent / corrupt / unknown_head / stale_on / stale_off / fresh_on / fresh_degraded
+check_understand_usability() {
+  # root 定位：优先 git 仓库根（支持从子目录跑 /codesop），再 worktree 重定向（图谱在主 repo root），非 git 回退 pwd
+  local root common_dir git_dir common_abs git_abs
+  root=$(git rev-parse --show-toplevel 2>/dev/null)
+  common_dir=$(git rev-parse --git-common-dir 2>/dev/null)
+  git_dir=$(git rev-parse --git-dir 2>/dev/null)
+  if [ -n "$common_dir" ] && [ -n "$git_dir" ]; then
+    common_abs=$(cd "$common_dir" 2>/dev/null && pwd -P)
+    git_abs=$(cd "$git_dir" 2>/dev/null && pwd -P)
+    if [ -n "$common_abs" ] && [ "$common_abs" != "$git_abs" ]; then
+      root="$(dirname "$common_abs")"   # linked worktree → 主 repo root
+    fi
+  fi
+  [ -n "$root" ] || root="$(pwd)"   # 非 git 回退
+  local graph="$root/.understand-anything/knowledge-graph.json"
+  local meta="$root/.understand-anything/meta.json"
+  local cfg="$root/.understand-anything/config.json"
+  local fp="$root/.understand-anything/fingerprints.json"
+
+  # 1. 存在性
+  [ -f "$graph" ] && [ -f "$meta" ] || { echo "UA_STATE=absent"; return; }
+
+  # 2. 完整性：graph 必须可解析且含 nodes 数组
+  if ! node -e "const g=require(process.argv[1]); if(!Array.isArray(g.nodes))process.exit(1)" "$graph" 2>/dev/null; then
+    echo "UA_STATE=corrupt"; return
+  fi
+
+  # 3. 完整性：meta 必须可解析且 gitCommitHash 是有效字符串（拒绝 undefined/空/<8字符）
+  local meta_hash
+  meta_hash=$(node -e "const m=require(process.argv[1]); const h=m.gitCommitHash; if(typeof h!=='string'||h==='undefined'||h.length<8)process.exit(1)" "$meta" 2>/dev/null \
+    && node -p "require(process.argv[1]).gitCommitHash" "$meta" 2>/dev/null)
+  [ -n "$meta_hash" ] || { echo "UA_STATE=corrupt"; return; }
+
+  # 4. HEAD 可读
+  local head_hash; head_hash=$(git rev-parse HEAD 2>/dev/null)
+  [ -n "$head_hash" ] || { echo "UA_STATE=unknown_head"; return; }
+
+  # 5. config：用 JSON parser 严格判 autoUpdate===true（拒绝字符串 "true" / missing / corrupt）
+  local cfg_on="false"
+  if node -e "const c=require(process.argv[1]); if(c.autoUpdate!==true)process.exit(1)" "$cfg" 2>/dev/null; then
+    cfg_on="true"
+  fi
+
+  # 6. fingerprints：autoUpdate=true 时必须存在且可解析（缺失则下次增量会 FULL_UPDATE 爆炸）
+  local fp_ok="yes"
+  if [ "$cfg_on" = "true" ]; then
+    if ! { [ -f "$fp" ] && node -e "require(process.argv[1])" "$fp" 2>/dev/null; }; then fp_ok="no"; fi
+  fi
+
+  # 7. 新鲜度 + 配置 + fingerprints 组合
+  if [ "$meta_hash" != "$head_hash" ]; then
+    if [ "$cfg_on" = "true" ]; then echo "UA_STATE=stale_on"; else echo "UA_STATE=stale_off"; fi
+  else
+    if [ "$cfg_on" = "true" ] && [ "$fp_ok" = "yes" ]; then echo "UA_STATE=fresh_on"; else echo "UA_STATE=fresh_degraded"; fi
+  fi
+}
