@@ -53,7 +53,7 @@ When fresh mechanical facts are needed (version, plugin status, document drift),
 
 Use `PRD.md` for long-term orientation and direct git/file commands for mechanical facts.
 
-5. 若图谱**可用**（`check_understand_usability` 返回 fresh_on/fresh_degraded/stale_on/stale_off，见 §4.1 step 7），作为项目结构认知输入。fresh_* 为可信输入；stale_* 为参考性输入（AI 须警惕结构滞后，工作台已提示更新）；absent/corrupt/unknown_head 跳过。codesop 不负责触发建图
+5. 若图谱**可用**（`check_understand_usability` 返回 fresh_on/fresh_degraded/stale_on/stale_off，见 §3 step 7），作为项目结构认知输入。fresh_* 为可信输入；stale_* 为参考性输入（AI 须警惕结构滞后，工作台已提示更新）；absent/corrupt/unknown_head 跳过。codesop 不负责触发建图
 
 ## 3. Default Behavior
 
@@ -94,12 +94,13 @@ When this skill triggers:
    ```bash
    (source ~/codesop/lib/detection.sh && check_understand_usability) || echo "UA 检查跳过"
    ```
+   注：`check_understand_usability` 依赖 `node` 解析 JSON，无 node 时会误判 corrupt。建议加兜底：`command -v node >/dev/null || echo "UA 检查跳过（无 node）"`
    Parse the output `UA_STATE=...` to decide graph usability (see §4.1 注意行 for per-state warning text):
    - `UA_STATE=absent` → 静默跳过（无图谱，不提示）
    - `UA_STATE=fresh_on` → 不提示（理想状态）
    - `UA_STATE=fresh_degraded` → add to `**注意**`: `图谱新鲜但有隐患（未开 auto-update 或 fingerprints 缺失，下次增量可能 FULL_UPDATE）。建议 /understand --auto-update`
    - `UA_STATE=stale_off` → add to `**注意**`: `图谱已过期（落后 HEAD）且未开自动更新。建议 /understand --auto-update`
-   - `UA_STATE=stale_on` → add to `**注意**`（事实性，**不断言 hook 坏了**）: `图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是会话外 commit 未触发（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 /understand 增量更新`
+   - `UA_STATE=stale_on` → add to `**注意**`（事实性，**严禁断言钩子未生效**——understand 用 Claude PostToolUse hook，会话外 commit 天然不触发 ≠ hook 坏了）: `图谱已过期（meta 落后 HEAD），auto-update 开启但自动更新未跟上——可能是**会话外 commit 未触发**（understand 钩子仅覆盖会话内 commit）/ 钩子未激活 / 增量失败。图谱可降级使用但须警惕滞后。建议 /understand 增量更新`（分级提示规则详见 §4.1，本处与之同源）
    - `UA_STATE=corrupt` → add to `**注意**`: `知识图谱损坏（graph/meta JSON 无效或缺关键字段），无法使用。建议重跑 /understand`
    - `UA_STATE=unknown_head` → add to `**注意**`: `非 git 仓库或 HEAD 不可读，无法判断图谱新鲜度`
 8. **Perform a quick document drift scan.** Ask whether current repo facts imply updates to `CLAUDE.md`, `PRD.md`, or `README.md`.

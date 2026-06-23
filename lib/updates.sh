@@ -248,8 +248,10 @@ check_routing_coverage() {
     [[ "$skill_name" =~ ^Skill$ ]] && continue
 
     # Strip plugin:skill prefix → plugin name for lookup
+    # 特殊 marketplace 映射（非默认 @claude-plugins-official）
     local lookup_name="$skill_name"
     [[ "$lookup_name" =~ ^codex: ]] && lookup_name="codex@openai-codex"
+    [[ "$lookup_name" =~ ^understand-anything: ]] && lookup_name="understand-anything@understand-anything"
     [[ "$lookup_name" =~ ^([^:]+): ]] && lookup_name="${BASH_REMATCH[1]}"
 
     if [ "$source" = "sp" ]; then
