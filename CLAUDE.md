@@ -62,7 +62,12 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │       ├── specs/          # Approved design documents
 │       └── plans/          # Implementation plans
 ├── patches/                # Skill patches applied by setup on sync
-│   └── superpowers/        # Modified superpowers skill files (writing-plans, finishing-a-development-branch, brainstorming)
+│   └── superpowers/        # Patched superpowers skill files (5):
+│       ├── brainstorming-SKILL.md           # v9: spec 三件 + codex high-risk + 内联 reviewer
+│       ├── writing-plans-SKILL.md           # v9: simple 跳 plan + 复杂度分流 + emoji→文字
+│       ├── verification-before-completion-SKILL.md  # v9 新建: deliver-gate 风险分级 + diff 守护
+│       ├── _evidence-pack-schema.md         # v9 新建: 证据包 schema（setup 同步为 sibling）
+│       └── finishing-a-development-branch-SKILL.md
 ├── setup                   # Host-aware installation script (router card + hook config + skill patches)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)
@@ -127,6 +132,7 @@ The CLI is symlinked to `~/.local/bin/codesop`.
 - `_run_with_timeout()` in updates.sh wraps `timeout` with macOS fallback. Use this pattern for any timed command
 - `has_mcp_server()` in `lib/detection.sh` checks `~/.claude/settings.json` mcpServers for skill detection fallback
 - `patch_skills()` in setup overwrites third-party skill files from `patches/superpowers/` — logic is "different from ours → overwrite, same → skip". Plugin updates will be re-patched on next `setup` run
+- v9: `patch_skills()` 还同步 `_evidence-pack-schema.md` 作为 sibling 到 3 个引用 skill 目录（brainstorming/writing-plans/verification）——patched SKILL.md 用**相对引用** `_evidence-pack-schema.md`（非源仓库路径），避 v8 子文件盲区。schema 更新时所有引用点一并刷新
 - `find` on non-existent directory returns exit 1; under `set -e`, always append `|| true` to `find` in command substitutions
 
 ## File References
