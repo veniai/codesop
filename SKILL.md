@@ -512,7 +512,7 @@ codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外
 | 抽样人审：1/N（默认 5）随机抽 deliver 强制人扫证据包，记 audit-log.md（soft 威慑，非阻断） | /goal 协同机制 |
 | No code without design approval | brainstorming |
 | No production code without failing test first | TDD |
-| No fix without root cause investigation | systematic-debugging |
+| No fix without root cause investigation（第一性原理找根因：从基本事实/约束推根因，不照搬"类似 bug 这样修"） | systematic-debugging |
 | No completion claim without verification evidence | verification-before-completion |
 | Task hygiene: completed→completed, obsolete→deleted, no buildup | codesop |
 | Load skill if 1% chance it applies | using-superpowers |

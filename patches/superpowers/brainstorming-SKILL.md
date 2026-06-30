@@ -25,6 +25,14 @@
        "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
        the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 §4.3 hole
        where codex-unavailable silently bypassed the cross-model anchor.
+    8. (first-principles v1) First-principles derivation step added to "Exploring approaches":
+       before proposing 2-3 approaches, AI MUST first derive the solution from basic facts /
+       constraints (not by copying an analogous pattern from training data), THEN compare
+       against analogy-based options and weigh trade-offs. Interrupts AI's default analogy
+       reasoning — forces re-derivation from the problem's irreducible facts before any
+       "we've done this before" shortcut lands. Complex / moderate tasks walk the derivation;
+       simple / trivial may skip (analogy is fast enough, derivation is overhead) — complexity
+       threshold reuses writing-plans' existing complexity assessment (no new gate).
   Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
     exploration before design. ADR trigger and domain-language delta prevent underspecified
     specs from reaching implementation — the #1 cause of rework in codesop pipelines. The
@@ -59,7 +67,7 @@ You MUST create a task for each of these items and complete them in order:
 1. **Explore project context** — check files, docs, recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
+4. **Propose 2-3 approaches (first-principles first)** — derive the solution from basic facts / constraints BEFORE proposing; then present 2-3 approaches with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
 6. **Write design doc (spec-as-goal, 三件 required)** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`; EVERY requirement must carry 完成条件 (machine-verifiable) + 边界 (anti-Goodhart) + 风险分级 (low/high); commit
 7. **Spec self-review + codex cross-model + evidence-pack + AI self-proof + spec-gate** — inline self-review (placeholders/contradictions/ambiguity/scope), then codex:rescue cross-model (high-risk「满足」MUST be re-checked, never skipped — see below), then dispatch evidence-pack subagent (INLINE reviewer prompt below), then AI self-proof loop (clear blockers/majors), then escalate spec-gate to human with advisory concerns only (see below)
@@ -123,11 +131,14 @@ digraph brainstorming {
 
 3. **Domain vocabulary alignment**: If CONTEXT.md exists in the project, use its terms when framing questions. When new terminology reaches consensus, record it in the spec's `## Domain Language Delta` section (create this section if it doesn't exist). When the user's language conflicts with CONTEXT.md, call it out: "Your glossary defines X as A, but you seem to mean B — which is it?"
 
-**Exploring approaches:**
+**Exploring approaches (第一性原理推导 first-principles derivation):**
 
-- Propose 2-3 different approaches with trade-offs
+- **第一性原理推导 (first-principles derivation, BEFORE proposing approaches):** AI's default mode is analogy reasoning — it reaches for a pattern that worked on a similar-seeming problem in training data. Interrupt that. Before proposing any approach, **derive the solution from the problem's irreducible basic facts and constraints** (第一性原理): what MUST be true for any correct solution? What are the hard constraints (physics of the system, invariants, scale, latency, security)? What is the minimum that has to exist? Only after the derivation do you have a grounded basis for comparing options — the alternative is照搬类比 (copying an analogous pattern) without checking whether it fits *this* problem.
+  - **Walk this for complex / moderate tasks.** simple / trivial tasks may skip — analogy is fast enough there, and forcing a derivation is overhead. Complexity threshold reuses `writing-plans-SKILL.md`'s existing complexity assessment (no new gate).
+  - **Compare derivation vs analogy:** after the 第一性原理 derivation, explicitly weigh it against the analogy-based option the AI would have reached by default. If they diverge, name the divergence and why — the divergence is usually where the analogy was wrong for *this* problem. If they converge, the derivation still confirms the analogy rather than inheriting it unexamined.
+- Propose 2-3 different approaches with trade-offs (the 第一性原理-derived approach is one of them)
 - Present options conversationally with your recommendation and reasoning
-- Lead with your recommended option and explain why
+- Lead with your recommended option and explain why — if the recommendation diverges from the "obvious analogy" approach, say so explicitly
 
 **Presenting the design:**
 
@@ -290,6 +301,7 @@ Wait for the user's response. If they request changes, make them and re-run the 
 - **One question at a time** - Don't overwhelm with multiple questions
 - **Multiple choice preferred** - Easier to answer than open-ended when possible
 - **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **First-principles before analogy** - For complex / moderate tasks, derive the solution from basic facts / constraints BEFORE reaching for an analogous pattern; then compare derivation vs analogy and name any divergence. simple / trivial may skip — analogy is fast enough there.
 - **Explore alternatives** - Always propose 2-3 approaches before settling
 - **Incremental validation** - Present design, get approval before moving on
 - **Be flexible** - Go back and clarify when something doesn't make sense

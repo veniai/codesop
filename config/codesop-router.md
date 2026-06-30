@@ -61,7 +61,7 @@
 
 PR review 反馈路径：receiving-code-review → superpowers:finishing-a-development-branch（receiving-code-review 内含逐项测试验证，finishing Step 1 自带全量测试门禁，无需额外插入 verification-before-completion）
 
-调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging → superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch；修 bug 后追问架构反思，如有价值建议写 ADR
+调试路径（"修 bug"/"测试挂了"）：跳过需求和计划，直接 superpowers:systematic-debugging（第一性原理找根因：从基本事实/约束推根因，不照搬"类似 bug 这样修"——强化"无根因不修 bug"铁律）→ superpowers:verification-before-completion → ☆claude-md-management → superpowers:finishing-a-development-branch；修 bug 后追问架构反思，如有价值建议写 ADR
 
 ### Codex 路由
 用户提到 codex（"让 codex 看看"、"交给 codex"、"codex 审查"、"第二意见"）时：
