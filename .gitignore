@@ -11,3 +11,4 @@ codex-review-output.txt
 
 # Local tool config (machine-specific, never commit)
 .config/
+.superpowers/
