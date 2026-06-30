@@ -62,13 +62,13 @@ codex 审查结果归位（spec §4.3 / v9 R9 跨模型强制）：
 
 - **① spec 必走 codex:rescue**；②③ 可选（risk:high）；adversarial 不自动（用户手动）
 - **R9 跨模型强制**：high-risk「满足」条目 codex 必复核，**不得标"跳过"**；codex 真不可用 → 该条目降级 advisory（人定夺），**不自动判满足**
-- **codex 不可用** → 本栏标「codex 不可用，跳过」，(a)(b) 照出，**不阻塞**（非 high-risk）；high-risk 见上一条
+- **codex 不可用** → 本栏标「codex 不可用，降级 advisory」，(a)(b) 照出；**非 high-risk 不阻塞**（advisory 给人可见，不静默丢锚点）；high-risk 见上一条（不自动判满足）
 - codex 可用时本栏**顺带跨模型扫未覆盖**（补同模型盲点；结果并入 (b) 复核）
 
 输出格式：
 
 ```
-- codex 状态：可用 / 不可用（跳过） / high-risk 强制未走（降级 advisory）
+- codex 状态：可用 / 不可用（降级 advisory） / high-risk 强制未走（降级 advisory，不自动判满足）
 - codex 结论：…（原文归位，不改写）
 - 跨模型未覆盖补充：（并入 (b) 复核，或「无补充」）
 ```
@@ -256,7 +256,7 @@ flowchart LR
 <!-- (c) 跨模型审查栏 -->
 <h3>(c) 跨模型审查栏</h3>
 <div class="ep-codex">
-  <strong>codex 状态</strong>：可用 / 不可用（跳过） / high-risk 强制未走（降级 advisory）<br/>
+  <strong>codex 状态</strong>：可用 / 不可用（降级 advisory） / high-risk 强制未走（降级 advisory，不自动判满足）<br/>
   <strong>codex 结论</strong>：&lt;原文归位，不改写&gt;<br/>
   <strong>跨模型未覆盖补充</strong>：并入 (b) 复核 / 「无补充」
 </div>
