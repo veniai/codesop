@@ -6,13 +6,14 @@
     2. Added ADR trigger — suggests writing ADR when design involves architectural decisions
     3. Added Domain Language Delta — records new terminology, offers to write into CONTEXT.md
     4. Added CONTEXT.md / docs/adr/ check during context exploration
-    5. Spec three-cycles gate: spec self-review → codex:rescue cross-model review (mandatory,
-       degrade-on-failure) → evidence-pack subagent with INLINE reviewer prompt (five dimensions
-       completeness/consistency/clarity/scope/YAGNI + calibration + output format, sourced from
-       upstream spec-document-reviewer-prompt.md) → AI self-proof loop (clear blockers) → spec-gate
-       to human (advisory concerns only). Evidence-pack schema fields reference the shared
-       _evidence-pack-schema.md (do NOT create a sibling patch file — patch_skills only syncs this
-       main SKILL.md, so the reviewer prompt must live inline here).
+    5. Spec three-cycles gate: spec self-review → codex:rescue cross-model review (high-risk
+       enforced per item 7; non-high-risk degrade-on-failure, never silent) → evidence-pack
+       subagent with INLINE reviewer prompt (five-dimension table completeness/consistency/
+       clarity/scope/YAGNI + Calibration sourced from upstream spec-document-reviewer-prompt.md;
+       Output Format adapted to the evidence-pack schema) → AI self-proof loop (clear blockers)
+       → spec-gate to human (advisory concerns only). Evidence-pack schema fields reference the
+       shared _evidence-pack-schema.md (do NOT create a sibling patch file — patch_skills only
+       syncs this main SKILL.md, so the reviewer prompt must live inline here).
     6. (v9 R1) Spec-as-goal: every spec requirement MUST carry 三件 — 完成条件 (machine-verifiable)
        + 边界 (anti-Goodhart, defined alongside the completion condition) + 风险分级 (low/high).
        The spec IS the goal file; the evidence-pack (a) verdict judges against the spec's declared
@@ -20,8 +21,10 @@
     7. (v9 R9) Cross-model enforcement (tightens v8 degrade-on-failure): high-risk「满足」verdicts
        MUST be re-checked by codex — never mark "跳过". If codex is genuinely unavailable, the
        high-risk「满足」entry degrades to advisory (human adjudicates) — it is NOT auto-judged
-       满足. Non-high-risk entries keep v8's degrade-on-failure (mark skip, proceed). Fixes v7 §4.3
-       hole where codex-unavailable silently bypassed the cross-model anchor.
+       满足. Non-high-risk entries: codex unavailable → degrade to advisory (column (c) marked
+       "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
+       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 §4.3 hole
+       where codex-unavailable silently bypassed the cross-model anchor.
   Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
     exploration before design. ADR trigger and domain-language delta prevent underspecified
     specs from reaching implementation — the #1 cause of rework in codesop pipelines. The
@@ -184,8 +187,8 @@ Immediately after the inline self-review, invoke `codex:rescue` to cross-model r
 - **(v9 R9) High-risk「满足」MUST be re-checked by codex — never mark "跳过".** When the evidence-pack (a) step below judges a `风险分级: high` requirement as 「满足」, that verdict is NOT final until codex has re-reviewed it. This closes the v7 §4.3 hole where codex-unavailable silently bypassed the cross-model anchor exactly on the riskiest entries.
   - **codex available** → codex re-checks the high-risk「满足」entry; its verbatim finding lands in column (c). If codex disagrees (flags it 没满足 / 顾虑), the entry reverts to blocker/major and re-enters the AI self-proof loop.
   - **codex genuinely unavailable** (skill missing / runtime error / timeout / empty output) → the high-risk「满足」entry **degrades to advisory** (downgrades verdict to `顾虑`, marks "high-risk codex 强制未走，降级 advisory" in column (c), escalates to human at spec-gate). It is **NOT auto-judged 满足** — the human decides whether it blocks. The (a) per-requirement and (b) uncovered-scan columns are still produced.
-  - **Non-high-risk entries** keep v8's degrade-on-failure: codex unavailable → mark column (c) as `codex 不可用，跳过` and proceed. Codex being down must NOT block the spec stage for low-risk entries.
-- **Never silently drop the step.** The evidence pack column (c) must show one of: codex verbatim findings, an explicit `codex 不可用，跳过` (non-high-risk only), or `high-risk codex 强制未走，降级 advisory` (high-risk only) — never blank.
+  - **Non-high-risk entries** keep v8's degrade-on-failure: codex unavailable → mark column (c) as `codex 不可用，降级 advisory` and proceed. The spec stage still MUST walk the codex step (schema §4: ① spec 必走 codex:rescue) — when codex is down the entry degrades to advisory (human-visible, non-blocking) rather than being silently skipped. "跳过" = silent anchor loss, which violates R9's spirit; codex being down must NOT block the spec stage for low-risk entries, but the degradation MUST be recorded in column (c).
+- **Never silently drop the step.** The evidence pack column (c) must show one of: codex verbatim findings, an explicit `codex 不可用，降级 advisory` (non-high-risk), or `high-risk codex 强制未走，降级 advisory` (high-risk only) — never blank, never a silent skip.
 
 **Evidence-Pack Subagent (INLINE reviewer prompt — do NOT create a sibling patch file):**
 Dispatch a `general-purpose` subagent to produce the evidence pack. The reviewer prompt is **inlined below** (not loaded from a sibling file) because `setup`'s `patch_skills()` only syncs this main SKILL.md — a sibling `spec-document-reviewer-prompt.md` patch would land outside the synced surface and silently go missing on re-install.
@@ -193,9 +196,9 @@ Dispatch a `general-purpose` subagent to produce the evidence pack. The reviewer
 The evidence pack has three columns whose field definitions live in the shared template `patches/superpowers/_evidence-pack-schema.md` (referenced, not duplicated here):
 - **(a) Per-requirement verdict** — `§ref` + verbatim spec excerpt + artifact location + verdict (`满足`/`没满足`/`顾虑`) + concern (advisory, for human). For the spec stage the artifact IS the spec itself, so artifact location is the §ref or neighboring §. **(v9 R1)** The verdict judges against the spec's **declared 完成条件** (not a subjective read of spec prose): `满足` only if the completion condition is machine-verifiable AND the 同字段 边界 is present AND a low/high 风险分级 is present. Missing 三件 on a requirement = `没满足` (blocker). When verdict=`满足` AND 风险分级=`high`, the entry is **provisional** pending codex re-check (R9) — the subagent flags it "(provisional, awaiting codex high-risk re-check)".
 - **(b) Uncovered scan** — scan the whole spec, list requirements not reflected in the artifact (for the spec stage: requirements with no anchoring section / contradictory anchors).
-- **(c) Cross-model review column** — codex verbatim output from the step above; or the explicit skip marker (non-high-risk); or the `high-risk codex 强制未走，降级 advisory` marker (high-risk, codex unavailable).
+- **(c) Cross-model review column** — codex verbatim output from the step above; or the explicit `codex 不可用，降级 advisory` marker (non-high-risk, human-visible, non-blocking); or the `high-risk codex 强制未走，降级 advisory` marker (high-risk, codex unavailable). Never blank, never a silent skip.
 
-Use the dispatch prompt below (five dimensions + calibration + output format sourced verbatim from upstream `spec-document-reviewer-prompt.md`, output format adapted to the evidence-pack schema):
+Use the dispatch prompt below (five-dimension table + Calibration sourced from upstream `spec-document-reviewer-prompt.md`; Output Format adapted to the evidence-pack schema):
 
 ```
 Subagent (general-purpose):
@@ -245,9 +248,9 @@ Subagent (general-purpose):
     Empty table = full coverage.
 
     ### (c) Cross-model review column
-    - codex status: available / unavailable (skipped) / high-risk 强制未走（降级 advisory）
-    - codex conclusion: [verbatim from the codex:rescue step above, or "codex 不可用，跳过"
-      (non-high-risk), or "high-risk codex 强制未走，降级 advisory" (high-risk, codex unavailable)]
+    - codex status: available / unavailable (降级 advisory) / high-risk 强制未走（降级 advisory）
+    - codex conclusion: [verbatim from the codex:rescue step above, or "codex 不可用，降级 advisory"
+      (non-high-risk, human-visible non-blocking), or "high-risk codex 强制未走，降级 advisory" (high-risk, codex unavailable)]
     - cross-model uncovered supplement: merged into (b) for re-check, or "无补充"
 
     ## Status
