@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-06-30
+
+### Added — 第一性原理视角强化
+- **brainstorming patch**: 加"第一性原理推导"步骤（造方案前从基本事实/约束推，再对比类比方案权衡）；complex/moderate 走，simple/trivial 跳
+- **systematic-debugging 强化**: SKILL + 路由卡排查路径加"第一性原理找根因"（强化"无根因不修 bug"铁律，不照搬"类似 bug 这样修"）
+- **tests/first-principles-behavior.sh**: golden-content 行为测试（8 断言）
+
+### Changed
+- 不加新 skill / 不另造 systematic-debugging patch（prompt 视角内化）
+- 叠加 v9 brainstorming（spec 三件 / codex high-risk / 内联 reviewer 不破坏）
+
 ## [4.0.0] - 2026-06-30
 
 ### Added — /goal 范式（spec-as-goal v9）
