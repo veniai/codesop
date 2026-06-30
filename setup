@@ -273,8 +273,37 @@ patch_skills() {
     fi
   fi
 
-  if [ "$patched" -gt 0 ]; then
-    echo "  ✓ Skill patches applied ($patched files)"
+  # verification-before-completion: deliver-gate 风险分级 + 外部锚点 AND + diff 守护 (v9 T5)
+  local vb="$plugin_dir/skills/verification-before-completion/SKILL.md"
+  local vb_patch="$patches_dir/verification-before-completion-SKILL.md"
+  if [ -f "$vb" ] && [ -f "$vb_patch" ]; then
+    if ! diff -q "$vb" "$vb_patch" >/dev/null 2>&1; then
+      cp "$vb_patch" "$vb"
+      patched=$((patched + 1))
+    fi
+  fi
+
+  # Evidence-pack schema sibling sync (v9): the 3 patched SKILL.md files above reference
+  # _evidence-pack-schema.md as a sibling at runtime. copy it next to each patched skill
+  # so the plugin cache resolves the relative reference (fixes v8 sub-file blind spot).
+  local schema_src="$patches_dir/_evidence-pack-schema.md"
+  local schema_copied=0
+  if [ -f "$schema_src" ]; then
+    local skill_dir
+    for skill_dir in writing-plans brainstorming verification-before-completion; do
+      local target_dir="$plugin_dir/skills/$skill_dir"
+      if [ -d "$target_dir" ]; then
+        local schema_dst="$target_dir/_evidence-pack-schema.md"
+        if ! diff -q "$schema_dst" "$schema_src" >/dev/null 2>&1; then
+          cp "$schema_src" "$schema_dst"
+          schema_copied=$((schema_copied + 1))
+        fi
+      fi
+    done
+  fi
+
+  if [ "$patched" -gt 0 ] || [ "$schema_copied" -gt 0 ]; then
+    echo "  ✓ Skill patches applied ($patched SKILL.md + $schema_copied schema sibling)"
   fi
 }
 

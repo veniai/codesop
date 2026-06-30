@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-06-30
+
+### Added — /goal 范式（spec-as-goal v9）
+- **spec 立住 = 分水岭**：前造目标（codesop+brainstorming），后跑目标（Claude Code `/goal` 主导，codesop 退为验证层）。/goal 是 Claude Code v2.1.139+ 官方命令，codesop 依赖不另造
+- **三 gate 降级**：spec-gate 唯一硬审 / plan-gate 默认过+advisory / deliver-gate 风险分级（low 自动 / high 人审）
+- **spec-gate rubric 五项**：可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability
+- **/goal 协同四步**（SKILL §8.7：启动 / 每轮 dispatch 证据包 / 退出接 deliver-gate / 失败码不静默）
+- **五条古德哈特防御**：完成条件认外部锚点（测试/lint/diff）不认 AI 自述
+- **verification-before-completion patch（新建）**：deliver-gate 风险分级 + 完成条件外部锚点 AND + diff 守护/test weakening + codex high-risk
+- **_evidence-pack-schema（新建，setup sibling 同步）**：证据包三块 + 不可缩减边界
+- **tests**: spec-as-goal-behavior.sh（R1-R4 行为测试）+ setup-patch-sync.sh（fake 树真跑 setup）
+
+### Changed
+- brainstorming patch: spec 产自带三件（完成条件+边界+风险分级）+ codex high-risk 强制不跳过 + 内联 reviewer
+- writing-plans patch: simple 跳 plan + 复杂度分流 + emoji→文字口径（满足/没满足/顾虑）
+- setup patch_skills: 加 verification 同步 + **schema sibling 同步**（修 v8 子文件盲区，patched SKILL.md 相对引用）
+- CLAUDE.md: patches 列表 + Key Gotchas（schema sibling）；PRD: v9 进度 + /goal 决策
+
+### Fixed
+- v8 patch_skills 子文件盲区（schema 子文件不同步 runtime）→ v9 schema sibling 同步 + 相对引用
+
 ## [3.16.1] - 2026-06-23
 
 ### Fixed

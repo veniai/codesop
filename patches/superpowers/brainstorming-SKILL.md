@@ -6,9 +6,31 @@
     2. Added ADR trigger — suggests writing ADR when design involves architectural decisions
     3. Added Domain Language Delta — records new terminology, offers to write into CONTEXT.md
     4. Added CONTEXT.md / docs/adr/ check during context exploration
+    5. Spec three-cycles gate: spec self-review → codex:rescue cross-model review (high-risk
+       enforced per item 7; non-high-risk degrade-on-failure, never silent) → evidence-pack
+       subagent with INLINE reviewer prompt (five-dimension table completeness/consistency/
+       clarity/scope/YAGNI + Calibration sourced from upstream spec-document-reviewer-prompt.md;
+       Output Format adapted to the evidence-pack schema) → AI self-proof loop (clear blockers)
+       → spec-gate to human (advisory concerns only). Evidence-pack schema fields reference the
+       shared _evidence-pack-schema.md (sibling at runtime — patch_skills syncs both this main
+       SKILL.md and the schema file next to it; the reviewer prompt itself lives inline here).
+    6. (v9 R1) Spec-as-goal: every spec requirement MUST carry 三件 — 完成条件 (machine-verifiable)
+       + 边界 (anti-Goodhart, defined alongside the completion condition) + 风险分级 (low/high).
+       The spec IS the goal file; the evidence-pack (a) verdict judges against the spec's declared
+       completion condition (not a subjective read of spec prose).
+    7. (v9 R9) Cross-model enforcement (tightens v8 degrade-on-failure): high-risk「满足」verdicts
+       MUST be re-checked by codex — never mark "跳过". If codex is genuinely unavailable, the
+       high-risk「满足」entry degrades to advisory (human adjudicates) — it is NOT auto-judged
+       满足. Non-high-risk entries: codex unavailable → degrade to advisory (column (c) marked
+       "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
+       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 §4.3 hole
+       where codex-unavailable silently bypassed the cross-model anchor.
   Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
     exploration before design. ADR trigger and domain-language delta prevent underspecified
-    specs from reaching implementation — the #1 cause of rework in codesop pipelines.
+    specs from reaching implementation — the #1 cause of rework in codesop pipelines. The
+    three-cycles gate adds AI self-proof + cross-model review before the human gate so humans
+    never receive a half-finished spec to debug. v9 R1 + R9 turn the spec into a goal file
+    (三件) and close the codex-skip loophole for high-risk verdicts.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
 -->
 ---
@@ -39,9 +61,9 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
+6. **Write design doc (spec-as-goal, 三件 required)** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`; EVERY requirement must carry 完成条件 (machine-verifiable) + 边界 (anti-Goodhart) + 风险分级 (low/high); commit
+7. **Spec self-review + codex cross-model + evidence-pack + AI self-proof + spec-gate** — inline self-review (placeholders/contradictions/ambiguity/scope), then codex:rescue cross-model (high-risk「满足」MUST be re-checked, never skipped — see below), then dispatch evidence-pack subagent (INLINE reviewer prompt below), then AI self-proof loop (clear blockers/majors), then escalate spec-gate to human with advisory concerns only (see below)
+8. **User reviews written spec (spec-gate)** — human receives the evidence pack with blockers already cleared; only advisory concerns + high-risk降级 entries remain for human adjudication
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
@@ -53,9 +75,12 @@ digraph brainstorming {
     "Propose 2-3 approaches" [shape=box];
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
-    "Write design doc" [shape=box];
+    "Write design doc\n(spec 三件: 完成条件+边界+风险分级)" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
-    "User reviews spec?" [shape=diamond];
+    "codex:rescue cross-model\n(high-risk「满足」必复核,\n不得跳过)" [shape=box];
+    "Evidence-pack subagent\n(INLINE reviewer prompt)" [shape=box];
+    "AI self-proof loop\n(clear blockers/majors)" [shape=diamond];
+    "spec-gate: user reviews\n(advisory + high-risk降级 only)" [shape=diamond];
     "Invoke writing-plans skill" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
@@ -63,11 +88,15 @@ digraph brainstorming {
     "Propose 2-3 approaches" -> "Present design sections";
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User approves design?" -> "Write design doc\n(spec 三件: 完成条件+边界+风险分级)" [label="yes"];
+    "Write design doc\n(spec 三件: 完成条件+边界+风险分级)" -> "Spec self-review\n(fix inline)";
+    "Spec self-review\n(fix inline)" -> "codex:rescue cross-model\n(high-risk「满足」必复核,\n不得跳过)";
+    "codex:rescue cross-model\n(high-risk「满足」必复核,\n不得跳过)" -> "Evidence-pack subagent\n(INLINE reviewer prompt)";
+    "Evidence-pack subagent\n(INLINE reviewer prompt)" -> "AI self-proof loop\n(clear blockers/majors)";
+    "AI self-proof loop\n(clear blockers/majors)" -> "Evidence-pack subagent\n(INLINE reviewer prompt)" [label="blocker/major found\n→ fix spec, re-review"];
+    "AI self-proof loop\n(clear blockers/majors)" -> "spec-gate: user reviews\n(advisory + high-risk降级 only)" [label="blockers cleared"];
+    "spec-gate: user reviews\n(advisory + high-risk降级 only)" -> "Write design doc\n(spec 三件: 完成条件+边界+风险分级)" [label="changes requested"];
+    "spec-gate: user reviews\n(advisory + high-risk降级 only)" -> "Invoke writing-plans skill" [label="approved"];
 }
 ```
 
@@ -128,28 +157,128 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
+- **(v9 R1) Spec-as-goal — every requirement MUST carry 三件:**
+  - **完成条件 (completion condition)** — machine-verifiable, not "优化一下". Concrete form: a runnable check or explicit external signal, e.g. "`tests/auth/ 全过 + tsc 零报错`", "`grep -c … ≥ N`", "`verification 证据包 blocking 清零`". Avoid prose-only conditions a human must subjectively judge.
+  - **边界 (anti-Goodhart boundary)** — defined ALONGSIDE the completion condition, on the same field/card. States what cannot be shrunk to satisfy the condition: "测试覆盖率不降 / 不删测试 / lint 规则数不减" etc. The boundary is a hard floor — satisfying the completion condition while violating the boundary = the whole entry fails (prevents drilling holes: meet the surface condition by silently deleting tests / lowering coverage / widening lint).
+  - **风险分级 (risk tier)** — `low` or `high`, with a one-line reason. `low` = pure refactor / no public behavior change / single-module. `high` = changes public behavior / cross-module / external interface. Risk tier decides whether deliver-gate forces human review (high) or auto-passes (low). Do NOT leave blank — blank = treat as high (conservative).
+  - **Why three:** the spec IS the goal file. `/goal` and downstream cycles consume the completion condition as the loop's exit signal; the boundary is the floor /goal cannot trade away; the risk tier routes the deliver-gate. An under-specified completion condition caps the whole pipeline — spec quality is the /goal ceiling, and this gate is the ceiling check.
 - Commit the design document to git
 
 **ADR trigger:** When the design involved architectural decisions, significant trade-offs, or choosing between multiple approaches, check if `docs/adr/` exists in the project. If it does, suggest writing an ADR alongside the spec. Use format `NNNN-decision-title.md` with sections: 决策 / 上下文 / 结果. Commit the ADR with the spec. Simple changes with no meaningful decisions do not trigger this.
 
 After spec approval, if the spec contains a `## Domain Language Delta` section, ask the user whether to write these terms into the project's CONTEXT.md (creating the file if needed). If the user agrees, update CONTEXT.md with the delta terms following the format: term definition + Avoid list.
 
-**Spec Self-Review:**
+**Spec Self-Review (AI inline, first pass):**
 After writing the spec document, look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
 2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
 3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **(v9 R1) 三件 check:** Every requirement carries a machine-verifiable 完成条件 + a 同字段 边界 + a low/high 风险分级 (see "Spec-as-goal" above). Entries missing any of the three are themselves a blocker — fix inline before proceeding.
 
-Fix any issues inline. No need to re-review — just fix and move on.
+Fix any issues inline. No need to re-review — just fix and move on. This is the AI's own first pass; the cross-model + evidence-pack steps below are the external anchors that follow.
 
-**User Review Gate:**
-After the spec review loop passes, ask the user to review the written spec before proceeding:
+**Cross-Model Review (codex:rescue — v9 R9 high-risk enforcement, non-high-risk degrade-on-failure):**
+Immediately after the inline self-review, invoke `codex:rescue` to cross-model review the spec. The spec stage is the highest-leverage point to catch underspecification before downstream cycles inherit it — this is why cross-model enforcement is strictest here.
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+- Invoke the `codex:rescue` skill with a prompt like: "Cross-model review the spec at `<SPEC_PATH>`. Look for: placeholders/TODOs, internal contradictions, requirements ambiguous enough to cause someone to build the wrong thing, scope drift across multiple independent subsystems, unrequested/over-engineered features (YAGNI), AND — per v9 R1 — any requirement missing 三件 (machine-verifiable 完成条件 / 同字段 边界 / low-high 风险分级). Pay extra attention to entries the spec marks `风险分级: high` (public behavior / cross-module / external interface). Report findings verbatim — do not rewrite the spec."
+- **Capture codex's output verbatim** (do not rewrite, summarize, or soften). This output lands in the evidence pack's (c) cross-model review column.
+- **(v9 R9) High-risk「满足」MUST be re-checked by codex — never mark "跳过".** When the evidence-pack (a) step below judges a `风险分级: high` requirement as 「满足」, that verdict is NOT final until codex has re-reviewed it. This closes the v7 §4.3 hole where codex-unavailable silently bypassed the cross-model anchor exactly on the riskiest entries.
+  - **codex available** → codex re-checks the high-risk「满足」entry; its verbatim finding lands in column (c). If codex disagrees (flags it 没满足 / 顾虑), the entry reverts to blocker/major and re-enters the AI self-proof loop.
+  - **codex genuinely unavailable** (skill missing / runtime error / timeout / empty output) → the high-risk「满足」entry **degrades to advisory** (downgrades verdict to `顾虑`, marks "high-risk codex 强制未走，降级 advisory" in column (c), escalates to human at spec-gate). It is **NOT auto-judged 满足** — the human decides whether it blocks. The (a) per-requirement and (b) uncovered-scan columns are still produced.
+  - **Non-high-risk entries** keep v8's degrade-on-failure: codex unavailable → mark column (c) as `codex 不可用，降级 advisory` and proceed. The spec stage still MUST walk the codex step (schema §4: ① spec 必走 codex:rescue) — when codex is down the entry degrades to advisory (human-visible, non-blocking) rather than being silently skipped. "跳过" = silent anchor loss, which violates R9's spirit; codex being down must NOT block the spec stage for low-risk entries, but the degradation MUST be recorded in column (c).
+- **Never silently drop the step.** The evidence pack column (c) must show one of: codex verbatim findings, an explicit `codex 不可用，降级 advisory` (non-high-risk), or `high-risk codex 强制未走，降级 advisory` (high-risk only) — never blank, never a silent skip.
 
-Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+**Evidence-Pack Subagent (INLINE reviewer prompt — do NOT create a sibling patch file):**
+Dispatch a `general-purpose` subagent to produce the evidence pack. The reviewer prompt is **inlined below** (not loaded from a sibling file) because `setup`'s `patch_skills()` only syncs this main SKILL.md — a sibling `spec-document-reviewer-prompt.md` patch would land outside the synced surface and silently go missing on re-install.
+
+The evidence pack has three columns whose field definitions live in the shared template `_evidence-pack-schema.md` (referenced, not duplicated here):
+- **(a) Per-requirement verdict** — `§ref` + verbatim spec excerpt + artifact location + verdict (`满足`/`没满足`/`顾虑`) + concern (advisory, for human). For the spec stage the artifact IS the spec itself, so artifact location is the §ref or neighboring §. **(v9 R1)** The verdict judges against the spec's **declared 完成条件** (not a subjective read of spec prose): `满足` only if the completion condition is machine-verifiable AND the 同字段 边界 is present AND a low/high 风险分级 is present. Missing 三件 on a requirement = `没满足` (blocker). When verdict=`满足` AND 风险分级=`high`, the entry is **provisional** pending codex re-check (R9) — the subagent flags it "(provisional, awaiting codex high-risk re-check)".
+- **(b) Uncovered scan** — scan the whole spec, list requirements not reflected in the artifact (for the spec stage: requirements with no anchoring section / contradictory anchors).
+- **(c) Cross-model review column** — codex verbatim output from the step above; or the explicit `codex 不可用，降级 advisory` marker (non-high-risk, human-visible, non-blocking); or the `high-risk codex 强制未走，降级 advisory` marker (high-risk, codex unavailable). Never blank, never a silent skip.
+
+Use the dispatch prompt below (five-dimension table + Calibration sourced from upstream `spec-document-reviewer-prompt.md`; Output Format adapted to the evidence-pack schema):
+
+```
+Subagent (general-purpose):
+  description: "Review spec document"
+  prompt: |
+    You are a spec document reviewer. Verify this spec is complete and ready for planning.
+
+    **Spec to review:** [SPEC_FILE_PATH]
+
+    ## What to Check
+
+    | Category | What to Look For |
+    |----------|------------------|
+    | Completeness | TODOs, placeholders, "TBD", incomplete sections |
+    | Consistency | Internal contradictions, conflicting requirements |
+    | Clarity | Requirements ambiguous enough to cause someone to build the wrong thing |
+    | Scope | Focused enough for a single plan — not covering multiple independent subsystems |
+    | YAGNI | Unrequested features, over-engineering |
+    | 三件 (v9 R1) | Each requirement carries a machine-verifiable 完成条件 + 同字段 边界 + low/high 风险分级 |
+
+    ## Calibration
+
+    **Only flag issues that would cause real problems during implementation planning.**
+    A missing section, a contradiction, or a requirement so ambiguous it could be
+    interpreted two different ways — those are issues. Minor wording improvements,
+    stylistic preferences, and "sections less detailed than others" are not. A missing
+    三件 field on a requirement IS a real issue (the spec is the goal file — a missing
+    completion condition caps the whole pipeline).
+
+    Approve unless there are serious gaps that would lead to a flawed plan.
+
+    ## Output Format
+
+    Produce the evidence pack per `_evidence-pack-schema.md`:
+
+    ### (a) Per-requirement verdict
+    One row per spec requirement. Fields (fixed, in order): §ref | verbatim spec excerpt
+    (copy directly, do not rewrite) | artifact location (for spec stage: the §ref itself
+    or neighboring §) | verdict (满足 / 没满足 / 顾虑) | concern (only if verdict=顾虑;
+    advisory, human decides whether it blocks).
+    **Verdict口径 (v9 R1):** 满足 only if the spec's declared 完成条件 is machine-verifiable
+    AND the 同字段 边界 is present AND a low/high 风险分级 is present. Missing 三件 = 没满足.
+    When verdict=满足 AND 风险分级=high, append "(provisional, awaiting codex high-risk re-check)".
+
+    ### (b) Uncovered scan
+    Table: §ref | uncovered requirement (verbatim excerpt) | nature (必做 / 边界 / 明确不做).
+    Empty table = full coverage.
+
+    ### (c) Cross-model review column
+    - codex status: available / unavailable (降级 advisory) / high-risk 强制未走（降级 advisory）
+    - codex conclusion: [verbatim from the codex:rescue step above, or "codex 不可用，降级 advisory"
+      (non-high-risk, human-visible non-blocking), or "high-risk codex 强制未走，降级 advisory" (high-risk, codex unavailable)]
+    - cross-model uncovered supplement: merged into (b) for re-check, or "无补充"
+
+    ## Status
+    **Status:** Approved | Issues Found
+
+    **Issues (if any):**
+    - [Section X]: [specific issue] - [why it matters for planning]
+
+    **Recommendations (advisory, do not block approval):**
+    - [suggestions for improvement]
+```
+
+**Evidence-pack visualization (visual companion):** The subagent reuses brainstorming's visual companion to serve the evidence pack to the human at the spec-gate. It calls `bash brainstorming/scripts/start-server.sh --project-dir <proj> --open`, takes `screen_dir`, and writes an HTML content fragment (mermaid full-chain + (a) verdict cards + (b) uncovered + (c) cross-model column) to `screen_dir`. The fragment template + mermaid load script + health-check steps are in `_evidence-pack-schema.md` §5-§8 — copy from there, do not improvise.
+
+**AI Self-Proof Loop (clear blockers before escalating to human):**
+Once the evidence pack is produced, the AI digests it itself BEFORE escalating to the human:
+
+- If (a) has any `没满足` verdict (including 三件-missing entries per R1) or (b) is non-empty with `必做`/`边界` nature (i.e. **blocker / major**), the AI goes back and fixes the spec → re-runs codex (if available) → re-dispatches the evidence-pack subagent → re-reviews. Loop.
+- **(v9 R9)** If a high-risk「满足」entry is provisional pending codex re-check and codex disagrees (reverts to 没满足/顾虑), that entry is a blocker/major — fix and re-loop. If codex is unavailable, the entry downgrades to advisory (`顾虑`) and is preserved into the spec-gate (NOT cleared by the AI — only the human adjudicates a degraded high-risk entry).
+- Continue until **blockers / majors are cleared** (only `顾虑` advisory verdicts remain, including any high-risk codex-降级 entries).
+- **Only then escalate to the human.** The human must never receive a half-finished spec to debug — that is the AI's job. Advisory `顾虑` concerns (including high-risk codex-降级) are preserved into the spec-gate for human adjudication.
+
+**Spec-Gate (human, advisory only):**
+After the AI self-proof loop clears all blockers, escalate the spec-gate to the human. The human receives the evidence pack with blockers already cleared — they only adjudicate advisory `顾虑` concerns (including any high-risk codex-降级 entries) and give final approval:
+
+> "Spec written and committed to `<path>`. Evidence pack produced (blockers cleared by AI self-proof; codex cross-model review in column (c); visual companion served at `<url>`). Please review the advisory concerns — note any `high-risk codex 强制未走，降级 advisory` entries need your call — and let me know if you want to make any changes before we start writing out the implementation plan."
+
+Wait for the user's response. If they request changes, make them and re-run the codex + evidence-pack + AI self-proof loop. Only proceed once the user approves.
 
 **Implementation:**
 
