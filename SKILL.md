@@ -420,6 +420,68 @@ complex 多走 plan 不是流程教条，是复杂度管理——复杂任务依
 
 **/goal 不可用降级**：`/goal` 命令缺失 / 宿主不支持 / dispatch subagent 失败 / `/goal` 死循环（默认 10 轮未收敛）→ **回退 v8-style pipeline**（codesop 主导逐步执行 + 三 gate 人审）**或**停止升级人，附最近一轮证据包 + 已尝试路径——**不静默改走普通执行**（普通执行无 spec 锚点，等于放飞 AI，违背分水岭命题）。
 
+## 8.7 /goal 协同四步 + gate 流程机制
+
+§1.1 准则 + §8.5 适用边界 + §8.5 三 gate 降级表 定义「审什么 / 降级到什么」；本节落「**流程怎么触发 / 证据包怎么出 / /goal 怎么启动退出 / 抽样怎么落**」——补机制，不重复准则。/goal 协同是 **SKILL 文本指示**（codesop SKILL 告诉 AI 怎么调 /goal、每轮 dispatch、退出接 deliver-gate），不是 hook（§8.6 不做表已声明：外部锚点信号已够，hook 是死规则不抗钻空子）。
+
+### A. /goal 协同四步（spec-gate 通过 → deliver-gate）
+
+| 步 | 触发 | codesop SKILL 指示 AI 做什么 | 外部锚点 |
+|---|------|----------------------------|---------|
+| **① 启动** | spec-gate 硬审通过（§8.5 rubric 五项过） | 调 `/goal "<spec §完成条件的 AND 表达>"`——condition 必须**引用 spec 写明的完成条件**（不是 AI 重述），按复杂度分级（见下 C） | spec 文件本身 |
+| **② 每轮** | /goal 自评 condition 未达标 | /goal 主循环的 Claude（执行者）改代码 → 跑测试 / lint（mechanical）→ **dispatch 独立 subagent** 出证据包（按 `_evidence-pack-schema.md`，sibling 文件，setup 同步到 runtime skill 目录；干活 AI 不写结论，独立 subagent 出证据包是古德哈特防御核心）→ 写 `.superpowers/goal-evidence/round-N.md`（N 自增）→ 评估 condition AND，未达标继续循环 | 测试 + lint + 独立 subagent 证据包 + spec-coverage 扫描 |
+| **③ 退出** | condition AND 全真 → /goal 退出 | codesop SKILL 接管：读**最后一轮** `round-N.md` 证据包 → 进入 deliver-gate（按 spec 风险分级，见 D） | 最后证据包 |
+| **④ 失败码** | 连续 N 轮（默认 10）未收敛 / dispatch 失败 / condition 不可评估 | **停 + 升级人**，附最近一轮证据包 + 已尝试路径——**不静默改走普通执行**（普通执行无 spec 锚点 = 放飞 AI，§8.5 /goal 不可用降级已声明，§8.6 不做表也列） | 最近一轮证据包 |
+
+**关键分工**：/goal 主循环的 Claude = 执行者；codesop skill（`_evidence-pack-schema.md` schema / dispatch 协议）= 它每轮调用的方法论。condition AND 保证正确性下限，skill 保证高效路径（§8.6 不做表「纯 /goal 不用 skill」已解释为什么不全裸跑）。
+
+### B. spec-gate rubric 流程（R2 落地——审 rubric 怎么触发）
+
+spec-gate 是人审（§8.5 唯一硬审），但**证据由 AI 出**，人按 rubric 五项判：
+
+1. **AI 出证据包**：spec 立住后，AI dispatch 独立 subagent 按 `_evidence-pack-schema.md` 整理 spec 三件（完成条件 + 边界 + 风险分级）对照表 + rubric 自评（每条完成条件是否可验证 / 边界是否覆盖反例 / 风险分级是否校准 / traceability 是否齐）
+2. **人审 rubric 五项**（§8.5 表）：可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability——任一项不过 = spec 不立住，回 brainstorming 修 spec（**不进 /goal**）
+3. **过 → 进 A①**：spec-gate 通过才允许调 /goal（没审就 /goal = 放大没定义好的目标，§8.5 铁律）
+
+spec-gate 接 TaskList：spec-gate 是 pipeline 的一个 task，未确认 = 阻塞 re-entry（§3 step 10.5 Pipeline Re-entry 现有机制，不另造 hook）。
+
+### C. 完成条件按复杂度分级（condition 表达式）
+
+| 复杂度 | /goal condition（spec 写明，外部锚点 AND） |
+|--------|------------------------------------------|
+| **simple** | 测试全过 AND lint 零违规（spec 短，spec-coverage 无意义；至少一项 mechanical 已满足） |
+| **moderate / complex** | 测试全过 AND lint 零违规 AND 独立 subagent 证据包 blocking 清零 AND spec-coverage 未覆盖 = 空 |
+
+complexity 阈值复用 `writing-plans-SKILL.md` 现有 assessment（§8.5 已声明不另造）。**至少一项 mechanical**（测试 / lint）是硬下限，不能全靠 independent-AI（§1.1 第 4 条准则）。
+
+### D. plan-gate 降级流程（R4）+ deliver-gate 分级（R5）
+
+**plan-gate**（仅 moderate / complex 走 plan 后触发）：
+- AI 自证清零（plan 任务全 done / 无遗留 advisory blocker）→ **默认通过**，进 A① 调 /goal
+- 人扫 advisory（如有），**不阻塞 re-entry**——advisory 是「顾虑 ≠ 阻塞」（语义同 `_evidence-pack-schema.md` §9），人定夺但不卡流程
+- 接 TaskList：plan-gate task 自证清零后自动标 completed，re-entry 继续（§3 step 10.5）
+
+**deliver-gate**（/goal 退出 A③ 后触发，接 T5 verification-before-completion patch §C）：
+- **low risk**（simple / 纯重构 / 无 public 行为变）→ 自动过
+- **high risk**（改 public 行为 / 跨模块 / 外部接口）→ **强制人审**，high 不可自动过（§8.5 三 gate 降级表）
+- high-risk「满足」条目 codex 必复核（R9，T5 patch §C.1）；codex 不可用 → 降级 advisory 升级人，**不自动判满足**
+- deliver-gate task 阻塞 re-entry，人确认才走（合并 / 发布动作）
+
+### E. 抽样人审（R10，soft 威慑）
+
+`/goal` 范式减 blocking 不等于放飞（§8.6 不做表已声明）。**1/N 抽样**（默认 N=5）：每 N 次 deliver-gate 随机抽 1 次，**强制人扫证据包**（不只是自动过的 low risk），记 `.superpowers/audit-log.md`：
+
+```
+# audit-log.md（抽样人审记录）
+## YYYY-MM-DD / feat/xxx / round-3.md
+- 抽中原因：第 5 次 deliver（N=5 命中）
+- 人扫结论：{通过 / 打回（理由）}
+```
+
+- **先 soft**：抽中后提示人扫，人不响应 = 标 pending（不阻塞当前 deliver，但下次 deliver 前需清）
+- N 可配（项目级 AGENTS.md 可覆盖，默认 5）
+- 威慑式非阻断式：让 AI 知道「会被随机抽查证据包」，抗「自证清零就放过」的漂移（§5 古德哈特防御 #5 落点）
+
 ## 8.6 明确不做
 
 codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外部锚点信号已够，复用 superpowers 现有能力）：
@@ -446,6 +508,8 @@ codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外
 | 完成条件引用外部锚点信号（不认 AI 自述，至少一项 mechanical） | /goal 分水岭 |
 | spec 变更重走：人改 spec → 回 ① 重走，不搞失效标记 | /goal 分水岭 |
 | /goal 不可用降级：回退 pipeline 或停升级人，不静默改走普通执行 | /goal 分水岭 |
+| /goal 协同四步：启动（spec-gate 通过→调 /goal）/ 每轮（dispatch 独立 subagent 出证据包→round-N.md）/ 退出（读最后证据包→deliver-gate）/ 失败码（N 轮未收敛→停升级人，不静默） | /goal 协同机制 |
+| 抽样人审：1/N（默认 5）随机抽 deliver 强制人扫证据包，记 audit-log.md（soft 威慑，非阻断） | /goal 协同机制 |
 | No code without design approval | brainstorming |
 | No production code without failing test first | TDD |
 | No fix without root cause investigation | systematic-debugging |
