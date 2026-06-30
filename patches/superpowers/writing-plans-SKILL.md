@@ -21,7 +21,7 @@
          each Gn's Verify). simple has NO spec-coverage.
        - **judgment vocabulary unified** from ✅/⚠️/❌ to 满足/没满足/顾虑 (referencing
          _evidence-pack-schema.md, NOT duplicated here) — verdict-semantic emojis fully replaced.
-       - spec-coverage reviewer prompt stays INLINE in this main SKILL.md (patch_skills only syncs
+       - spec-coverage reviewer prompt stays INLINE in this main SKILL.md (patch_skills syncs this
          this file). plan-gate (human, advisory) is OUT of this patch's scope — lives in SKILL.md
          (T6), so Pipeline Continuation here has NO plan-gate blocking.
   Retained from upstream v6.0.3: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
@@ -438,7 +438,7 @@ verifies implementation briefs can achieve each Gn's Verify condition).
 Dispatch a `general-purpose` subagent to review spec coverage and produce the plan-stage evidence
 pack. The reviewer prompt is **inlined below** (not loaded from a sibling file) because `setup`'s
 `patch_skills()` only syncs this main SKILL.md. The evidence pack has three columns whose field
-definitions live in the shared template `patches/superpowers/_evidence-pack-schema.md` (referenced,
+definitions live in the shared template `_evidence-pack-schema.md` (referenced,
 not duplicated here):
 - **(a) Per-requirement verdict** — `§ref` + verbatim spec excerpt + artifact location (`task-N` /
   `task-N.M` / `task-N 步骤K` for the plan stage) + verdict (`满足`/`没满足`/`顾虑`) + concern
@@ -506,7 +506,7 @@ Subagent (general-purpose):
 
     ## Output Format
 
-    Produce the evidence pack per `patches/superpowers/_evidence-pack-schema.md`:
+    Produce the evidence pack per `_evidence-pack-schema.md`:
 
     ### (a) Per-requirement verdict
     One row per spec requirement. Fields (fixed, in order): §ref | verbatim spec excerpt

@@ -1,6 +1,6 @@
 # Evidence-Pack Schema + Visual Companion（共用模板）
 
-> **源码模板（v9 内联约束，spec §4.6）**：本文件是**源码模板**，安装时（setup `patch_skills`）**内联进主 SKILL.md**——避 `patch_skills` 只同步主 SKILL.md 的子文件盲区（v8 踩坑：`spec-document-reviewer-prompt.md` 子文件不同步导致 reviewer 跑旧 schema）。setup 同步逻辑见 `setup` 的 `patch_skills()`：只处理主 SKILL.md，子文件覆盖靠 patches 目录原样复制；schema 内联约束要求 T3/T5 patch 在主 SKILL.md 内嵌本 schema 全文，不靠子文件引用。
+> **源码模板（v9 sibling 同步，spec §4.6）**：本文件是**源码模板**，安装时（setup `patch_skills`）由 setup 复制到每个 patched skill 目录作为 **sibling 文件**（`_evidence-pack-schema.md`）——`writing-plans/`、`brainstorming/`、`verification-before-completion/` 各一份。patched SKILL.md 用**相对引用** `_evidence-pack-schema.md`（sibling），plugin cache runtime 可访问，避 v8 子文件不同步盲区（v8 踩坑：`spec-document-reviewer-prompt.md` 子文件不同步导致 reviewer 跑旧 schema）。setup 同步逻辑见 `setup` 的 `patch_skills()`：先同步 4 个主 SKILL.md，再把本 schema 作为 sibling 复制到上述 3 个 skill 目录。
 >
 > 共用模板：spec 阶段（T3 brainstorming reviewer）/ plan 阶段（writing-plans spec-coverage）/ 代码阶段（T5 verification Gate Function）三方引用同一份 schema。
 >

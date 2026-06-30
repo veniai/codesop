@@ -15,8 +15,8 @@
        per-line verdict + (b) uncovered scan + (c) cross-model column. The Gate Function IS
        the verification; the evidence-pack IS the AI assembly — clear division of labor, no
        intrusion into the verification core. Evidence-pack schema fields reference the shared
-       _evidence-pack-schema.md (do NOT duplicate the schema here — patch_skills syncs this
-       main SKILL.md; schema lives inline via that reference, fields cited by §-number).
+       _evidence-pack-schema.md (sibling at runtime — patch_skills syncs both this main SKILL.md
+       and the schema file next to it; fields cited by §-number, not duplicated here).
     4. (v9 R5) deliver-gate 风险分级: by spec-declared risk — low auto-pass (all four AND
        anchors true) / high FORCED human review (high-risk can NEVER auto-pass — codex review
        required, then human adjudicates; this mirrors T3 brainstorming high-risk enforcement).
@@ -206,8 +206,8 @@ From 24 failure memories:
 ## A. AI 证据包组装（Gate Function 跑完后）
 
 Gate Function 五步 + Step 6 diff 守护**全过后**，工作 AI 把验证结果与 spec 对照，整理成
-证据包。证据包 schema 字段引用共享 `patches/superpowers/_evidence-pack-schema.md`（不在此
-重复定义；patch_skills 同步主 SKILL.md，schema 通过该引用 + §-号内联约束）。
+证据包。证据包 schema 字段引用共享 `_evidence-pack-schema.md`（sibling 文件，setup 同步到
+skill 目录；不在此重复定义，字段以 §-号引用）。
 
 ### A.1 证据包三块（schema §1，逐字照搬 spec §4.1）
 

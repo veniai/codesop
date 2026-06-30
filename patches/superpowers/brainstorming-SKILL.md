@@ -12,8 +12,8 @@
        clarity/scope/YAGNI + Calibration sourced from upstream spec-document-reviewer-prompt.md;
        Output Format adapted to the evidence-pack schema) → AI self-proof loop (clear blockers)
        → spec-gate to human (advisory concerns only). Evidence-pack schema fields reference the
-       shared _evidence-pack-schema.md (do NOT create a sibling patch file — patch_skills only
-       syncs this main SKILL.md, so the reviewer prompt must live inline here).
+       shared _evidence-pack-schema.md (sibling at runtime — patch_skills syncs both this main
+       SKILL.md and the schema file next to it; the reviewer prompt itself lives inline here).
     6. (v9 R1) Spec-as-goal: every spec requirement MUST carry 三件 — 完成条件 (machine-verifiable)
        + 边界 (anti-Goodhart, defined alongside the completion condition) + 风险分级 (low/high).
        The spec IS the goal file; the evidence-pack (a) verdict judges against the spec's declared
@@ -193,7 +193,7 @@ Immediately after the inline self-review, invoke `codex:rescue` to cross-model r
 **Evidence-Pack Subagent (INLINE reviewer prompt — do NOT create a sibling patch file):**
 Dispatch a `general-purpose` subagent to produce the evidence pack. The reviewer prompt is **inlined below** (not loaded from a sibling file) because `setup`'s `patch_skills()` only syncs this main SKILL.md — a sibling `spec-document-reviewer-prompt.md` patch would land outside the synced surface and silently go missing on re-install.
 
-The evidence pack has three columns whose field definitions live in the shared template `patches/superpowers/_evidence-pack-schema.md` (referenced, not duplicated here):
+The evidence pack has three columns whose field definitions live in the shared template `_evidence-pack-schema.md` (referenced, not duplicated here):
 - **(a) Per-requirement verdict** — `§ref` + verbatim spec excerpt + artifact location + verdict (`满足`/`没满足`/`顾虑`) + concern (advisory, for human). For the spec stage the artifact IS the spec itself, so artifact location is the §ref or neighboring §. **(v9 R1)** The verdict judges against the spec's **declared 完成条件** (not a subjective read of spec prose): `满足` only if the completion condition is machine-verifiable AND the 同字段 边界 is present AND a low/high 风险分级 is present. Missing 三件 on a requirement = `没满足` (blocker). When verdict=`满足` AND 风险分级=`high`, the entry is **provisional** pending codex re-check (R9) — the subagent flags it "(provisional, awaiting codex high-risk re-check)".
 - **(b) Uncovered scan** — scan the whole spec, list requirements not reflected in the artifact (for the spec stage: requirements with no anchoring section / contradictory anchors).
 - **(c) Cross-model review column** — codex verbatim output from the step above; or the explicit `codex 不可用，降级 advisory` marker (non-high-risk, human-visible, non-blocking); or the `high-risk codex 强制未走，降级 advisory` marker (high-risk, codex unavailable). Never blank, never a silent skip.
@@ -232,7 +232,7 @@ Subagent (general-purpose):
 
     ## Output Format
 
-    Produce the evidence pack per `patches/superpowers/_evidence-pack-schema.md`:
+    Produce the evidence pack per `_evidence-pack-schema.md`:
 
     ### (a) Per-requirement verdict
     One row per spec requirement. Fields (fixed, in order): §ref | verbatim spec excerpt
@@ -263,7 +263,7 @@ Subagent (general-purpose):
     - [suggestions for improvement]
 ```
 
-**Evidence-pack visualization (visual companion):** The subagent reuses brainstorming's visual companion to serve the evidence pack to the human at the spec-gate. It calls `bash brainstorming/scripts/start-server.sh --project-dir <proj> --open`, takes `screen_dir`, and writes an HTML content fragment (mermaid full-chain + (a) verdict cards + (b) uncovered + (c) cross-model column) to `screen_dir`. The fragment template + mermaid load script + health-check steps are in `patches/superpowers/_evidence-pack-schema.md` §5-§8 — copy from there, do not improvise.
+**Evidence-pack visualization (visual companion):** The subagent reuses brainstorming's visual companion to serve the evidence pack to the human at the spec-gate. It calls `bash brainstorming/scripts/start-server.sh --project-dir <proj> --open`, takes `screen_dir`, and writes an HTML content fragment (mermaid full-chain + (a) verdict cards + (b) uncovered + (c) cross-model column) to `screen_dir`. The fragment template + mermaid load script + health-check steps are in `_evidence-pack-schema.md` §5-§8 — copy from there, do not improvise.
 
 **AI Self-Proof Loop (clear blockers before escalating to human):**
 Once the evidence pack is produced, the AI digests it itself BEFORE escalating to the human:
