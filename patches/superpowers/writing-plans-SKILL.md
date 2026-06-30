@@ -6,10 +6,24 @@
     2. Added Requirement Extraction (R1..RN) before review
     3. Added Acceptance Criteria phase (G1..GN Given/When/Then, adversarial self-check, Coverage Matrix, Gap Scan)
     4. Added Complexity Assessment (simple/moderate/complex → plan-depth routing)
-    5. Added Phase Split + Lightweight Plan (simple/moderate avoid over-planning)
+    5. Added Phase Split + Lightweight Plan (moderate avoids over-planning; simple skips plan entirely — see #9)
     6. Added Staged checkpoint flow + Resume Protocol (skeleton → per-task save → self-review)
     7. Replaced self-checklist Self-Review with subagent spec-coverage review (complex path)
     8. Switched complex tasks from complete-code to implementation-brief
+    9. v9 R3 + v8 plan-stage spec-coverage:
+       - **simple 跳 plan** (R3 / spec §2.2-2.3): simple skips ALL plan orchestration and proceeds
+         directly to /goal (no Lightweight Plan, no spec-coverage — simple spec is short,
+         spec-coverage is meaningless per spec §4.6 simple 完成条件). moderate/complex keep plan
+         orchestration (dependency topology).
+       - **spec-coverage 扩 moderate** (v8): spec-coverage runs for moderate AND complex. Moderate
+         uses a lightweight variant (Requirement Traceability + Acceptance IDs only — does NOT force
+         implementation-brief expansion); complex runs the full variant (also verifies briefs achieve
+         each Gn's Verify). simple has NO spec-coverage.
+       - **judgment vocabulary unified** from ✅/⚠️/❌ to 满足/没满足/顾虑 (referencing
+         _evidence-pack-schema.md, NOT duplicated here) — verdict-semantic emojis fully replaced.
+       - spec-coverage reviewer prompt stays INLINE in this main SKILL.md (patch_skills only syncs
+         this file). plan-gate (human, advisory) is OUT of this patch's scope — lives in SKILL.md
+         (T6), so Pipeline Continuation here has NO plan-gate blocking.
   Retained from upstream v6.0.3: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
   Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
     "define what done looks like" step. Acceptance criteria + traceability close it; staged
@@ -275,21 +289,29 @@ recorded as "AC revision: [reason]".
 
 ## Phase Split
 
-Based on complexity assessment:
+Based on complexity assessment (spec §2.2-2.3 — three-way routing by dependency topology):
 
-**simple / moderate:**
-Generate a Lightweight Plan (next section). Then Pipeline Continuation.
-Skip File Structure, Task Decomposition, and full Self-Review.
+**simple:**
+**Skip ALL plan orchestration.** No Lightweight Plan, no spec-coverage review, no File Structure
+mapping. Proceed directly to Pipeline Continuation → /goal. The spec is short enough that
+spec-coverage is meaningless (spec §4.6 simple 完成条件 = test + lint only). The implementer
+self-decomposes inside /goal from the spec directly.
+
+**moderate:**
+Generate a Lightweight Plan (next section), then run the **lightweight spec-coverage review**
+(see Self-Review section — moderate variant: does NOT require implementation-brief expansion,
+verifies Requirement Traceability + Acceptance IDs only). Then Pipeline Continuation.
 If implementation discovers actual scope significantly exceeds the estimate (e.g., file count
 crosses the complex threshold), the implementer should flag this and escalate to full planning.
 
 **complex:**
 Continue to Staged Output for Complex Tasks (Stage 1 → Stage 2 → Stage 3).
-Then Pipeline Continuation.
+Then full Self-Review (spec-coverage full variant). Then Pipeline Continuation.
 
 ## Lightweight Plan
 
-For simple/moderate tasks only. Uses the same schema as full plans, but with reduced depth.
+For moderate tasks only (simple skips plan entirely — see Phase Split). Uses the same schema as
+full plans, but with reduced depth.
 
 Each task follows **implementation cohesion**, not one-task-per-Gn. A task may reference multiple Gn via `Acceptance IDs`.
 
@@ -307,7 +329,7 @@ Schema (shared with full plans — execution skill sees the same structure):
 
 Difference from full plan:
 
-| Field | Lightweight (simple/moderate) | Full (complex) |
+| Field | Lightweight (moderate) | Full (complex) |
 |-------|------------------------------|----------------|
 | Implementation guidance | `brief` — key direction, implementer decides | `implementation brief` — constraints, interfaces, edge cases |
 | Steps | None — implementer self-decomposes | Implementation briefs (no checkbox steps) |
@@ -342,6 +364,12 @@ Write the initial plan file with structure but NO implementation details.
 
 **Checkpoint 1:** Write the file.
 Announce: "Stage 1/3 complete: plan skeleton saved to [path]."
+
+**Moderate tier follows up with the lightweight spec-coverage review** (see Self-Review section):
+the reviewer verifies the plan's Requirement Traceability + Acceptance IDs against the spec, but
+does NOT require implementation-brief expansion — the lightweight plan's `Implementation guidance: brief`
+is sufficient evidence for moderate. This catches moderate-tier drift (the most common tier)
+without forcing full Stage 2 expansion overhead.
 
 ### Stage 2: Task Expansion
 
@@ -397,92 +425,125 @@ If the session is interrupted at any point:
 3. Resume from the first incomplete stage
 4. Announce: "Resuming plan from Stage N: [description]"
 
-## Self-Review (Stage 3 for Complex Tasks)
+## Self-Review (Stage 3 for Complex Tasks; lightweight pass for Moderate)
 
 Re-read the expanded plan from file before starting this section.
-Only complex tasks reach this section (simple/moderate skip to Pipeline Continuation).
+Complex and moderate tasks reach this section (simple skips to Pipeline Continuation — no plan
+to review). Moderate runs the **lightweight variant** (Requirement Traceability + Acceptance IDs
+only — does NOT require implementation-brief expansion). Complex runs the **full variant** (also
+verifies implementation briefs can achieve each Gn's Verify condition).
 
-**1. Spec Coverage (subagent dispatch):**
+**1. Spec Coverage (evidence-pack subagent dispatch, INLINE reviewer prompt):**
 
-Dispatch a general-purpose subagent to review spec coverage. Use this prompt:
+Dispatch a `general-purpose` subagent to review spec coverage and produce the plan-stage evidence
+pack. The reviewer prompt is **inlined below** (not loaded from a sibling file) because `setup`'s
+`patch_skills()` only syncs this main SKILL.md. The evidence pack has three columns whose field
+definitions live in the shared template `patches/superpowers/_evidence-pack-schema.md` (referenced,
+not duplicated here):
+- **(a) Per-requirement verdict** — `§ref` + verbatim spec excerpt + artifact location (`task-N` /
+  `task-N.M` / `task-N 步骤K` for the plan stage) + verdict (`满足`/`没满足`/`顾虑`) + concern
+  (advisory, for human).
+- **(b) Uncovered scan** — scan the whole spec, list requirements with no corresponding plan task.
+- **(c) Cross-model review column** — codex output if `codex:rescue` was invoked for this plan
+  (optional for the plan stage; if not invoked, mark `codex 未调用（plan 阶段可选）`).
 
-> You are a plan coverage reviewer. Your job is to verify that every requirement
-> from the spec is covered by the plan.
->
-> **Plan to review:** [PLAN_FILE_PATH]
-> **Spec for reference:** [SPEC_FILE_PATH]
->
-> ## What to Check
->
-> Read the plan's `## Requirement Traceability` section to get the enumerated
-> requirements (R1, R2, ...).
->
-> For each requirement:
-> 1. Find it in the spec to confirm the enumeration is accurate
-> 2. Find which plan task/step covers it (use `+` for cross-task coverage)
-> 3. Assess coverage: ✅ fully covered, ⚠️ partial, ❌ missing
->
-> Additionally:
-> - Scan the full spec independently for requirements NOT in the traceability list.
->   For any spec requirement you find that has no corresponding R-number, add a row
->   to the Traceability Matrix with Req marked "UNENUMERATED-§X.X" and Status ❌.
-> - Scan the plan for placeholders (TBD, TODO, "implement later", vague descriptions)
->
-> ## Calibration
->
-> You are a thorough reviewer, not a rubber stamp. The plan author has cognitive
-> bias toward their own work. Your job is to find what they missed.
->
-> Flag as ❌ any requirement with no corresponding plan task.
-> Flag as ⚠️ any requirement where the plan task exists but doesn't fully address
-> the spec's detail.
->
-> Do NOT approve if any ❌ exists.
->
-> Example ❌: Spec says "output must include error code and message" but plan
-> only has a task for "output error message" — error code is missing.
->
-> Example ⚠️: Spec says "validate email, phone, and address" but plan task only
-> shows validation code for email and phone — address validation is implied but
-> not shown.
->
-> ## Output Format
->
-> ## Plan Coverage Review
->
-> **Status:** Approved | Issues Found
->
-> **Traceability Matrix:**
-> | Req | Spec Section | Plan Task | Status |
-> |-----|-------------|-----------|--------|
-> | R1  | §X.X        | Task N | ✅/⚠️/❌ |
->
-> **Issues (if any):**
-> - R? (§X.X): [what's missing]
->
-> **Recommendations (advisory):**
-> - [non-blocking suggestions]
->
-> **Acceptance Coverage Matrix:**
-> | Gn | Spec Req | Plan Task | Status |
-> |----|----------|-----------|--------|
-> | G1 | R1       | Task 2 | ✅/⚠️/❌ |
->
-> For each acceptance criterion, verify that the plan's implementation briefs
-> can actually achieve the criterion's Verify condition. If a plan task exists
-> but cannot pass Gn's Verify → mark ⚠️.
+Use the dispatch prompt below. **Verdict vocabulary is unified to 满足/没满足/顾虑** (replaces the
+prior ✅/⚠️/❌) so the plan-stage evidence pack uses the same judgment vocabulary as the spec stage:
+
+```
+Subagent (general-purpose):
+  description: "Review plan spec coverage"
+  prompt: |
+    You are a plan coverage reviewer. Your job is to verify that every requirement
+    from the spec is covered by the plan, and to produce the plan-stage evidence pack.
+
+    **Plan to review:** [PLAN_FILE_PATH]
+    **Spec for reference:** [SPEC_FILE_PATH]
+    **Plan tier:** [moderate | complex]  (moderate = lightweight plan; complex = staged plan)
+
+    ## What to Check
+
+    Read the plan's `## Requirement Traceability` section to get the enumerated
+    requirements (R1, R2, ...).
+
+    For each requirement:
+    1. Find it in the spec to confirm the enumeration is accurate
+    2. Find which plan task/step covers it (use `+` for cross-task coverage)
+    3. Assess coverage: 满足 (fully covered) / 没满足 (missing) / 顾虑 (partial or advisory concern)
+
+    Additionally:
+    - Scan the full spec independently for requirements NOT in the traceability list.
+      For any spec requirement you find that has no corresponding R-number, add a row
+      to the Traceability Matrix with Req marked "UNENUMERATED-§X.X" and verdict 没满足.
+    - Scan the plan for placeholders (TBD, TODO, "implement later", vague descriptions)
+
+    ## Calibration
+
+    You are a thorough reviewer, not a rubber stamp. The plan author has cognitive
+    bias toward their own work. Your job is to find what they missed.
+
+    Flag as 没满足 any requirement with no corresponding plan task.
+    Flag as 顾虑 any requirement where the plan task exists but doesn't fully address
+    the spec's detail.
+
+    Do NOT approve if any 没满足 exists.
+
+    Example 没满足: Spec says "output must include error code and message" but plan
+    only has a task for "output error message" — error code is missing.
+
+    Example 顾虑: Spec says "validate email, phone, and address" but plan task only
+    shows validation code for email and phone — address validation is implied but
+    not shown.
+
+    ## Tier-specific scope
+
+    - **moderate** (lightweight plan): verify Requirement Traceability + Acceptance IDs only.
+      Do NOT require implementation-brief expansion — the lightweight plan's brief guidance
+      is sufficient evidence for moderate.
+    - **complex** (staged plan): additionally verify each acceptance criterion — confirm the
+      plan's implementation briefs can actually achieve each Gn's Verify condition. If a plan
+      task exists but cannot pass Gn's Verify → mark 顾虑.
+
+    ## Output Format
+
+    Produce the evidence pack per `patches/superpowers/_evidence-pack-schema.md`:
+
+    ### (a) Per-requirement verdict
+    One row per spec requirement. Fields (fixed, in order): §ref | verbatim spec excerpt
+    (copy directly, do not rewrite) | artifact location (task-N / task-N.M / task-N 步骤K) |
+    verdict (满足 / 没满足 / 顾虑) | concern (only if verdict=顾虑; advisory, human decides
+    whether it blocks).
+
+    ### (b) Uncovered scan
+    Table: §ref | uncovered requirement (verbatim excerpt) | nature (必做 / 边界 / 明确不做).
+    Empty table = full coverage.
+
+    ### (c) Cross-model review column
+    - codex status: invoked / not invoked (plan stage optional)
+    - codex conclusion: [verbatim if invoked, or "codex 未调用（plan 阶段可选）"]
+    - cross-model uncovered supplement: merged into (b) for re-check, or "无补充"
+
+    ## Status
+    **Status:** Approved | Issues Found
+
+    **Issues (if any):**
+    - R? (§X.X): [what's missing]
+
+    **Recommendations (advisory, do not block approval):**
+    - [non-blocking suggestions]
+```
 
 - Agent description: "Review plan spec coverage"
-- Inputs: replace [PLAN_FILE_PATH] and [SPEC_FILE_PATH] with actual paths
+- Inputs: replace [PLAN_FILE_PATH], [SPEC_FILE_PATH], and [moderate | complex] with actual values
 
-If the subagent finds ❌ issues: fix them inline by adding or modifying tasks, then
-re-dispatch. Maximum 2 rounds. Fixing ⚠️ only does not require re-dispatch.
+If the subagent finds 没满足 issues: fix them inline by adding or modifying tasks, then
+re-dispatch. Maximum 2 rounds. Fixing 顾虑 only does not require re-dispatch.
 
 **2. Placeholder scan (self-check):**
 
 Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
-**3. Type consistency (self-check):**
+**3. Type consistency (self-check, complex only — lightweight plans have no implementation briefs):**
 
 Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks?
 
@@ -494,8 +555,16 @@ If you find issues, fix them inline. No need to re-review.
 1. TaskUpdate(current task, completed)
 2. TaskList → find next pending task (source: codesop-pipeline) → execute immediately
 
-Completion points by tier:
-- simple/moderate: after Lightweight Plan is written
-- complex: after all three stages complete (skeleton → expansion → self-review)
+Completion points by tier (spec §2.2-2.3 three-way routing):
+- **simple**: NO plan stage — proceed directly to /goal (spec is the goal file; implementer
+  self-decomposes inside /goal). The plan-writing skill is not invoked for simple.
+- **moderate**: after Lightweight Plan is written + lightweight spec-coverage review produces the
+  evidence pack (Requirement Traceability + Acceptance IDs verified).
+- **complex**: after all three stages complete (skeleton → expansion → self-review) + full
+  spec-coverage review produces the evidence pack (implementation briefs verified against Gn).
+
+**Note on plan-gate:** the human plan-gate (advisory, default-pass after AI self-proof) is owned
+by `SKILL.md` (codesop main skill), NOT this writing-plans patch. writing-plans produces the plan
+and the evidence pack; the codesop-level gate adjudicates advisory concerns. Do not block here.
 
 The task list was already approved. Proceed without asking.
