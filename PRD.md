@@ -81,7 +81,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v3.10.0.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.0.0.
 
 ## 5. 产品核心规范
 
