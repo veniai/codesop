@@ -27,6 +27,10 @@
     6. (v9 R9) codex high-risk 复核: when delivering a high-risk item, codex MUST re-check
        (consistent with T3 brainstorming high-risk enforcement); codex genuinely unavailable
        → degrade to advisory (human adjudicates), NEVER auto-judge 满足.
+  7. (adversarial-review R1) §C.2 high-risk deliver 前对抗式审查: Gate Function + 证据包后,
+     high-risk 加攻击者视角扫边界 bug (11 类, 含但不限于). 复用动态工作流多 agent (AI 自动)
+     + codex:adversarial-review (用户手动), 不另造. low 判定可疑升级 high. 双机制不可用降级
+     单 agent. 找到的 bug 进证据包 blocking. 互补 Gate Function (功能对 vs 搞不崩).
   Why: upstream Gate Function catches "claimed pass without running" but does NOT catch
     "ran pass then weakened the test to manufacture it" (test deletion / skip surge / coverage
     threshold drop / lint config relaxation). The diff guard (R8) closes that hole. The
@@ -288,6 +292,23 @@ deliver **high-risk** codex 必复核：
 
 **与 T3 brainstorming 一致**（spec 阶段 high-risk 强制）；与 T4 writing-plans spec-coverage
 同 schema、同 AND 锚点。三阶段 high-risk 路径统一：codex 强制 + 人审，不可静默跳过。
+
+### C.2 对抗式审查（high-risk deliver 前，adversarial-review 强化）
+
+Gate Function 五步 + Step 6 diff 守护 + 证据包组装（§A）全过后，**high-risk deliver 前加一轮攻击者视角扫**——不是再验证"功能对不对"，是站**"恶意用户怎么搞崩"**角度全链路找边界 bug。
+
+**触发**：deliver-gate 风险分级 = **high**（§C）；或 **low 判定可疑兜底**——deliver 涉及**鉴权 / 外部输入 / 并发 / 资源 / 注入面**，即使 spec 声明 low（§C 自动过）也**升级 high** 走对抗式审查（防 spec 作者误判 low 放过边界 bug）。
+
+**攻击者视角扫的边界 bug 类（含但不限于）**：OOM 死循环 / 未来时间污染 / 缓存穿透 / 超大数据 / 性能炸弹（ReDoS）/ 资源泄漏（文件句柄·连接池·内存渐进）/ 并发竞态（race·死锁·TOCTOU）/ 权限越界（鉴权绕过·IDOR）/ 注入（SQL·命令·XSS·路径穿越）/ 日志泄敏 / 降级熔断失效。
+
+**执行机制（复用，不另造攻击者 agent）**：
+- **动态工作流多 agent（AI 自动走）**：ultracode 开时 dispatch N 个 skeptic 攻击者 subagent（adversarial verify pattern），各站攻击者视角找一类边界 bug，投票汇总
+- **codex:adversarial-review（用户手动）**：跨模型第二意见挑战设计假设（路由卡约束：用户手动触发，AI 不可自动调用）
+- **双机制都不可用降级**：ultracode 未开 + codex:adversarial-review 未触发 → **至少单 agent 攻击者视角扫**（不静默跳过，advisory 给人定夺——延续 §B"不静默丢锚点"）
+
+**找到的 bug 进证据包 blocking**：对抗式审查发现的 bug 进证据包 (a) 判定为 **blocking**（没满足），不清零不交付（衔接 §A）；边界类（理论可能但无复现路径）降 advisory 给人定夺（§D）。
+
+**与 Gate Function 分工**：Gate Function 证"功能对 + 测试过 + diff 没削弱"；对抗式审查证"攻击者视角找不到搞崩路径"。互补不替代。
 
 ## D. advisory 语义（防漂移）
 

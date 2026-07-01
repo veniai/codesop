@@ -23,7 +23,7 @@
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: understand-anything 接入（路由表大类 0 + check_understand_usability 7 状态可用性检测）
+- **最后更新原因**: 对抗式审查 v4.2.0（verification §C.2 high-risk deliver 前攻击者视角扫边界 bug）
 
 ## 2. 当前进度
 
@@ -31,12 +31,13 @@
 - 无
 
 ### 2.2 Next Up
-- **对抗式审查（剩候选，第一性原理 v4.1.0 已落地）**：交付前多 agent 攻击者视角全链路扫 bug（复用动态工作流 adversarial verify + codex:adversarial-review）。codesop 已有骨架（verification/code-review），缺的是显式化，不加新 skill。来源：卡兹克《2 个 Vibe Coding 神级 Prompt》
+- 无（v4.1.0 第一性原理 + v4.2.0 对抗式审查均落地；按需迭代）
 
 ### 2.3 Blocked
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.2.0: 对抗式审查（feat/adversarial-review）— verification patch §C.2 high-risk deliver 前加攻击者视角扫边界 bug（11 类含但不限于：OOM/未来时间/缓存穿透/超大数据/性能炸弹/资源泄漏/并发竞态/权限越界/注入/日志泄敏/降级熔断失效）+ 复用动态工作流（AI 自动）+ codex:adversarial-review（用户手动）+ 双机制降级单 agent + low 判定可疑升级 high + 找到的 bug 进证据包 blocking；tests/adversarial-review-behavior.sh；simple 路径（spec-gate→跳 plan→实施）；codex Cloudflare+代理坏 R9 降级人审补 2 漏洞；run_all 15/0
 - [x] v4.1.0: 第一性原理强化（feat/first-principles）— brainstorming 加第一性原理推导步骤（造方案前从基本事实推）+ systematic-debugging 强化找根因（SKILL/路由卡）+ tests/first-principles-behavior.sh；simple 路径（spec-gate→跳 plan→实施）+ review Approved + run_all 14/0
 - [x] v9: spec-as-goal 实施（feat/spec-as-goal）— /goal 范式（spec 立住=分水岭，前造目标/后跑目标）+ 三 gate 降级（spec-gate 硬 / plan-gate 默认过 / deliver-gate 风险分级）+ spec-gate rubric 五项 + /goal 协同四步（SKILL §8.7）+ 抽样人审 + spec 变更重走；patches 加 verification-before-completion（新建）+ _evidence-pack-schema（新建 sibling 同步）+ brainstorming/writing-plans v9 改；tests 加 spec-as-goal-behavior.sh（R1-R4）+ setup-patch-sync.sh（fake 树真跑 setup）；7 task SDD + final review 可 merge + run_all 13/0
 - [x] understand-anything 接入（feat/understand-anything-integration）— 路由表新增「0. 项目理解与导航」大类 + `lib/detection.sh` `check_understand_usability`（7 状态可用性检测）+ SKILL §2/§4.1 工作台注意行 + README 兼容生态段 + `tests/detect-understand.sh`；spec 经 codex 三审 + detection 实测（bash -n + 7 状态 + worktree + 子目录）
@@ -55,6 +56,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-01 | 对抗式审查视角强化（v4.2.0）| verification 测试过不保证上线稳——边界 bug（OOM/未来时间/注入等）自己写代码想不到。卡兹克第二点 | verification patch §C.2 high-risk deliver 前攻击者视角扫边界 bug（11 类）+ 复用动态工作流/codex:adversarial-review + low 升级兜底 + 双机制降级；不加 skill 强化 deliver-gate；codex 不可用 R9 降级人审补 2 漏洞（边界 bug 类不全 + low 无兜底）|
 | 2026-06-30 | 第一性原理视角强化（v4.1.0）| AI 默认类比推理（照搬训练数据相似方案），第一性原理强制从基本事实推。卡兹克第一点 | brainstorming patch 加推导步骤 + SKILL/路由卡 debugging 强化 + tests；不加 skill，prompt 视角内化 |
 | 2026-06-29 | /goal 范式：spec-as-goal v9 取代 v8 spec-as-truth | spec 立住后 /goal（Claude Code v2.1.139+ 命令）主导执行，codesop 退为验证层——避免 codesop 与宿主原生执行流重复造轮子；spec 立住前的"造目标"仍归 codesop（brainstorming spec 三件） | SKILL §8.7 /goal 协同四步（启动/每轮 dispatch 证据包/退出 deliver-gate/失败码）+ 三 gate 降级（spec-gate 硬 / plan-gate 默认过 / deliver-gate 风险分级）+ verification-before-completion patch + _evidence-pack-schema sibling 同步；v8 spec-as-truth/plan 标 superseded |
 | 2026-06-22 | 接入 understand-anything 作为「0. 项目理解与导航」路由环节 + 7 状态可用性检测 | 12 大类缺"项目理解"环节（靠 brainstorming 兜底且兜不好）；图谱过期/损坏会误导 AI（codex 实证 AIGIS-V5 drift） | 路由表大类 0 + `lib/detection.sh` `check_understand_usability`（absent/corrupt/unknown_head/stale_on/stale_off/fresh_on/fresh_degraded）+ SKILL §2/§4.1 + tests；**stale 降级使用非跳过**；spec 三审 + detection 实测驱动 |

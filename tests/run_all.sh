@@ -16,6 +16,7 @@ suites=(
   skill-routing-coverage.sh
   spec-as-goal-behavior.sh
   first-principles-behavior.sh
+  adversarial-review-behavior.sh
   setup-patch-sync.sh
   dep-upgrade.sh
   codesop-e2e.sh
