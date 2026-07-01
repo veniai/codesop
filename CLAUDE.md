@@ -68,7 +68,8 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │       ├── verification-before-completion-SKILL.md  # v9 新建: deliver-gate 风险分级 + diff 守护；v4.2: §C.2 对抗式审查
 │       ├── _evidence-pack-schema.md         # v9 新建: 证据包 schema（setup 同步为 sibling）
 │       └── finishing-a-development-branch-SKILL.md
-├── setup                   # Host-aware installation script (router card + hook config + skill patches)
+├── install.sh              # 用户一键入口（git clone + bash install.sh，内部调 setup --host auto）
+├── setup                   # Host-aware installer (router card + hook config + skill patches)
 ├── SKILL.md                # Full skill definition for /codesop; target source of truth
 ├── AGENTS.md               # → @CLAUDE.md (project-level reference)
 ├── CLAUDE.md               # This file

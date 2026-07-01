@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.4.2] - 2026-07-01
+
+### Fixed — 全方位诊断 P2 清理（17 问题全清）
+- **HOME 守卫**：commands.sh:31-33 + install.sh:8 裸 `$HOME` → `${HOME:-$(echo ~)}`（Key Gotcha 一致性，hook/IDE 环境安全）
+- **删孤儿模板** templates/init/prompt.md（无生产引用）
+- **SKILL §8 init 补 docs/adr/**（实际 init 生成 docs/adr，文档漏列）
+- **brainstorming "v7 §4.3 hole" → "v7 codex-skip 漏洞"**（去不可证 §引用，patch 头部 + 正文 2 处）
+- **project/README.md 模板去 npm 硬编码** → 通用占位（按技术栈 npm/pip/cargo/go，非 JS 项目不误导）
+- **CLAUDE 架构图补 install.sh**（用户一键入口调 setup；此前只列 setup）
+
+run_all 18/0。**至此 v4.4 全方位诊断 P0+P1+P2 共 17 问题全清。**
+
 ## [4.4.1] - 2026-07-01
 
 ### Fixed — 全方位诊断 P1 清理（v8 命名残留 + bare return + 覆盖缺口）

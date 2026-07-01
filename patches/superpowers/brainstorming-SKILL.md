@@ -23,7 +23,7 @@
        high-risk「满足」entry degrades to advisory (human adjudicates) — it is NOT auto-judged
        满足. Non-high-risk entries: codex unavailable → degrade to advisory (column (c) marked
        "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
-       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 §4.3 hole
+       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 codex-skip 漏洞
        where codex-unavailable silently bypassed the cross-model anchor.
     8. (first-principles v1) First-principles derivation step added to "Exploring approaches":
        before proposing 2-3 approaches, AI MUST first derive the solution from basic facts /
@@ -195,7 +195,7 @@ Immediately after the inline self-review, invoke `codex:rescue` to cross-model r
 
 - Invoke the `codex:rescue` skill with a prompt like: "Cross-model review the spec at `<SPEC_PATH>`. Look for: placeholders/TODOs, internal contradictions, requirements ambiguous enough to cause someone to build the wrong thing, scope drift across multiple independent subsystems, unrequested/over-engineered features (YAGNI), AND — per v9 R1 — any requirement missing 三件 (machine-verifiable 完成条件 / 同字段 边界 / low-high 风险分级). Pay extra attention to entries the spec marks `风险分级: high` (public behavior / cross-module / external interface). Report findings verbatim — do not rewrite the spec."
 - **Capture codex's output verbatim** (do not rewrite, summarize, or soften). This output lands in the evidence pack's (c) cross-model review column.
-- **(v9 R9) High-risk「满足」MUST be re-checked by codex — never mark "跳过".** When the evidence-pack (a) step below judges a `风险分级: high` requirement as 「满足」, that verdict is NOT final until codex has re-reviewed it. This closes the v7 §4.3 hole where codex-unavailable silently bypassed the cross-model anchor exactly on the riskiest entries.
+- **(v9 R9) High-risk「满足」MUST be re-checked by codex — never mark "跳过".** When the evidence-pack (a) step below judges a `风险分级: high` requirement as 「满足」, that verdict is NOT final until codex has re-reviewed it. This closes the v7 codex-skip 漏洞 where codex-unavailable silently bypassed the cross-model anchor exactly on the riskiest entries.
   - **codex available** → codex re-checks the high-risk「满足」entry; its verbatim finding lands in column (c). If codex disagrees (flags it 没满足 / 顾虑), the entry reverts to blocker/major and re-enters the AI self-proof loop.
   - **codex genuinely unavailable** (skill missing / runtime error / timeout / empty output) → the high-risk「满足」entry **degrades to advisory** (downgrades verdict to `顾虑`, marks "high-risk codex 强制未走，降级 advisory" in column (c), escalates to human at spec-gate). It is **NOT auto-judged 满足** — the human decides whether it blocks. The (a) per-requirement and (b) uncovered-scan columns are still produced.
   - **Non-high-risk entries** keep v8's degrade-on-failure: codex unavailable → mark column (c) as `codex 不可用，降级 advisory` and proceed. The spec stage still MUST walk the codex step (schema §4: ① spec 必走 codex:rescue) — when codex is down the entry degrades to advisory (human-visible, non-blocking) rather than being silently skipped. "跳过" = silent anchor loss, which violates R9's spirit; codex being down must NOT block the spec stage for low-risk entries, but the degradation MUST be recorded in column (c).
