@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-07-01
+
+### Changed — doc-consistency：/goal 分水岭贯穿工作台输出层
+- **SKILL §3 step 9**：链路组装加 /goal 分水岭边界（组装到 spec-gate，spec 后 /goal 接管）
+- **SKILL §4.3/§4.5**：pipeline 示例从 v3.x 全程 10 步编排改为"造目标段（codesop）+ 跑目标段（/goal）"
+- **SKILL §4.4**：auto-proceed 加 spec-gate 边界
+- **SKILL §5**：文档判定 gate 明确在 deliver-gate 之后触发
+- **SKILL §8.5**："/goal 不可用降级"的 "v8-style pipeline" 改 "codesop pipeline（§3 step 10.5）"（v8 superseded 命名清理）
+- **SKILL §3 step 10.5**：衔接任务（创建分支）锚点改 spec-gate 后 + pipeline 适用边界（造目标 + 降级）
+- **路由卡 v3→v4**：链路组装分"造目标段（codesop 编排）/ 跑目标段（嵌 /goal 完成条件）"
+
+### Fixed
+- v4.0 /goal 范式（v9 加在 §1.1/§8.5/§8.7）此前没贯穿工作台输出层（§3/§4/路由卡仍 v3.x 全程编排口吻），SKILL 内部矛盾（§8 说 /goal 主导 vs §3/§4 说 codesop 全程编排）。本次贯穿
+
 ## [4.2.0] - 2026-07-01
 
 ### Added — 对抗式审查视角强化

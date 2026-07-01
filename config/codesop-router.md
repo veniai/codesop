@@ -1,4 +1,4 @@
-## codesop 路由卡 (v3)
+## codesop 路由卡 (v4)
 
 新任务必须先输出任务对齐块（理解 + 阶段 + Skill）。
 完整 pipeline 定义见 /codesop。
@@ -53,9 +53,9 @@
 | | | plugin | codex:adversarial-review | 高风险操作需要挑战设计假设和实现选择时 ⚠️ 需用户手动输入 |
 
 ### 链路组装（路由表是链路唯一真相源）
-所有链路必须应用以下插入规则（☆=有插件时走）：
-开发前 → 如在 main/master 上则插入 using-git-worktrees（优先 EnterWorktree 隔离工作区）| 开发后 → ☆code-simplifier:code-simplifier | 验证后 → ☆claude-md-management:claude-md-improver | 设计后 → ★codex:rescue
-跨模块改动 / 大仓库（锚点：≥2 个路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（建立全局上下文；图谱不可用则跳过回退读 CONTEXT.md/ADR；stale 则降级使用并提示更新）| 同锚点场景开发后 → 验证前条件插入 understand-anything:understand-diff（辅助影响面复核；不可用跳过；stale 降级并提示）
+**v4.0 /goal 分水岭**：链路组装到 **spec-gate 为止**（造目标段 codesop 编排）；spec-gate 后 `/goal` 接管 dev/verify/finishing，spec 后步骤嵌 `/goal` 完成条件、非 codesop pipeline。
+**造目标段**（codesop 编排，☆=有插件时走）：设计后 → ★codex:rescue | 跨模块（锚点：≥2 路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（不可用跳过回退 CONTEXT.md/ADR；stale 降级提示）
+**跑目标段**（spec-gate 后，嵌 `/goal` 完成条件）：/goal 启动前 → main 上建分支 / using-git-worktrees | /goal dev 后 → ☆code-simplifier | /goal verify 后 → ☆claude-md-management | 跨模块同锚点 /goal dev 后 → understand-anything:understand-diff（辅助；不可用跳过；stale 降级）
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
