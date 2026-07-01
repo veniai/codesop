@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.3.1: iron-laws 分层 + design approval 澄清（feat/v4.3.1）— §9 Iron Laws 分 v4.0 /goal 范式铁律(9) / 通用工程铁律(7)；§8.5 加注 brainstorming design approval ≠ spec-gate；run_all 15/0
 - [x] v4.3.0: doc-consistency（feat/v4.3-doc-consistency）— /goal 分水岭贯穿工作台输出层（§3 step 9 链路组装 + §4.3/4.5 pipeline 示例 + §4.4 auto-proceed + 路由卡链路组装分造目标/跑目标段）+ §5 文档判定 gate 明确 deliver-gate 后 + §8.5 v8-style 命名清理 + §3 衔接任务锚点 spec-gate；修 v4.0 范式没贯穿输出层的内部矛盾；深度核查（逐行 SKILL + 路由卡 + patch）发现 7 处真实张力；run_all 15/0
 - [x] v4.2.0: 对抗式审查（feat/adversarial-review）— verification patch §C.2 high-risk deliver 前加攻击者视角扫边界 bug（11 类含但不限于：OOM/未来时间/缓存穿透/超大数据/性能炸弹/资源泄漏/并发竞态/权限越界/注入/日志泄敏/降级熔断失效）+ 复用动态工作流（AI 自动）+ codex:adversarial-review（用户手动）+ 双机制降级单 agent + low 判定可疑升级 high + 找到的 bug 进证据包 blocking；tests/adversarial-review-behavior.sh；simple 路径（spec-gate→跳 plan→实施）；codex Cloudflare+代理坏 R9 降级人审补 2 漏洞；run_all 15/0
 - [x] v4.1.0: 第一性原理强化（feat/first-principles）— brainstorming 加第一性原理推导步骤（造方案前从基本事实推）+ systematic-debugging 强化找根因（SKILL/路由卡）+ tests/first-principles-behavior.sh；simple 路径（spec-gate→跳 plan→实施）+ review Approved + run_all 14/0
