@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [4.3.1] - 2026-07-01
+
+### Changed
+- **§9 Iron Laws 分层**：v4.0 /goal 范式铁律（9 条）与通用工程铁律（7 条）分组
+- **§8.5 加注**：brainstorming design approval（方向认可）≠ spec-gate（质量硬审）澄清——两个阶段不重复
+
 ## [4.3.0] - 2026-07-01
 
 ### Changed — doc-consistency：/goal 分水岭贯穿工作台输出层

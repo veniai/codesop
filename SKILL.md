@@ -422,6 +422,8 @@ complex 多走 plan 不是流程教条，是复杂度管理——复杂任务依
 | **plan-gate** | 降级：AI 自证清零后默认通过；人只扫 advisory，不阻塞 re-entry |
 | **deliver-gate** | 风险分级：low risk（simple / 纯重构）自动过；high risk（改 public 行为 / 跨模块 / 外部接口）强制人审 |
 
+**注**：brainstorming 的 design approval（present design 后用户认可方向，upstream 固有）≠ spec-gate（spec 立住后质量硬审 rubric 五项）。前者轻（防做错方向），后者重（审 spec 质量）——两个阶段，不重复。
+
 **/goal 不可用降级**：`/goal` 命令缺失 / 宿主不支持 / dispatch subagent 失败 / `/goal` 死循环（默认 10 轮未收敛）→ **回退 codesop pipeline（§3 step 10.5）**（codesop 主导逐步执行 + 三 gate 人审）**或**停止升级人，附最近一轮证据包 + 已尝试路径——**不静默改走普通执行**（普通执行无 spec 锚点，等于放飞 AI，违背分水岭命题）。
 
 ## 8.7 /goal 协同四步 + gate 流程机制
@@ -503,6 +505,8 @@ codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外
 
 ## 9. Iron Laws
 
+**v4.0 /goal 范式铁律**：
+
 | Iron Law | Source |
 |----------|--------|
 | spec 即目标文件：自带三件（完成条件 + 边界 + 风险分级），plan / 代码必须满足 spec | /goal 分水岭 |
@@ -512,8 +516,13 @@ codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外
 | 完成条件引用外部锚点信号（不认 AI 自述，至少一项 mechanical） | /goal 分水岭 |
 | spec 变更重走：人改 spec → 回 ① 重走，不搞失效标记 | /goal 分水岭 |
 | /goal 不可用降级：回退 pipeline 或停升级人，不静默改走普通执行 | /goal 分水岭 |
-| /goal 协同四步：启动（spec-gate 通过→调 /goal）/ 每轮（dispatch 独立 subagent 出证据包→round-N.md）/ 退出（读最后证据包→deliver-gate）/ 失败码（N 轮未收敛→停升级人，不静默） | /goal 协同机制 |
-| 抽样人审：1/N（默认 5）随机抽 deliver 强制人扫证据包，记 audit-log.md（soft 威慑，非阻断） | /goal 协同机制 |
+| /goal 协同四步：启动（spec-gate 通过→调 /goal）/ 每轮（dispatch 证据包→round-N.md）/ 退出（读最后证据包→deliver-gate）/ 失败码（停升级人） | /goal 协同机制 |
+| 抽样人审：1/N（默认 5）随机抽 deliver 强制人扫证据包，记 audit-log.md | /goal 协同机制 |
+
+**通用工程铁律**：
+
+| Iron Law | Source |
+|----------|--------|
 | No code without design approval | brainstorming |
 | No production code without failing test first | TDD |
 | No fix without root cause investigation（第一性原理找根因：从基本事实/约束推根因，不照搬"类似 bug 这样修"） | systematic-debugging |
