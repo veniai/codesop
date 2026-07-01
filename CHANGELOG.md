@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-07-01
+
+### Added — 对抗式审查视角强化
+- **verification patch §C.2**: high-risk deliver 前加攻击者视角扫边界 bug（11 类含但不限于：OOM 死循环/未来时间污染/缓存穿透/超大数据/性能炸弹/资源泄漏/并发竞态/权限越界/注入/日志泄敏/降级熔断失效）；复用动态工作流多 agent（AI 自动）+ codex:adversarial-review（用户手动），不另造攻击者 agent
+- **low 判定可疑兜底**: deliver 涉鉴权/外部输入/并发/资源/注入面，即使 spec 声明 low 也升级 high 走对抗式
+- **双机制都不可用降级**: ultracode 未开 + codex:adversarial-review 未触发 → 至少单 agent 攻击者视角扫（不静默跳过）
+- **找到的 bug 进证据包 blocking**: 不清零不交付
+- **tests/adversarial-review-behavior.sh**: golden-content 行为测试（11 断言）
+
+### Changed
+- 不加新 skill（强化 verification deliver-gate §C.2）；衔接 v9 证据包 + AI 自证循环
+- codex 跨模型审不可用（Cloudflare IP 封锁 + Hiddify 代理坏）→ R9 降级人审，补 2 spec 漏洞（边界 bug 类不全 + low 无兜底）
+
 ## [4.1.0] - 2026-06-30
 
 ### Added — 第一性原理视角强化
