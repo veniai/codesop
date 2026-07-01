@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-07-01
+
+### Fixed — 全方位诊断 P0 + 防再犯守卫
+- **P0-1 init 访谈死代码**：删 codesop 自己的访谈机制（check_user_preferences/has_user_preferences/interview_user_preferences + 占位符 sed + AskUserQuestion）+ 假绿测试 codesop-init-interview.sh；偏好由 Claude Code /init + 全局 CLAUDE.md 管，codesop init 只生成标准模板
+- **P0-2 PRD 版本脱节**：§1 里程碑/§4 Current 同步（之前停 v3.10.1/v4.0.0）
+- **P0-3 schema §4.x 错引**：_evidence-pack-schema 的 spec §号对齐实际章节（§4.1→自定/§4.5、§4.3→§5#4+§8、§4.4→brainstorming skill）
+- **P0-4 spec 关联悬空**：spec-as-goal.md 删 spec-three-cycles.md（SUPERSEDED plan）关联
+
+### Added — 防再犯守卫（治"为什么之前没发现"根因）
+- tests/consistency-guards.sh：A 引用存在 / B run_all 一致 / C 版本快照（VERSION==PRD §1==§4）
+- tests/init-deadcode-removed.sh：D init 无访谈 + 真实模板无占位符（禁合成 fixture）
+- run_all 注册 codesop-uninstall.sh（32 断言此前零覆盖，B 暴露）
+
+### Changed
+- commands/codesop-init.md：删 Step 1-3 访谈入口，重编号 + Phase 1 清
+- CLAUDE.md：Init Flow Phase 1（删访谈）+ 模块描述 + 死测试引用更新
+
+### 根因（codex 审点出）
+测试假绿 + 跨文件软引用无绑定 + 聚焦加法没扫存量 + codex 跨模型审长期不可用。本次补防再犯守卫 + codex 恢复（Hiddify 停，ohmycdn 直连）
+
 ## [4.3.1] - 2026-07-01
 
 ### Changed

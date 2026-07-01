@@ -10,9 +10,11 @@ suites=(
   detect-understand.sh
   setup.sh
   codesop-init.sh
-  codesop-init-interview.sh
+  init-deadcode-removed.sh
+  consistency-guards.sh
   codesop-symlink.sh
   codesop-update.sh
+  codesop-uninstall.sh
   skill-routing-coverage.sh
   spec-as-goal-behavior.sh
   first-principles-behavior.sh

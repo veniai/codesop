@@ -38,9 +38,8 @@ mkdir -p "$claude_home/.claude"
 
 claude_output="$(HOME="$claude_home" bash "$CLI" init "$project_dir" 2>&1)"
 
-assert_contains "$claude_output" "codesop 初始化面试流程"
+assert_contains "$claude_output" "codesop 初始化流程"
 assert_contains "$claude_output" "=== Phase 0: 工具检测与环境配置 ==="
-assert_contains "$claude_output" "=== Phase 1: 用户偏好 ==="
 assert_contains "$claude_output" "=== Phase 3: 项目级文件 ==="
 assert_contains "$claude_output" "=== Phase 4: 技能检查 ==="
 assert_contains "$claude_output" "✓ 创建 AGENTS.md"

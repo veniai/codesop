@@ -27,7 +27,7 @@ EOF
 
 output="$(HOME="$home_dir" bash "$home_dir/.local/bin/codesop" init "$project_dir" 2>&1)"
 
-assert_contains "$output" "codesop 初始化面试流程"
+assert_contains "$output" "codesop 初始化流程"
 assert_contains "$output" "✓ 创建 AGENTS.md"
 assert_contains "$output" "✓ 创建 PRD.md"
 assert_contains "$output" "✓ 创建 README.md"
