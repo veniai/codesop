@@ -3,7 +3,7 @@
 **日期**：2026-06-29
 **状态**：Draft v2（dogfood §6：本文每条变更点自带完成条件 + 边界 + 风险分级）
 **定位**：spec 三次循环 v7/v8 的**方向演进**，覆盖 v7（不留两份真相源）。保留三层锚点 / 证据包 / spec 标杆 / AI 自证循环；新增：① 三 human-gate 降级 ② `/goal` 接管 spec 后执行 ③ 五条古德哈特防御 ④ pipeline/skill 角色转换 ⑤ spec 即目标文件。
-**关联**：`2026-06-27-spec-as-truth-full-pipeline.md`（v7）、`2026-06-29-spec-three-cycles.md`（plan，T1-T7 执行中）、卡兹克《Loop Engineering》（mp.weixin.qq.com/s/omwt7d9BSFX7kotW9vo9bQ）
+**关联**：`2026-06-27-spec-as-truth-full-pipeline.md`（v7）、卡兹克《Loop Engineering》（mp.weixin.qq.com/s/omwt7d9BSFX7kotW9vo9bQ）
 
 ---
 

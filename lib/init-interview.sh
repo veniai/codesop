@@ -4,47 +4,10 @@
 # This module provides functions for:
 # - Detecting installed AI coding tools
 # - Setting up system-level symbolic links
-# - Checking if user preferences already exist in templates
-# - Detecting placeholder patterns in template files
 #
 # Usage: source this file from another bash script
 #   source /path/to/lib/init-interview.sh
 
-# Check if user preferences already exist
-# Returns 0 if preferences exist (skip interview), 1 if interview is needed
-check_user_preferences() {
-  local template_file="$1"  # templates/system/AGENTS.md
-
-  if [ -f "$template_file" ]; then
-    if has_user_preferences "$template_file"; then
-      echo "用户偏好已存在，跳过面试"
-      return 0
-    fi
-  fi
-  return 1  # Need interview
-}
-
-# Detect if template file contains user preferences (not placeholders)
-# Placeholder format: {LANG}, {STYLE}, {FUNC_LENGTH}, {COMMENT_STYLE}
-# Returns 0 if preferences exist (no placeholders found), 1 if placeholders exist
-has_user_preferences() {
-  local template_file="$1"
-
-  # Validate input
-  if [ -z "$template_file" ]; then
-    return 1
-  fi
-
-  if [ ! -f "$template_file" ]; then
-    return 1
-  fi
-
-  # If file contains {LANG} etc placeholders, user preferences not yet filled
-  if grep -q '{LANG}\|{STYLE}\|{FUNC_LENGTH}\|{COMMENT_STYLE}' "$template_file"; then
-    return 1  # Has placeholders, needs interview
-  fi
-  return 0  # Real preferences filled in
-}
 
 # ============================================================================
 # Tool Detection
@@ -463,134 +426,6 @@ is_interactive() {
   [ -t 0 ]
 }
 
-# Interview user for coding preferences
-# Arguments:
-#   $1 - Template file path (templates/system/AGENTS.md)
-# Returns: 0 on success, 1 on failure
-interview_user_preferences() {
-  local template_file="$1"
-
-  # Validate template file exists
-  if [ -z "$template_file" ]; then
-    echo "Error: Template file path is required" >&2
-    return 1
-  fi
-
-  if [ ! -f "$template_file" ]; then
-    echo "Error: Template file not found: $template_file" >&2
-    return 1
-  fi
-
-  # Check if file is writable
-  if [ ! -w "$template_file" ]; then
-    echo "Error: Template file is not writable: $template_file" >&2
-    return 1
-  fi
-
-  # Check if running interactively
-  if ! is_interactive; then
-    echo "⚠ 非交互式终端，跳过面试（使用默认偏好）"
-    echo "  提示：在终端中运行 'codesop init' 进行偏好设置"
-    # Use default values
-    local lang="中文"
-    local style="标准"
-    local func_length="建议 <= 50 行"
-    local comment_style="必要才注释"
-
-    # Replace template variables
-    local temp_file
-    temp_file=$(mktemp)
-    sed -e "s/{LANG}/$lang/g" \
-        -e "s/{STYLE}/$style/g" \
-        -e "s/{FUNC_LENGTH}/$func_length/g" \
-        -e "s/{COMMENT_STYLE}/$comment_style/g" \
-        "$template_file" > "$temp_file"
-    mv "$temp_file" "$template_file"
-
-    echo "✓ 已使用默认偏好"
-    return 0
-  fi
-
-  echo "=== 用户偏好面试 ==="
-  echo "这将帮助我生成适合你的系统级 AI 编码契约"
-  echo ""
-
-  # Question 1: Default language
-  echo "1. 你希望 AI 默认使用什么语言？"
-  echo "   [1] 中文"
-  echo "   [2] English"
-  read -p "选择 [1-2]: " lang_choice
-  local lang="中文"
-  [ "$lang_choice" = "2" ] && lang="English"
-
-  # Question 2: Code style
-  echo ""
-  echo "2. 你的代码风格偏好？"
-  echo "   [1] 简洁 - 最少代码完成功能"
-  echo "   [2] 标准 - 平衡可读性和简洁性"
-  echo "   [3] 详细 - 充分注释和类型"
-  read -p "选择 [1-3]: " style_choice
-  local style="标准"
-  [ "$style_choice" = "1" ] && style="简洁"
-  [ "$style_choice" = "3" ] && style="详细"
-
-  # Question 3: Function length preference
-  echo ""
-  echo "3. 函数长度偏好？"
-  echo "   [1] 无限制"
-  echo "   [2] 建议 <= 50 行"
-  echo "   [3] 建议 <= 25 行"
-  read -p "选择 [1-3]: " func_choice
-  local func_length="无限制"
-  [ "$func_choice" = "2" ] && func_length="建议 <= 50 行"
-  [ "$func_choice" = "3" ] && func_length="建议 <= 25 行"
-
-  # Question 4: Comment style
-  echo ""
-  echo "4. 代码注释风格？"
-  echo "   [1] 必要才注释"
-  echo "   [2] 标准注释"
-  echo "   [3] 详细注释"
-  read -p "选择 [1-3]: " comment_choice
-  local comment_style="必要才注释"
-  [ "$comment_choice" = "2" ] && comment_style="标准注释"
-  [ "$comment_choice" = "3" ] && comment_style="详细注释"
-
-  # Replace template variables using sed
-  # Use temporary file for safe in-place editing (compatible with BSD and GNU sed)
-  local temp_file
-  temp_file=$(mktemp)
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to create temporary file" >&2
-    return 1
-  fi
-
-  # Perform variable replacements
-  sed -e "s/{LANG}/$lang/g" \
-      -e "s/{STYLE}/$style/g" \
-      -e "s/{FUNC_LENGTH}/$func_length/g" \
-      -e "s/{COMMENT_STYLE}/$comment_style/g" \
-      "$template_file" > "$temp_file"
-
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to replace template variables" >&2
-    rm -f "$temp_file"
-    return 1
-  fi
-
-  # Move temp file to replace original
-  mv "$temp_file" "$template_file"
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to update template file" >&2
-    rm -f "$temp_file"
-    return 1
-  fi
-
-  echo ""
-  echo "✓ 用户偏好已保存到 $template_file"
-
-  return 0
-}
 
 # ============================================================================
 # Main Entry Functions
@@ -741,7 +576,7 @@ run_init_interview() {
   fi
 
   echo "========================================"
-  echo "  codesop 初始化面试流程"
+  echo "  codesop 初始化流程"
   echo "========================================"
   echo ""
 
@@ -761,20 +596,6 @@ run_init_interview() {
   fi
 
   ensure_new_init_env
-
-  # Phase 1: 检查/生成用户偏好
-  echo ""
-  echo "=== Phase 1: 用户偏好 ==="
-  local template_file="$source_dir/templates/system/AGENTS.md"
-
-  if [ ! -f "$template_file" ]; then
-    echo "Warning: 系统模板文件不存在: $template_file" >&2
-    echo "跳过用户偏好设置"
-  else
-    if ! check_user_preferences "$template_file"; then
-      interview_user_preferences "$template_file"
-    fi
-  fi
 
   # Phase 2: 由用户在 Claude Code 中运行 /init 生成 CLAUDE.md
   # 此处不处理，由 skill 或用户手动执行

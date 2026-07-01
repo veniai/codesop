@@ -17,7 +17,7 @@ bash codesop uninstall          # Remove codesop artifacts (keeps installed plug
 # Core tests
 bash tests/run_all.sh                 # All tests (unified runner)
 bash tests/codesop-router.sh          # Router card consistency + setup integration
-bash tests/codesop-init-interview.sh  # Init interview tests
+bash tests/init-deadcode-removed.sh  # init 死代码防再犯（v4.4 P0-1）
 bash tests/detect-environment.sh      # Documentation consistency tests
 bash tests/detect-understand.sh       # understand-anything 可用性检测（7 状态）
 bash tests/codesop-e2e.sh             # End-to-end test
@@ -46,7 +46,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   ├── detection.sh        # Project detection, find_superpowers_plugin_path(), has_mcp_server(), check_understand_usability()
 │   ├── updates.sh          # Version checking, CHANGELOG extraction, git update checks
 │   ├── commands.sh         # Subcommands; target contract keeps init/update/uninstall
-│   └── init-interview.sh   # Init workflow: tool detection, system links, user preferences, project files
+│   └── init-interview.sh   # Init workflow: tool detection, system links, project files
 ├── commands/               # Sub-command files synced to ~/.claude/commands/
 │   ├── codesop-init.md     # /codesop-init
 │   ├── codesop-update.md   # /codesop-update
@@ -87,8 +87,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 |-------|-------|-------------|
 | 0 | Skill Step 0 | Self-heal: `codesop update` + re-read fresh skill |
 | 0 | CLI | Tool detection, system links, `CLAUDE_CODE_NEW_INIT` |
-| 1 | Skill Step 2-3 | User preference interview (language, style, etc.) |
-| 1 | CLI | Skip if preferences already set |
+| 1 | — | (v4.4 删访谈) 标准偏好硬编码在模板；用户偏好由 Claude Code `/init` + 全局 CLAUDE.md 管 |
 | 2 | — | **User runs `/init`** to generate project CLAUDE.md |
 | 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md |
 | 4 | CLI | Check skill dependencies (`check_skill_dependencies`) |
