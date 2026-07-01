@@ -191,12 +191,12 @@ spec 每条需求必须自带三件：
 
 | 场景 | 降级方案 |
 |---|---|
-| codex 不可用 | (c) 栏标"跳过"；但 **R9**：high-risk「满足」条目降级 advisory，**不自动判满足**，升级人定夺 |
+| codex 不可用 | (c) 栏标"codex 不可用，降级 advisory"；但 **R9**：high-risk「满足」条目降级 advisory，**不自动判满足**，升级人定夺 |
 | /goal 死循环（N 轮未收敛） | 停，升级人，附最近一轮证据包 + 已尝试路径 |
 | 人不在场、deliver-gate high-risk 卡住 | **暂停，不自动合并**，等人回（high-risk 不允许无人交付） |
 | diff 守护检测到测试删减（R8） | 立即停 /goal，按不可缩减边界判失败 |
 | spec-coverage 未覆盖扫描非空（R6） | /goal 继续修，不判满足 |
-| **/goal 不可用**（命令不存在 / 宿主不支持 / dispatch subagent 失败） | 回退 v8-style pipeline（codesop 主导逐步执行 + 三 gate）**或**停止升级人——**不静默改走普通执行**（§4.6 失败码） |
+| **/goal 不可用**（命令不存在 / 宿主不支持 / dispatch subagent 失败） | 回退 codesop pipeline（§3 step 10.5，codesop 主导逐步执行 + 三 gate）**或**停止升级人——**不静默改走普通执行**（§4.6 失败码） |
 
 ---
 

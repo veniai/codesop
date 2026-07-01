@@ -19,11 +19,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v4.4.0
+- **当前里程碑**: v4.4.1
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.4 全方位诊断修复（17 问题：P0 init 死代码/PRD 版本脱节/schema 引用/spec 悬空 + 防再犯测试 A-E + codex 跨模型审恢复）
+- **最后更新原因**: v4.4.1 P1 清理（bare return ×13 + v8 命名残留 + /goal §8.7 测试覆盖缺口）
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.4.1: P1 清理（feat/v4.4.1）— bare return ×13→return 0/$? + brainstorming three-cycles→spec-gate + writing-plans T6→§8.7 D + spec §8 口差/v8-style + CLAUDE patches 注释补 v4.1/v4.2 + tests/goal-collaboration-behavior.sh（§8.7 协同四步覆盖）；run_all 18/0
 - [x] v4.4.0: 全方位诊断 P0 + 防再犯守卫（feat/v4.4）— P0 init 死代码+假绿测试/PRD 版本脱节/schema §4.x 错引/spec 关联悬空 + 防再犯 consistency-guards(A引用/B run_all/C 版本)+init-deadcode-removed(D) + codex 审计划恢复 + run_all 注册 uninstall；run_all 17/0
 - [x] v4.3.1: iron-laws 分层 + design approval 澄清（feat/v4.3.1）— §9 Iron Laws 分 v4.0 /goal 范式铁律(9) / 通用工程铁律(7)；§8.5 加注 brainstorming design approval ≠ spec-gate；run_all 15/0
 - [x] v4.3.0: doc-consistency（feat/v4.3-doc-consistency）— /goal 分水岭贯穿工作台输出层（§3 step 9 链路组装 + §4.3/4.5 pipeline 示例 + §4.4 auto-proceed + 路由卡链路组装分造目标/跑目标段）+ §5 文档判定 gate 明确 deliver-gate 后 + §8.5 v8-style 命名清理 + §3 衔接任务锚点 spec-gate；修 v4.0 范式没贯穿输出层的内部矛盾；深度核查（逐行 SKILL + 路由卡 + patch）发现 7 处真实张力；run_all 15/0
@@ -59,6 +60,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-01 | P1 清理（v4.4.1）| v4.4 诊断剩 6 P1（v8 命名残留/bare return/覆盖缺口）清完 | bare return ×13→return 0/$? + brainstorming three-cycles→spec-gate + writing-plans T6→§8.7 D + spec §8 口差/v8-style + CLAUDE patches 注释 + goal-collaboration-behavior §8.7 测试；run_all 18/0 |
 | 2026-07-01 | 全方位诊断 P0 + 防再犯守卫（v4.4.0）| v4.3 后全方位诊断发现 17 真实问题（init 死代码+假绿测试/PRD 版本脱节/schema 错引/spec 悬空），根因=测试假绿+跨文件软引用无绑定+聚焦加法没扫存量+codex 跨模型审长期不可用 | P0×4 修复 + 防再犯 consistency-guards(A/B/C)+init-deadcode-removed(D) + codex 审计划恢复双 AI + run_all 注册 uninstall；codex 审计划打回补 5 点；run_all 17/0 |
 | 2026-07-01 | doc-consistency：/goal 分水岭贯穿工作台输出层（v4.3.0）| v4.0 /goal 范式（v9 加 §1.1/§8.5/§8.7）没贯穿 §3/§4/路由卡（v3.x 全程编排口吻），SKILL 内部矛盾。逐行核查 SKILL+路由卡+patch 发现 7 处真实张力 | SKILL §3 step 9/§4.3/§4.5/§4.4 + 路由卡链路组装分造目标/跑目标段 + §5 顺序 + §8.5 命名 + §3 衔接任务；run_all 15/0 |
 | 2026-07-01 | 对抗式审查视角强化（v4.2.0）| verification 测试过不保证上线稳——边界 bug（OOM/未来时间/注入等）自己写代码想不到。卡兹克第二点 | verification patch §C.2 high-risk deliver 前攻击者视角扫边界 bug（11 类）+ 复用动态工作流/codex:adversarial-review + low 升级兜底 + 双机制降级；不加 skill 强化 deliver-gate；codex 不可用 R9 降级人审补 2 漏洞（边界 bug 类不全 + low 无兜底）|
@@ -90,7 +92,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.4.0.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.4.1.
 
 ## 5. 产品核心规范
 

@@ -6,7 +6,7 @@
     2. Added ADR trigger — suggests writing ADR when design involves architectural decisions
     3. Added Domain Language Delta — records new terminology, offers to write into CONTEXT.md
     4. Added CONTEXT.md / docs/adr/ check during context exploration
-    5. Spec three-cycles gate: spec self-review → codex:rescue cross-model review (high-risk
+    5. spec-gate 流程（v9，取代 v8 three-cycles 命名）: spec self-review → codex:rescue cross-model review (high-risk
        enforced per item 7; non-high-risk degrade-on-failure, never silent) → evidence-pack
        subagent with INLINE reviewer prompt (five-dimension table completeness/consistency/
        clarity/scope/YAGNI + Calibration sourced from upstream spec-document-reviewer-prompt.md;
@@ -36,7 +36,7 @@
   Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
     exploration before design. ADR trigger and domain-language delta prevent underspecified
     specs from reaching implementation — the #1 cause of rework in codesop pipelines. The
-    three-cycles gate adds AI self-proof + cross-model review before the human gate so humans
+    spec-gate 流程 adds AI self-proof + cross-model review before the human gate so humans
     never receive a half-finished spec to debug. v9 R1 + R9 turn the spec into a goal file
     (三件) and close the codex-skip loophole for high-risk verdicts.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.

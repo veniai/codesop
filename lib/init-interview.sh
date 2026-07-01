@@ -230,7 +230,7 @@ _check_changelog() {
   local update_cmd="$3"
 
   if [ -z "$current_ver" ] || [ "$current_ver" = "unknown" ]; then
-    return
+    return 0
   fi
 
   local latest_ver
@@ -239,7 +239,7 @@ _check_changelog() {
 
   if [ "$current_ver" = "$latest_ver" ]; then
     echo "  已是最新"
-    return
+    return 0
   fi
 
   # Compare versions: if current >= latest, it's up to date
@@ -247,7 +247,7 @@ _check_changelog() {
   higher_ver=$(printf '%s\n%s\n' "$current_ver" "$latest_ver" | sort -V | tail -1)
   if [ "$higher_ver" = "$current_ver" ]; then
     echo "  已是最新"
-    return
+    return 0
   fi
 
   echo "  → 发现新版本: $latest_ver"

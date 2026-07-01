@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-07-01
+
+### Fixed — 全方位诊断 P1 清理（v8 命名残留 + bare return + 覆盖缺口）
+- **bare return ×13 → return 0/return $?**：setup:81（copy_file 后 `return $?` 显式继承）+ updates ×10 + init-interview ×3（Key Gotcha：防继承前命令非 0 退出码）
+- **brainstorming "three-cycles" v8 命名 → spec-gate**（patch 头部 changelog）
+- **writing-plans "(T6)" v8 SUPERSEDED 引用 → §8.7 D**
+- **spec §8 口径**：codex 不可用 (c) 栏"跳过"→"降级 advisory"（对齐 patch/schema）+ "v8-style pipeline"→"codesop pipeline（§3 step 10.5）"
+- **CLAUDE patches 注释补 v4.1/v4.2**：brainstorming（第一性原理）+ verification（§C.2 对抗式审查）
+
+### Added — /goal §8.7 协同四步行为测试
+- tests/goal-collaboration-behavior.sh：§8.7 协同四步（①启动/②每轮/③退出/④失败码）+ round-N.md 证据包 + deliver-gate 衔接 + 不静默改走普通执行——补 v4.0 范式核心覆盖缺口（诊断 P1-4）
+
+run_all 18/0。
+
 ## [4.4.0] - 2026-07-01
 
 ### Fixed — 全方位诊断 P0 + 防再犯守卫

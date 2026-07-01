@@ -63,9 +63,9 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │       └── plans/          # Implementation plans
 ├── patches/                # Skill patches applied by setup on sync
 │   └── superpowers/        # Patched superpowers skill files (5):
-│       ├── brainstorming-SKILL.md           # v9: spec 三件 + codex high-risk + 内联 reviewer
+│       ├── brainstorming-SKILL.md           # v9: spec 三件 + codex high-risk + 内联 reviewer；v4.1: 第一性原理推导
 │       ├── writing-plans-SKILL.md           # v9: simple 跳 plan + 复杂度分流 + emoji→文字
-│       ├── verification-before-completion-SKILL.md  # v9 新建: deliver-gate 风险分级 + diff 守护
+│       ├── verification-before-completion-SKILL.md  # v9 新建: deliver-gate 风险分级 + diff 守护；v4.2: §C.2 对抗式审查
 │       ├── _evidence-pack-schema.md         # v9 新建: 证据包 schema（setup 同步为 sibling）
 │       └── finishing-a-development-branch-SKILL.md
 ├── setup                   # Host-aware installation script (router card + hook config + skill patches)
