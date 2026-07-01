@@ -10,14 +10,14 @@
 ### 安装与启动
 
 ```bash
-# 安装
-npm install
+# 安装依赖（按技术栈：npm install / pip install -r / cargo build / go mod download 等）
+<安装命令>
 
 # 开发
-npm run dev
+<开发命令>
 
 # 测试
-npm run test
+<测试命令>
 ```
 
 ### 环境变量
@@ -35,9 +35,9 @@ npm run test
 ## 测试
 
 ```bash
-npm run test       # 单元测试
-npm run lint       # 代码检查
-npm run build      # 构建检查
+<测试命令>          # 单元测试
+<lint 命令>         # 代码检查
+<构建命令>          # 构建检查
 ```
 
 ## 兼容性

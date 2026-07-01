@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-REPO_DIR="$HOME/codesop"
+REPO_DIR="${HOME:-$(echo ~)}/codesop"
 
 echo "=== codesop installer ==="
 

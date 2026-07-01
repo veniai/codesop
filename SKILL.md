@@ -388,7 +388,7 @@ When no scenario matches:
 
 | Command | Run | What it does |
 |---------|-----|-------------|
-| `/codesop init [path]` | `codesop init <dir>` | Generate AGENTS.md (`@CLAUDE.md`), PRD.md (活文档), README.md (if missing). Defaults to 中文. |
+| `/codesop init [path]` | `codesop init <dir>` | Generate AGENTS.md (`@CLAUDE.md`), PRD.md (活文档), README.md (if missing), docs/adr/ (scaffold). Defaults to 中文. |
 | `/codesop update` | `codesop update` | Check plugin versions → show status → resync host integration. |
 | `/codesop uninstall` | `codesop uninstall` | Remove codesop integration (keeps installed plugins). |
 

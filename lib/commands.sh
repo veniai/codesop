@@ -28,9 +28,9 @@ _resync_and_check() {
 
   # Check plugin dependencies
   local host="unknown"
-  [ -d "$HOME/.config/opencode" ] && host="opencode"
-  [ -d "$HOME/.codex" ] && host="codex"
-  [ -d "$HOME/.claude" ] && host="claude"
+  [ -d "${HOME:-$(echo ~)}/.config/opencode" ] && host="opencode"
+  [ -d "${HOME:-$(echo ~)}/.codex" ] && host="codex"
+  [ -d "${HOME:-$(echo ~)}/.claude" ] && host="claude"
   print_dependency_report "$host"
 
   check_routing_coverage || true
