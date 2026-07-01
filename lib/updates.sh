@@ -487,7 +487,7 @@ extract_changelog_entries() {
   fi
 
   if [ "$local_version" = "unknown" ]; then
-    return
+    return 0
   fi
 
   # Find the line number of the current version heading
@@ -512,7 +512,7 @@ extract_changelog_entries() {
   entry=$(head -n $((start_line - 1)) "$changelog" 2>/dev/null)
 
   if [ -z "$entry" ]; then
-    return
+    return 0
   fi
 
   # Remove top-level title line (e.g. "# Changelog") and trim trailing empty lines
@@ -530,7 +530,7 @@ plugin_update_check() {
 
   if [ ! -f "$plugins_json" ]; then
     printf '%s\n' "- $tool：无法检查（未找到插件注册信息）"
-    return
+    return 0
   fi
 
   # Find the version and install path from the JSON
@@ -543,7 +543,7 @@ plugin_update_check() {
 
   if [ -z "$version" ]; then
     printf '%s\n' "- $tool：无法检查（未找到版本信息）"
-    return
+    return 0
   fi
 
   # Extract latest CHANGELOG entry and compare version
@@ -552,7 +552,7 @@ plugin_update_check() {
     changelog="$install_path/CHANGELOG.md"
   else
     printf '%s\n' "- $tool：$version（插件安装，已是最新）"
-    return
+    return 0
   fi
 
   # Get version from latest CHANGELOG heading
@@ -592,7 +592,7 @@ git_update_check() {
 
   if ! git -C "$repo_dir" rev-parse --git-dir >/dev/null 2>&1; then
     printf '%s\n' "无法检查（非 git 安装）"
-    return
+    return 0
   fi
 
   # Fetch latest from remote (quiet, with timeout to avoid hanging)
@@ -636,7 +636,7 @@ EOF
 
   if [ "${ahead:-0}" = "0" ] && [ "${behind:-0}" = "0" ]; then
     printf '%s\n' "- $tool_name：$local_version（已是最新）"
-    return
+    return 0
   fi
 
   # 远端领先时，优先展示版本变化；若版本未变，则退化为“待更新提交”
@@ -678,12 +678,12 @@ EOF
     else
       printf '\n  更新命令：cd %s && git pull\n' "$repo_dir"
     fi
-    return
+    return 0
   fi
 
   if [ "${ahead:-0}" != "0" ] && [ "${behind:-0}" = "0" ]; then
     printf '%s\n' "- $tool_name：本地领先上游 ${ahead} 个提交，暂不建议自动更新"
-    return
+    return 0
   fi
 
   printf '%s\n' "- $tool_name：无法确认更新状态"

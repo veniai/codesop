@@ -23,7 +23,7 @@
          _evidence-pack-schema.md, NOT duplicated here) — verdict-semantic emojis fully replaced.
        - spec-coverage reviewer prompt stays INLINE in this main SKILL.md (patch_skills syncs this
          this file). plan-gate (human, advisory) is OUT of this patch's scope — lives in SKILL.md
-         (T6), so Pipeline Continuation here has NO plan-gate blocking.
+         (§8.7 D), so Pipeline Continuation here has NO plan-gate blocking.
   Retained from upstream v6.0.3: Global Constraints block, per-task Interfaces block, Task Right-Sizing.
   Why: spec→plan deviations (omission, deformation, granularity) stem from missing the
     "define what done looks like" step. Acceptance criteria + traceability close it; staged
