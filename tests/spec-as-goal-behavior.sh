@@ -128,15 +128,15 @@ assert_in_file "$SKILL" \
   "AI 自证清零后默认通过；人只扫 advisory，不阻塞 re-entry" \
   "R4 plan-gate 默认过 + 不阻塞 re-entry (降级表)"
 
-# R4b: §8.7 D 节 plan-gate 流程也声明默认过
+# R4b: §8.7 D 节 plan-gate 流程声明默认过（v4.6 去重后引用 §8.5）
 assert_in_file "$SKILL" \
-  "AI 自证清零（plan 任务全 done / 无遗留 advisory blocker）→ **默认通过**，进 A① 调 /goal" \
+  "plan-gate**（仅 moderate/complex 走 plan 后）：AI 自证清零 → 默认过" \
   "R4 plan-gate §8.7D default-pass"
 
 # R4c: 人扫 advisory 不阻塞
 assert_in_file "$SKILL" \
-  "人扫 advisory（如有），**不阻塞 re-entry**" \
-  "R4 plan-gate 人扫 advisory 不阻塞 re-entry"
+  "人扫 advisory 不阻塞（§8.5）" \
+  "R4 plan-gate 人扫 advisory 不阻塞"
 
 # R4d: writing-plans 侧 plan-gate 不在本 patch 范围、不在此阻塞（口径一致）
 assert_in_file "$PATCHES/writing-plans-SKILL.md" \

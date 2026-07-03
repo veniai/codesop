@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [4.6.0] - 2026-07-03
+
+### Changed — spec-gate 可视化重构（dispatch 独立 subagent + spec 实质为主）
+实际工作反馈（Cherry）：spec-gate 可视化主 AI 做（无交叉检验）+ 内容套 evidence pack 模板（审完备性，非 spec 实质——"方案对不对" vs "够不够齐"做混）。两层修：
+- **§8.7 B 重写**：spec-gate 可视化派**全新独立 subagent**（交叉检验，非主 AI 自审）+ subagent 渲染两层（**主 spec 实质呈现**：功能去留地图/改动拓扑/数据流/去留卡片；**辅 evidence pack**：rubric 五项）+ completed 认 serve URL（外部锚点，§1.1 第 4 条）
+- **schema §8 改**：spec 实质呈现为主（subagent 读 spec 定制）+ evidence pack 为辅（完备性锚点）
+
+**防空洞**：机制（serve URL 锚点）防"跳过"；独立 subagent + spec 实质任务防"内容做错对象"（Cherry 反馈：套 evidence pack 模板，内容空洞）。两层 = 交叉检验 + 内容对。
+
+### SKILL.md 去重（533→522，-11 行）
+- §8.7 D（plan-gate/deliver-gate）引用 §8.5 三 gate 降级表（不重复）
+- §9 /goal 铁律引用 §1.1/§8.5/§8.7（不重复列 9 条）
+
+run_all 18/0。
+
 ## [4.5.0] - 2026-07-03
 
 ### Changed — spec-gate 归位（架构重构，codex 审 A'）
