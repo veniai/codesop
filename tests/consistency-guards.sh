@@ -49,4 +49,15 @@ grep -q "Current version: v$VER" "$PRD" || fail "C: PRD §4 Current != VERSION(v
 echo "  PASS C（VERSION=$VER == skill.json == PRD §1 == §4）"
 
 echo ""
+echo "=== F: README/CLAUDE 架构段列的目录真实存在（防删文件后文档悬空）==="
+for d in templates/system templates/project lib patches/superpowers config docs commands; do
+  [ -d "$ROOT_DIR/$d" ] || fail "F: 架构段列的目录 $d 不存在（文档悬空）"
+done
+# templates/init 已删（v4.4.2 删孤儿 prompt.md），README/CLAUDE 不该再列
+if grep -qE "templates/init|init/.*[Ii]nit prompt" README.md CLAUDE.md; then
+  fail "F: README/CLAUDE 仍列已删的 templates/init/"
+fi
+echo "  PASS F（架构段目录存在 + 无悬空 init/）"
+
+echo ""
 echo "All consistency guards passed (A 引用存在 / B run_all 一致 / C 版本快照)."
