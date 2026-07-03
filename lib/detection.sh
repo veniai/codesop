@@ -1,4 +1,6 @@
 #!/bin/bash
+# Guard: HOME may be unset when sourced by hooks/IDE
+export HOME="${HOME:-$(echo ~)}"
 # detection.sh - Project environment detection module
 #
 # This module provides a function to detect project language, shape, framework,

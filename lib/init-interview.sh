@@ -1,4 +1,6 @@
 #!/bin/bash
+# Guard: HOME may be unset when sourced by hooks/IDE
+export HOME="${HOME:-$(echo ~)}"
 # init-interview.sh - Tool detection and system-level symlink management
 #
 # This module provides functions for:

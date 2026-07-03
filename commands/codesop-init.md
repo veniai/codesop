@@ -27,7 +27,7 @@ bash ~/.local/bin/codesop init $ARGUMENTS
 
 This handles:
 - Phase 0: tool detection, system links, enable CLAUDE_CODE_NEW_INIT
-- Phase 3: normalize `AGENTS.md` → `@CLAUDE.md`, then generate `PRD.md` and `README.md`
+- Phase 3: normalize `AGENTS.md` → `@CLAUDE.md`, then generate `PRD.md`, `README.md`, and `docs/adr/` scaffold
 - Phase 4: skill dependency checks
 
 ## Step 2: Prompt user to run /init
