@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-07-03
+
+### Changed — spec-gate 归位（架构重构，codex 审 A'）
+spec-gate（人审 rubric + 可视化）从 brainstorming patch **归位到 codesop SKILL §8.7 B**（spec-gate 是 codesop gate，本就该在 codesop 层，不在造 spec 的 brainstorming skill）：
+- **brainstorming 瘦身**：只造 spec + 自审链（inline reviewer + codex 跨模型 + 证据包 + AI self-proof 清 blocker），到**交付 codesop spec-gate** 止。删 spec-gate 人审 + 可视化 + 直接进 writing-plans。流程图/checklist/terminal/头部锚点同步改
+- **SKILL §8.7 B**：改"**读** brainstorming 交出的证据包"（不重复 dispatch，防双出）+ **可视化 serve**（gate 职责，必可视化，非 just-in-time 可选）+ 人审 rubric
+- **setup write_skill_runtime**：`_evidence-pack-schema.md` 同步到 codesop skill 目录（sibling，§8.7 B 引用）
+
+**根因**：spec-gate 可视化寄生 brainstorming，AI 混两个 visual companion（设计讨论 just-in-time vs spec-gate 必可视化）→ 不自动可视化。归位后位置对 + 消歧。codex 审 A'（三点风险全解）+ 锚点残留清理。
+
+run_all 18/0。
+
 ## [4.4.4] - 2026-07-03
 
 ### Changed — 新项目反馈首批（CONTEXT 定位 + superpowers Codex 输出）

@@ -11,7 +11,7 @@
        subagent with INLINE reviewer prompt (five-dimension table completeness/consistency/
        clarity/scope/YAGNI + Calibration sourced from upstream spec-document-reviewer-prompt.md;
        Output Format adapted to the evidence-pack schema) → AI self-proof loop (clear blockers)
-       → spec-gate to human (advisory concerns only). Evidence-pack schema fields reference the
+       → 交付 codesop spec-gate（人审归 codesop §8.7 B）. Evidence-pack schema fields reference the
        shared _evidence-pack-schema.md (sibling at runtime — patch_skills syncs both this main
        SKILL.md and the schema file next to it; the reviewer prompt itself lives inline here).
     6. (v9 R1) Spec-as-goal: every spec requirement MUST carry 三件 — 完成条件 (machine-verifiable)
@@ -20,7 +20,7 @@
        completion condition (not a subjective read of spec prose).
     7. (v9 R9) Cross-model enforcement (tightens v8 degrade-on-failure): high-risk「满足」verdicts
        MUST be re-checked by codex — never mark "跳过". If codex is genuinely unavailable, the
-       high-risk「满足」entry degrades to advisory (human adjudicates) — it is NOT auto-judged
+       high-risk「满足」entry degrades to advisory (codesop spec-gate 人审 adjudicates) — it is NOT auto-judged
        满足. Non-high-risk entries: codex unavailable → degrade to advisory (column (c) marked
        "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
        the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 codex-skip 漏洞
@@ -36,7 +36,7 @@
   Why: upstream brainstorming assumes single-pass Q&A; grill mode ensures deeper requirement
     exploration before design. ADR trigger and domain-language delta prevent underspecified
     specs from reaching implementation — the #1 cause of rework in codesop pipelines. The
-    spec-gate 流程 adds AI self-proof + cross-model review before the human gate so humans
+    spec-gate 流程（v4.5：人审归 codesop）adds AI self-proof + cross-model review before handing to codesop spec-gate, so humans
     never receive a half-finished spec to debug. v9 R1 + R9 turn the spec into a goal file
     (三件) and close the codex-skip loophole for high-risk verdicts.
   Revert: delete this file and run `bash setup --host claude` to restore upstream version.
@@ -70,9 +70,8 @@ You MUST create a task for each of these items and complete them in order:
 4. **Propose 2-3 approaches (first-principles first)** — derive the solution from basic facts / constraints BEFORE proposing; then present 2-3 approaches with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
 6. **Write design doc (spec-as-goal, 三件 required)** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`; EVERY requirement must carry 完成条件 (machine-verifiable) + 边界 (anti-Goodhart) + 风险分级 (low/high); commit
-7. **Spec self-review + codex cross-model + evidence-pack + AI self-proof + spec-gate** — inline self-review (placeholders/contradictions/ambiguity/scope), then codex:rescue cross-model (high-risk「满足」MUST be re-checked, never skipped — see below), then dispatch evidence-pack subagent (INLINE reviewer prompt below), then AI self-proof loop (clear blockers/majors), then escalate spec-gate to human with advisory concerns only (see below)
-8. **User reviews written spec (spec-gate)** — human receives the evidence pack with blockers already cleared; only advisory concerns + high-risk降级 entries remain for human adjudication
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+7. **Spec self-review + codex cross-model + evidence-pack + AI self-proof** — inline self-review (placeholders/contradictions/ambiguity/scope), then codex:rescue cross-model (high-risk「满足」MUST be re-checked, never skipped — see below), then dispatch evidence-pack subagent (INLINE reviewer prompt below), then AI self-proof loop (clear blockers/majors)
+8. **交付 codesop spec-gate** — brainstorming 完成（spec 三件 + 证据包 blockers 清零）；spec-gate 人审（rubric + 可视化）归 codesop（SKILL §8.7 B），不在 brainstorming
 
 ## Process Flow
 
@@ -88,8 +87,7 @@ digraph brainstorming {
     "codex:rescue cross-model\n(high-risk「满足」必复核,\n不得跳过)" [shape=box];
     "Evidence-pack subagent\n(INLINE reviewer prompt)" [shape=box];
     "AI self-proof loop\n(clear blockers/majors)" [shape=diamond];
-    "spec-gate: user reviews\n(advisory + high-risk降级 only)" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "交付 codesop spec-gate\n(人审 rubric + 可视化, SKILL §8.7 B)" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
@@ -102,13 +100,11 @@ digraph brainstorming {
     "codex:rescue cross-model\n(high-risk「满足」必复核,\n不得跳过)" -> "Evidence-pack subagent\n(INLINE reviewer prompt)";
     "Evidence-pack subagent\n(INLINE reviewer prompt)" -> "AI self-proof loop\n(clear blockers/majors)";
     "AI self-proof loop\n(clear blockers/majors)" -> "Evidence-pack subagent\n(INLINE reviewer prompt)" [label="blocker/major found\n→ fix spec, re-review"];
-    "AI self-proof loop\n(clear blockers/majors)" -> "spec-gate: user reviews\n(advisory + high-risk降级 only)" [label="blockers cleared"];
-    "spec-gate: user reviews\n(advisory + high-risk降级 only)" -> "Write design doc\n(spec 三件: 完成条件+边界+风险分级)" [label="changes requested"];
-    "spec-gate: user reviews\n(advisory + high-risk降级 only)" -> "Invoke writing-plans skill" [label="approved"];
+    "AI self-proof loop\n(clear blockers/majors)" -> "交付 codesop spec-gate\n(人审 rubric + 可视化, SKILL §8.7 B)" [label="blockers cleared"];
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is 交付 codesop spec-gate.** brainstorming 完成后交 codesop spec-gate（SKILL §8.7 B：人审 rubric + 可视化）；spec-gate 审过后由 codesop 决定调 `/goal` 或（complex）走 writing-plans——brainstorming 不直接进 writing-plans。
 
 ## The Process
 
@@ -197,7 +193,7 @@ Immediately after the inline self-review, invoke `codex:rescue` to cross-model r
 - **Capture codex's output verbatim** (do not rewrite, summarize, or soften). This output lands in the evidence pack's (c) cross-model review column.
 - **(v9 R9) High-risk「满足」MUST be re-checked by codex — never mark "跳过".** When the evidence-pack (a) step below judges a `风险分级: high` requirement as 「满足」, that verdict is NOT final until codex has re-reviewed it. This closes the v7 codex-skip 漏洞 where codex-unavailable silently bypassed the cross-model anchor exactly on the riskiest entries.
   - **codex available** → codex re-checks the high-risk「满足」entry; its verbatim finding lands in column (c). If codex disagrees (flags it 没满足 / 顾虑), the entry reverts to blocker/major and re-enters the AI self-proof loop.
-  - **codex genuinely unavailable** (skill missing / runtime error / timeout / empty output) → the high-risk「满足」entry **degrades to advisory** (downgrades verdict to `顾虑`, marks "high-risk codex 强制未走，降级 advisory" in column (c), escalates to human at spec-gate). It is **NOT auto-judged 满足** — the human decides whether it blocks. The (a) per-requirement and (b) uncovered-scan columns are still produced.
+  - **codex genuinely unavailable** (skill missing / runtime error / timeout / empty output) → the high-risk「满足」entry **degrades to advisory** (downgrades verdict to `顾虑`, marks "high-risk codex 强制未走，降级 advisory" in column (c), preserved for codesop spec-gate 人审). It is **NOT auto-judged 满足** — codesop spec-gate 人审 decides whether it blocks. The (a) per-requirement and (b) uncovered-scan columns are still produced.
   - **Non-high-risk entries** keep v8's degrade-on-failure: codex unavailable → mark column (c) as `codex 不可用，降级 advisory` and proceed. The spec stage still MUST walk the codex step (schema §4: ① spec 必走 codex:rescue) — when codex is down the entry degrades to advisory (human-visible, non-blocking) rather than being silently skipped. "跳过" = silent anchor loss, which violates R9's spirit; codex being down must NOT block the spec stage for low-risk entries, but the degradation MUST be recorded in column (c).
 - **Never silently drop the step.** The evidence pack column (c) must show one of: codex verbatim findings, an explicit `codex 不可用，降级 advisory` (non-high-risk), or `high-risk codex 强制未走，降级 advisory` (high-risk only) — never blank, never a silent skip.
 
@@ -274,27 +270,15 @@ Subagent (general-purpose):
     - [suggestions for improvement]
 ```
 
-**Evidence-pack visualization (visual companion):** The subagent reuses brainstorming's visual companion to serve the evidence pack to the human at the spec-gate. It calls `bash brainstorming/scripts/start-server.sh --project-dir <proj> --open`, takes `screen_dir`, and writes an HTML content fragment (mermaid full-chain + (a) verdict cards + (b) uncovered + (c) cross-model column) to `screen_dir`. The fragment template + mermaid load script + health-check steps are in `_evidence-pack-schema.md` §5-§8 — copy from there, do not improvise.
-
-**AI Self-Proof Loop (clear blockers before escalating to human):**
-Once the evidence pack is produced, the AI digests it itself BEFORE escalating to the human:
+**AI Self-Proof Loop (clear blockers before handing to codesop spec-gate):**
+Once the evidence pack is produced, the AI digests it itself BEFORE handing off to codesop:
 
 - If (a) has any `没满足` verdict (including 三件-missing entries per R1) or (b) is non-empty with `必做`/`边界` nature (i.e. **blocker / major**), the AI goes back and fixes the spec → re-runs codex (if available) → re-dispatches the evidence-pack subagent → re-reviews. Loop.
-- **(v9 R9)** If a high-risk「满足」entry is provisional pending codex re-check and codex disagrees (reverts to 没满足/顾虑), that entry is a blocker/major — fix and re-loop. If codex is unavailable, the entry downgrades to advisory (`顾虑`) and is preserved into the spec-gate (NOT cleared by the AI — only the human adjudicates a degraded high-risk entry).
+- **(v9 R9)** If a high-risk「满足」entry is provisional pending codex re-check and codex disagrees (reverts to 没满足/顾虑), that entry is a blocker/major — fix and re-loop. If codex is unavailable, the entry downgrades to advisory (`顾虑`) and is preserved (NOT cleared by the AI — codesop spec-gate 人审 adjudicates a degraded high-risk entry).
 - Continue until **blockers / majors are cleared** (only `顾虑` advisory verdicts remain, including any high-risk codex-降级 entries).
-- **Only then escalate to the human.** The human must never receive a half-finished spec to debug — that is the AI's job. Advisory `顾虑` concerns (including high-risk codex-降级) are preserved into the spec-gate for human adjudication.
 
-**Spec-Gate (human, advisory only):**
-After the AI self-proof loop clears all blockers, escalate the spec-gate to the human. The human receives the evidence pack with blockers already cleared — they only adjudicate advisory `顾虑` concerns (including any high-risk codex-降级 entries) and give final approval:
-
-> "Spec written and committed to `<path>`. Evidence pack produced (blockers cleared by AI self-proof; codex cross-model review in column (c); visual companion served at `<url>`). Please review the advisory concerns — note any `high-risk codex 强制未走，降级 advisory` entries need your call — and let me know if you want to make any changes before we start writing out the implementation plan."
-
-Wait for the user's response. If they request changes, make them and re-run the codex + evidence-pack + AI self-proof loop. Only proceed once the user approves.
-
-**Implementation:**
-
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+**brainstorming 完成 — 交付 codesop spec-gate:**
+交付物：已 commit 的 spec 文件（三件齐全）+ 最新证据包（blockers 清零，只剩 advisory）+ advisory 列表。**spec-gate 人审（rubric + 可视化）归 codesop**（SKILL §8.7 B）——brainstorming 不直接 escalate 人审，也不直接进 writing-plans；由 codesop spec-gate 审过后调 `/goal`（§8.7 A①）。
 
 ## Key Principles
 
