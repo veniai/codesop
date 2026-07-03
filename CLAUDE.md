@@ -55,7 +55,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   └── codesop-router.md   # Router card
 ├── templates/
 │   ├── system/             # System-level AGENTS.md template
-│   └── project/             # Project-level templates (PRD.md, README.md, CONTEXT.md, adr-template.md)
+│   └── project/             # Project-level templates (PRD.md, README.md, adr-template.md; CONTEXT.md 可选业务领域文档，init 不生成)
 ├── docs/                   # Design specs and implementation plans
 │   └── superpowers/
 │       ├── specs/          # Approved design documents
@@ -89,7 +89,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 | 0 | CLI | Tool detection, system links, `CLAUDE_CODE_NEW_INIT` |
 | 1 | — | (v4.4 删访谈) 标准偏好硬编码在模板；用户偏好由 Claude Code `/init` + 全局 CLAUDE.md 管 |
 | 2 | — | **User runs `/init`** to generate project CLAUDE.md |
-| 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md |
+| 3 | CLI | AGENTS.md (`@CLAUDE.md`), PRD.md, README.md, docs/adr/（CONTEXT.md 可选业务领域文档，init 不生成）|
 | 4 | CLI | Check skill dependencies (`check_skill_dependencies`) |
 | 4a | Skill | If `ADAPT_MODE:YES`: template adaptation (PRD/README diff + CLAUDE.md dedup) |
 | 5 | Skill | Prompt user to run `/init` (new mode) or confirm adaptation (adapt mode) |
