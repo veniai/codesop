@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.7.1] - 2026-07-03
+
+### Fixed — 全方位审查 P2 收尾
+v4.7.0 P0+P1 已修，P2 follow-up 小修复（codex 完整审查建议 #7/#9 不动）：
+- **HOME 守卫**（`lib/detection.sh` + `lib/init-interview.sh`）：模块顶部 `export HOME="${HOME:-$(echo ~)}"`，hooks/IDE 环境 HOME 未设防御（与 entrypoint/updates.sh 同模式）
+- **docs/adr scaffold**（`commands/codesop-init.md`）：Phase 3 说明补 `docs/adr/` scaffold（之前遗漏）
+- **R2 rubric 实质断言**（`tests/spec-as-goal-behavior.sh`）：R2b0 断言 rubric 实质文本（`不是"优化一下"` / `缩减 / 钻空子` / `不空分` / `无悬空需求`），防"字段在、实质退化"
+
+run_all 19/0。
+
 ## [4.7.0] - 2026-07-03
 
 ### Fixed — 全方位审查 P0+P1（4 agent 扫 + codex 双 AI 验证）
