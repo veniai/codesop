@@ -19,11 +19,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v4.6.0
+- **当前里程碑**: v4.6.1
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.6.0 spec-gate 可视化重构（dispatch 独立 subagent + spec 实质为主）+ SKILL 去重
+- **最后更新原因**: v4.6.1 review 修（schema 注释 + subagent 区分 + serve 消歧）
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.6.1: review 修（feat/v4.6.1）— schema §8 注释 + §8.7 B subagent 区分（codesop vs brainstorming）+ serve 消歧（复用 server 非 just-in-time offer）；run_all 18/0
 - [x] v4.6.0: spec-gate 可视化重构（feat/v4.6）— §8.7 B dispatch 独立 subagent（交叉检验）+ spec 实质呈现为主（功能地图/改动拓扑/数据流）+ evidence pack 为辅 + completed 认 serve URL + SKILL 去重 -11 行；run_all 18/0
 - [x] v4.5.0: spec-gate 归位（feat/v4.5）— spec-gate 人审+可视化从 brainstorming patch 归位 codesop SKILL §8.7 B（架构修正：spec-gate 是 codesop gate）；brainstorming 瘦身（造 spec+自证，到交付 codesop 止）+ §8.7 B 读证据包（防双 dispatch）+ 可视化 serve + schema codesop sibling；codex 审 A' 三点解；run_all 18/0
 - [x] v4.4.4: 新项目反馈首批 + 防再犯 E（feat/v4.4.4）— CONTEXT 定位澄清（可选业务领域文档，init 不生成）+ superpowers Codex 输出注明区分（框架宿主端 vs AI 模型）+ consistency-guards E（patch changelog vs CHANGELOG）；run_all 18/0
@@ -65,6 +66,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-03 | review 修（v4.6.1）| v4.6.0 review 发现 3 处（schema 注释残留 / subagent 混 / serve 歧义）| schema §8 注释 + §8.7 B subagent 区分 + serve 消歧；run_all 18/0 |
 | 2026-07-03 | spec-gate 可视化重构（v4.6.0）| 实际工作 Cherry 反馈：spec-gate 可视化主 AI 做（无交叉）+ 内容套 evidence pack（完备性 vs spec 实质做混）| §8.7 B dispatch 独立 subagent + spec 实质为主 + completed 认 serve URL + SKILL 去重；run_all 18/0 |
 | 2026-07-03 | spec-gate 归位（v4.5.0）| spec-gate 可视化寄生 brainstorming，AI 混两个 visual companion（设计讨论 just-in-time vs spec-gate 必可视化）→ 不自动可视化 | spec-gate 人审+可视化从 brainstorming 移 codesop §8.7 B（架构修正）+ brainstorming 瘦身 + §8.7 B 读证据包防双 dispatch + 可视化 serve + schema codesop sibling；codex 审 A' 三点解；run_all 18/0 |
 | 2026-07-03 | 新项目反馈首批 + 防再犯 E（v4.4.4）| codesop init 新项目反馈：CONTEXT 为啥不生成 + superpowers(Codex) 咋来的 | CONTEXT 定位澄清（可选业务领域文档，init 不生成）+ superpowers Codex 输出注明（框架宿主端 ≠ codex AI 模型）+ consistency-guards E；run_all 18/0 |
@@ -102,7 +104,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.6.0.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.6.1.
 
 ## 5. 产品核心规范
 

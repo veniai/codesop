@@ -446,10 +446,10 @@ complex 多走 plan 不是流程教条，是复杂度管理——复杂任务依
 spec-gate 是人审（§8.5 唯一硬审）。人审的本质是人看 spec 做了什么 + 判 rubric 够不够齐——所以派**全新独立 subagent**（交叉检验，非主 AI 自审）渲染两层呈现，serve 给人。
 
 brainstorming 交付 spec + evidence pack（blockers 已清）后，codesop：
-1. **dispatch 全新 subagent**（非主 AI）读 spec + evidence pack，渲染两层：
+1. **dispatch 全新独立 subagent**（codesop spec-gate 的，非主 AI，也独立于 brainstorming 阶段的 evidence-pack subagent）读 spec + evidence pack，渲染两层：
    - **主：spec 实质呈现**——功能去留地图 / 改动跨层拓扑 / 数据流 / 去留三色卡片（subagent 读 spec 内容定制，回答"方案对不对"）
    - **辅：evidence pack**——rubric 五项判定（§8.5，回答"spec 够不够齐"）
-2. **serve**：subagent 渲染 HTML（schema §8 模板，spec 实质为主）+ serve（start-server，产出 URL）
+2. **serve**：subagent 渲染 HTML（schema §8 模板，spec 实质为主）+ 调 start-server serve server 进程（复用 brainstorming 的 server 进程，非它的 just-in-time offer 逻辑——codesop spec-gate 是强制 serve）产出 URL
 3. **人审**：人看 spec 实质呈现（方案对不对）+ rubric 五项（§8.5 完备性）——任一不过回 brainstorming 修 spec
 4. **过 → /goal**（§8.7 A①）
 

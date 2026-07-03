@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [4.6.1] - 2026-07-03
+
+### Fixed — v4.6.0 review 修（3 处）
+- schema §8 HTML 注释"证据包可视化"→"spec-gate 可视化"（标题已改，注释残留）
+- §8.7 B 明说 codesop spec-gate subagent 独立于 brainstorming evidence-pack subagent（防两个 subagent 混）
+- §8.7 B serve 消歧：调 start-server serve server 进程（复用 brainstorming server 进程，非它的 just-in-time offer 逻辑——codesop spec-gate 强制 serve）
+
+run_all 18/0。
+
 ## [4.6.0] - 2026-07-03
 
 ### Changed — spec-gate 可视化重构（dispatch 独立 subagent + spec 实质为主）

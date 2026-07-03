@@ -181,7 +181,7 @@ bash brainstorming/scripts/start-server.sh --project-dir <proj> --open
 spec-gate 人审看两层：**主 spec 实质呈现**（功能去留地图 / 改动跨层拓扑 / 数据流 / 去留三色卡片——subagent 读 spec 内容定制，回答"方案对不对"）+ **辅 evidence pack**（mermaid + (a)(b)(c) + 边界 + AND——完备性锚点，回答"够不够齐"）。占位符 `<…>` subagent 按 spec 内容 + §2/§5/§6 填。
 
 ```html
-<!-- 证据包可视化 fragment —— server 自动套 frame template -->
+<!-- spec-gate 可视化 fragment —— server 自动套 frame template -->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>window.addEventListener('load',function(){if(window.mermaid){mermaid.initialize({startOnLoad:false,theme:'neutral'});mermaid.run();}});</script>
 
