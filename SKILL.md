@@ -441,16 +441,19 @@ complex 多走 plan 不是流程教条，是复杂度管理——复杂任务依
 
 **关键分工**：/goal 主循环的 Claude = 执行者；codesop skill（`_evidence-pack-schema.md` schema / dispatch 协议）= 它每轮调用的方法论。condition AND 保证正确性下限，skill 保证高效路径（§8.6 不做表「纯 /goal 不用 skill」已解释为什么不全裸跑）。
 
-### B. spec-gate rubric 流程（R2 落地——审 rubric 怎么触发）
+### B. spec-gate 流程（dispatch 独立 subagent，交叉检验）
 
-spec-gate 是人审（§8.5 唯一硬审），证据**由 brainstorming 交出**（blockers 已清零，只剩 advisory），人按 rubric 五项判：
+spec-gate 是人审（§8.5 唯一硬审）。人审的本质是人看 spec 做了什么 + 判 rubric 够不够齐——所以派**全新独立 subagent**（交叉检验，非主 AI 自审）渲染两层呈现，serve 给人。
 
-1. **读 brainstorming 交出的证据包**：brainstorming 完成（spec 三件 + AI self-proof 清 blocker）后交 codesop。codesop 读最新证据包（`_evidence-pack-schema.md`，spec 三件对照 + rubric 自评）；缺失/过期 → 回 brainstorming 重出（**不重复 dispatch**）
-2. **可视化 serve（gate 职责）**：证据包可视化给人审——调 brainstorming visual companion（`start-server.sh --project-dir --open`）serve 证据包 HTML（schema §5-§8 模板）。spec-gate 是人审点，证据包**必可视化**（非 just-in-time 可选）
-3. **人审 rubric 五项**（§8.5 表）：可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability——任一项不过 = spec 不立住，回 brainstorming 修 spec（**不进 /goal**）
-4. **过 → 进 A①**：spec-gate 通过才允许调 /goal（没审就 /goal = 放大没定义好的目标，§8.5 铁律）
+brainstorming 交付 spec + evidence pack（blockers 已清）后，codesop：
+1. **dispatch 全新 subagent**（非主 AI）读 spec + evidence pack，渲染两层：
+   - **主：spec 实质呈现**——功能去留地图 / 改动跨层拓扑 / 数据流 / 去留三色卡片（subagent 读 spec 内容定制，回答"方案对不对"）
+   - **辅：evidence pack**——rubric 五项判定（§8.5，回答"spec 够不够齐"）
+2. **serve**：subagent 渲染 HTML（schema §8 模板，spec 实质为主）+ serve（start-server，产出 URL）
+3. **人审**：人看 spec 实质呈现（方案对不对）+ rubric 五项（§8.5 完备性）——任一不过回 brainstorming 修 spec
+4. **过 → /goal**（§8.7 A①）
 
-spec-gate 接 TaskList：spec-gate 是 pipeline 的一个 task，未确认 = 阻塞 re-entry（§3 step 10.5 Pipeline Re-entry 现有机制，不另造 hook）。
+spec-gate task completed 认 serve URL（外部信号，§1.1 第 4 条——完成条件不认 AI 自述）。没 serve → 没 URL → task 未完成 → 不触发人审。spec-gate 接 TaskList（§3 step 10.5）。
 
 ### C. 完成条件按复杂度分级（condition 表达式）
 
@@ -461,18 +464,10 @@ spec-gate 接 TaskList：spec-gate 是 pipeline 的一个 task，未确认 = 阻
 
 complexity 阈值复用 `writing-plans-SKILL.md` 现有 assessment（§8.5 已声明不另造）。**至少一项 mechanical**（测试 / lint）是硬下限，不能全靠 independent-AI（§1.1 第 4 条准则）。
 
-### D. plan-gate 降级流程（R4）+ deliver-gate 分级（R5）
+### D. gate 流程（降级规则见 §8.5 三 gate 降级表）
 
-**plan-gate**（仅 moderate / complex 走 plan 后触发）：
-- AI 自证清零（plan 任务全 done / 无遗留 advisory blocker）→ **默认通过**，进 A① 调 /goal
-- 人扫 advisory（如有），**不阻塞 re-entry**——advisory 是「顾虑 ≠ 阻塞」（语义同 `_evidence-pack-schema.md` §9），人定夺但不卡流程
-- 接 TaskList：plan-gate task 自证清零后自动标 completed，re-entry 继续（§3 step 10.5）
-
-**deliver-gate**（/goal 退出 A③ 后触发，接 T5 verification-before-completion patch §C）：
-- **low risk**（simple / 纯重构 / 无 public 行为变）→ 自动过
-- **high risk**（改 public 行为 / 跨模块 / 外部接口）→ **强制人审**，high 不可自动过（§8.5 三 gate 降级表）
-- high-risk「满足」条目 codex 必复核（R9，T5 patch §C.1）；codex 不可用 → 降级 advisory 升级人，**不自动判满足**
-- deliver-gate task 阻塞 re-entry，人确认才走（合并 / 发布动作）
+- **plan-gate**（仅 moderate/complex 走 plan 后）：AI 自证清零 → 默认过；人扫 advisory 不阻塞（§8.5）；接 TaskList（§3 step 10.5）
+- **deliver-gate**（/goal 退出 A③ 后，接 verification patch §C）：low 自动 / high 强制人审（§8.5）；high-risk codex 必复核（R9，patch §C.1），codex 不可用降级 advisory 升级人；deliver-gate task 阻塞 re-entry，人确认才走
 
 ### E. 抽样人审（R10，soft 威慑）
 
@@ -506,19 +501,13 @@ codesop 在 /goal 范式下**明确不做**以下事项（相信 AI 能力 + 外
 
 ## 9. Iron Laws
 
-**v4.0 /goal 范式铁律**：
+**v4.0 /goal 范式铁律**（详见 §1.1 核心准则 + §8.5 适用边界 + §8.7 协同）：
 
 | Iron Law | Source |
 |----------|--------|
-| spec 即目标文件：自带三件（完成条件 + 边界 + 风险分级），plan / 代码必须满足 spec | /goal 分水岭 |
-| /goal 分水岭：spec 前=造目标（pipeline 主导），spec 后=跑目标（/goal 主导，codesop 退为验证层） | /goal 分水岭 |
-| spec-gate 唯一硬审 + 五项 rubric（可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability） | /goal 分水岭 |
-| gate 降级：plan-gate 默认过 / deliver-gate 风险分级；减 blocking 不减语义偏离 | /goal 分水岭 |
-| 完成条件引用外部锚点信号（不认 AI 自述，至少一项 mechanical） | /goal 分水岭 |
-| spec 变更重走：人改 spec → 回 ① 重走，不搞失效标记 | /goal 分水岭 |
-| /goal 不可用降级：回退 pipeline 或停升级人，不静默改走普通执行 | /goal 分水岭 |
-| /goal 协同四步：启动（spec-gate 通过→调 /goal）/ 每轮（dispatch 证据包→round-N.md）/ 退出（读最后证据包→deliver-gate）/ 失败码（停升级人） | /goal 协同机制 |
-| 抽样人审：1/N（默认 5）随机抽 deliver 强制人扫证据包，记 audit-log.md | /goal 协同机制 |
+| spec 即目标（三件齐全）；/goal 分水岭（spec 前 codesop 造目标 / 后 /goal 跑目标）；完成条件认外部锚点不认 AI 自述 | §1.1 |
+| spec-gate 唯一硬审（rubric 五项 §8.5）；spec-gate 可视化 dispatch 独立 subagent + completed 认 serve URL | §8.7 B |
+| spec 变更重走；/goal 不可用降级不静默；协同四步（§8.7 A）；抽样人审（§8.7 E） | §8.5/§8.7 |
 
 **通用工程铁律**：
 
