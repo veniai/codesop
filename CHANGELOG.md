@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.4.3] - 2026-07-03
+
+### Fixed — v4.4.2 删孤儿的连带遗漏 + 防再犯
+- **README + CLAUDE 架构段删 templates/init/**：v4.4.2 删 templates/init/prompt.md（孤儿）后目录空，但 README/CLAUDE 架构段仍列 `init/` → 悬空引用，本次清
+- **防再犯 F**：consistency-guards 加 F——README/CLAUDE 架构段列的目录真实存在（templates/system, project, lib, patches, config, docs, commands）+ 负向断言无悬空 `templates/init/`。防"删文件后文档架构段过时"再发（根因同类于 P0-3 跨文件引用悬空，这次是目录级）
+
+run_all 18/0。
+
 ## [4.4.2] - 2026-07-01
 
 ### Fixed — 全方位诊断 P2 清理（17 问题全清）

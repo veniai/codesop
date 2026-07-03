@@ -137,8 +137,7 @@ setup                       # 宿主安装与同步
 │   └── codesop-router.md   # 路由卡
 ├── templates/
 │   ├── system/             # 系统级 AGENTS.md 模板
-│   ├── project/            # PRD.md, README.md 模板
-│   └── init/               # Init prompt 模板
+│   └── project/            # PRD.md, README.md 模板
 ├── tests/                  # 合同测试
 ├── AGENTS.md               # → @CLAUDE.md
 ├── CLAUDE.md               # 项目指南

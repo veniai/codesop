@@ -55,8 +55,7 @@ codesop                     # CLI entrypoint, sources lib modules in order
 │   └── codesop-router.md   # Router card
 ├── templates/
 │   ├── system/             # System-level AGENTS.md template
-│   ├── project/             # Project-level templates (PRD.md, README.md, CONTEXT.md, adr-template.md)
-│   └── init/               # Init prompt templates
+│   └── project/             # Project-level templates (PRD.md, README.md, CONTEXT.md, adr-template.md)
 ├── docs/                   # Design specs and implementation plans
 │   └── superpowers/
 │       ├── specs/          # Approved design documents
