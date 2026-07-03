@@ -443,11 +443,12 @@ complex 多走 plan 不是流程教条，是复杂度管理——复杂任务依
 
 ### B. spec-gate rubric 流程（R2 落地——审 rubric 怎么触发）
 
-spec-gate 是人审（§8.5 唯一硬审），但**证据由 AI 出**，人按 rubric 五项判：
+spec-gate 是人审（§8.5 唯一硬审），证据**由 brainstorming 交出**（blockers 已清零，只剩 advisory），人按 rubric 五项判：
 
-1. **AI 出证据包**：spec 立住后，AI dispatch 独立 subagent 按 `_evidence-pack-schema.md` 整理 spec 三件（完成条件 + 边界 + 风险分级）对照表 + rubric 自评（每条完成条件是否可验证 / 边界是否覆盖反例 / 风险分级是否校准 / traceability 是否齐）
-2. **人审 rubric 五项**（§8.5 表）：可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability——任一项不过 = spec 不立住，回 brainstorming 修 spec（**不进 /goal**）
-3. **过 → 进 A①**：spec-gate 通过才允许调 /goal（没审就 /goal = 放大没定义好的目标，§8.5 铁律）
+1. **读 brainstorming 交出的证据包**：brainstorming 完成（spec 三件 + AI self-proof 清 blocker）后交 codesop。codesop 读最新证据包（`_evidence-pack-schema.md`，spec 三件对照 + rubric 自评）；缺失/过期 → 回 brainstorming 重出（**不重复 dispatch**）
+2. **可视化 serve（gate 职责）**：证据包可视化给人审——调 brainstorming visual companion（`start-server.sh --project-dir --open`）serve 证据包 HTML（schema §5-§8 模板）。spec-gate 是人审点，证据包**必可视化**（非 just-in-time 可选）
+3. **人审 rubric 五项**（§8.5 表）：可验证性 / 反例边界 / 不可缩减边界 / 风险分级校准 / traceability——任一项不过 = spec 不立住，回 brainstorming 修 spec（**不进 /goal**）
+4. **过 → 进 A①**：spec-gate 通过才允许调 /goal（没审就 /goal = 放大没定义好的目标，§8.5 铁律）
 
 spec-gate 接 TaskList：spec-gate 是 pipeline 的一个 task，未确认 = 阻塞 re-entry（§3 step 10.5 Pipeline Re-entry 现有机制，不另造 hook）。
 
