@@ -18,6 +18,7 @@ suites=(
   skill-routing-coverage.sh
   spec-as-goal-behavior.sh
   goal-collaboration-behavior.sh
+  spec-gate-visualize-behavior.sh
   first-principles-behavior.sh
   adversarial-review-behavior.sh
   setup-patch-sync.sh

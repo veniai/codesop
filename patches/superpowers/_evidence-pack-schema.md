@@ -319,4 +319,4 @@ flowchart LR
 | ② plan | writing-plans spec-coverage subagent（升级版，扩到 moderate） | plan 阶段证据包 | prompt 内联进主 SKILL.md |
 | ③ 代码 | verification-before-completion 的 **Gate Function** 输出（复用现有 gate，仅改输出格式，**不新增函数**）+ 加 diff 守护（R8） | 代码阶段证据包 | Gate Function 文本内联进主 SKILL.md |
 
-**三阶段共同要求**（spec §4.6）：dispatch 的 subagent prompt **必须内联本 schema 全文**，不靠子文件引用（v8 踩坑：子文件不同步）。setup `patch_skills()` 同步主 SKILL.md，本 schema 通过 patches 目录原样复制 + T3/T5 patch 在主 SKILL.md 内嵌全文双保险。
+**三阶段共同要求**（spec §4.6）：dispatch 的 subagent **prompt 内联主 SKILL.md**（v8 踩坑：子文件不同步）；schema **字段以 sibling 文件 + §号引用**（setup `patch_skills()` 同步 sibling，T3/T5 patch 不重复定义字段）——prompt 内联 + schema 引用，非全文内嵌。

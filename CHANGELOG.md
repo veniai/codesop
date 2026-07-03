@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.7.0] - 2026-07-03
+
+### Fixed — 全方位审查 P0+P1（4 agent 扫 + codex 双 AI 验证）
+v4.6.1 后全方位审查发现 P0+P1，全修：
+- **P0 setup jq null guard**：setup:340/409 jq test() 对 null .command 报错（抄 349 tostring guard）——修 hook .command null 误判重复追加
+- **P1-1 §8.7 B 行为测试**：新 tests/spec-gate-visualize-behavior.sh（dispatch 独立 subagent + spec 实质为主 + completed 认 serve URL）——v4.6 核心机制补 golden-content
+- **P1-2 git pull timeout**：commands.sh:112/125 git pull 包 timeout 10（抄 58-67 fetch）
+- **P1-3 PRD init/ 悬空 + F 扩 PRD**：PRD:182 删已空 templates/init/；consistency-guards F 扩覆盖 PRD（架构树精确 grep，不查历史叙事）
+- **P1-4 schema §10 矛盾**：§10③ "内嵌全文双保险" 改"prompt 内联 + schema 字段 §号引用"（反映 verification 实际行为）
+
+run_all 19/0。
+
 ## [4.6.1] - 2026-07-03
 
 ### Fixed — v4.6.0 review 修（3 处）
