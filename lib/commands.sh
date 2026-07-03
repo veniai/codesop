@@ -109,7 +109,7 @@ run_update() {
   fi
 
   printf '%s\n' "发现 $behind 个新提交，正在更新..."
-  git pull --ff-only origin main 2>/dev/null || {
+  timeout 10 git pull --ff-only origin main 2>/dev/null || {
     if git diff --quiet && git diff --cached --quiet; then
       printf '%s\n' "更新失败，可能存在冲突。" >&2
       printf '%s\n' "请手动处理：cd $repo_dir && git pull" >&2
@@ -122,7 +122,7 @@ run_update() {
       exit 1
     }
 
-    if git pull --ff-only origin main 2>/dev/null; then
+    if timeout 10 git pull --ff-only origin main 2>/dev/null; then
       if ! git stash pop 2>/dev/null; then
         printf '%s\n' "更新成功但 stash pop 存在冲突，请手动解决：cd $repo_dir && git stash pop" >&2
         exit 1

@@ -337,7 +337,7 @@ configure_hooks() {
 
   # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME vs absolute)
   local existing
-  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" != "0" ]; then
     # Migration: replace old ~ or $HOME variants with absolute path
     local migrated
@@ -406,7 +406,7 @@ remove_codesop_hook() {
   jq '.' "$settings" >/dev/null 2>&1 || { echo "  ⚠ $settings invalid JSON — hook removal skipped"; return 0; }
 
   local existing
-  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]?.command | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" = "0" ]; then
     return 0
   fi
