@@ -19,11 +19,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v4.4.3
+- **当前里程碑**: v4.4.4
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.4.3 修 v4.4.2 删孤儿连带遗漏（README/CLAUDE init/ 悬空）+ 防再犯 F（架构段目录存在）
+- **最后更新原因**: v4.4.4 新项目反馈首批（CONTEXT 定位澄清 + superpowers Codex 输出注明 + 防再犯 E）
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.4.4: 新项目反馈首批 + 防再犯 E（feat/v4.4.4）— CONTEXT 定位澄清（可选业务领域文档，init 不生成）+ superpowers Codex 输出注明区分（框架宿主端 vs AI 模型）+ consistency-guards E（patch changelog vs CHANGELOG）；run_all 18/0
 - [x] v4.4.3: 修 v4.4.2 连带遗漏 + 防再犯 F（feat/v4.4.3）— README/CLAUDE 架构段删已空的 templates/init/（v4.4.2 删孤儿 prompt.md 后悬空）+ consistency-guards F（架构段目录存在校验）；run_all 18/0
 - [x] v4.4.2: P2 清理（feat/v4.4.2）— HOME 守卫（commands.sh+install.sh）+ 删孤儿 init/prompt.md + SKILL §8 补 docs/adr + brainstorming v7 hole 清 + README npm 通用化 + CLAUDE 架构补 install.sh；17 问题全清；run_all 18/0
 - [x] v4.4.1: P1 清理（feat/v4.4.1）— bare return ×13→return 0/$? + brainstorming three-cycles→spec-gate + writing-plans T6→§8.7 D + spec §8 口差/v8-style + CLAUDE patches 注释补 v4.1/v4.2 + tests/goal-collaboration-behavior.sh（§8.7 协同四步覆盖）；run_all 18/0
@@ -62,6 +63,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-03 | 新项目反馈首批 + 防再犯 E（v4.4.4）| codesop init 新项目反馈：CONTEXT 为啥不生成 + superpowers(Codex) 咋来的 | CONTEXT 定位澄清（可选业务领域文档，init 不生成）+ superpowers Codex 输出注明（框架宿主端 ≠ codex AI 模型）+ consistency-guards E；run_all 18/0 |
 | 2026-07-03 | 修 v4.4.2 连带遗漏 + 防再犯 F（v4.4.3）| v4.4.2 删孤儿 templates/init/prompt.md 后 README/CLAUDE 架构段仍列 init/（悬空） | 删 README/CLAUDE init/ + consistency-guards F（架构段目录存在 + 负向 init/）；run_all 18/0 |
 | 2026-07-01 | P2 清理（v4.4.2）| v4.4 诊断 P2（6 小问题）清完，17 全清 | HOME 守卫（commands.sh+install.sh）+ 删孤儿 init/prompt.md + SKILL §8 补 docs/adr + brainstorming v7 hole + README npm 通用化 + CLAUDE 架构 install.sh；run_all 18/0 |
 | 2026-07-01 | P1 清理（v4.4.1）| v4.4 诊断剩 6 P1（v8 命名残留/bare return/覆盖缺口）清完 | bare return ×13→return 0/$? + brainstorming three-cycles→spec-gate + writing-plans T6→§8.7 D + spec §8 口差/v8-style + CLAUDE patches 注释 + goal-collaboration-behavior §8.7 测试；run_all 18/0 |
@@ -96,7 +98,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.4.3.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.4.4.
 
 ## 5. 产品核心规范
 

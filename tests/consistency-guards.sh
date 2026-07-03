@@ -49,6 +49,15 @@ grep -q "Current version: v$VER" "$PRD" || fail "C: PRD §4 Current != VERSION(v
 echo "  PASS C（VERSION=$VER == skill.json == PRD §1 == §4）"
 
 echo ""
+echo "=== E: patch 头部 changelog 的 codesop 版本（vX.Y）在 CHANGELOG 存在 ==="
+for patch in "$ROOT_DIR"/patches/superpowers/*-SKILL.md; do
+  for ver in $(sed -n '1,/^---/p' "$patch" | grep -vE "Based on|upstream|Retained|superpowers v" | grep -oE 'v[0-9]+\.[0-9]+' | sort -u); do
+    grep -q "## \[${ver#v}" "$ROOT_DIR/CHANGELOG.md" || fail "E: $patch 头部提 $ver 但 CHANGELOG 无 [${ver#v}]"
+  done
+done
+echo "  PASS E（patch 头部 codesop 版本与 CHANGELOG 一致）"
+
+echo ""
 echo "=== F: README/CLAUDE 架构段列的目录真实存在（防删文件后文档悬空）==="
 for d in templates/system templates/project lib patches/superpowers config docs commands; do
   [ -d "$ROOT_DIR/$d" ] || fail "F: 架构段列的目录 $d 不存在（文档悬空）"

@@ -164,7 +164,7 @@ _check_skills_all() {
     local _sp_path
     _sp_path="$(find_superpowers_plugin_path 2>/dev/null)" || true
     if [ -n "$_sp_path" ]; then
-      printf '  %-14s %s（Claude Code 插件）\n' "superpowers:" "$(basename "$_sp_path")"
+      printf '  %-14s %s（Claude Code 宿主，superpowers 框架）\n' "superpowers:" "$(basename "$_sp_path")"
       _check_changelog "$_sp_path" "$(basename "$_sp_path")" "/plugin update superpowers"
       sp_found=1; sp_cc_found=1
     fi
@@ -196,8 +196,8 @@ _check_skills_all() {
       local codex_ver codex_label
       codex_ver=$(cat "$codex_sp/VERSION" 2>/dev/null | tr -d '[:space:]') || codex_ver=""
       [ -z "$codex_ver" ] && codex_ver=$(git -C "$codex_sp" describe --tags --always 2>/dev/null || echo "unknown")
-      codex_label="Codex"
-      [ "$codex_sp" = "$HOME/.agents/skills/superpowers" ] && codex_label="Codex (agents)"
+      codex_label="Codex 宿主（superpowers 框架端，非 codex AI 模型）"
+      [ "$codex_sp" = "$HOME/.agents/skills/superpowers" ] && codex_label="Codex agents 宿主（superpowers 框架端）"
       printf '  %-14s %s（%s）\n' "superpowers:" "$codex_ver" "$codex_label"
       git_update_check "$codex_sp" "superpowers ($codex_label)" "cd $codex_sp && git pull"
       sp_found=1; sp_codex_found=1
@@ -207,7 +207,7 @@ _check_skills_all() {
   if [ $sp_found -eq 0 ]; then
     echo "⚠ superpowers 未安装"
     echo "  Claude Code：/plugin install superpowers"
-    [ -d "$HOME/.codex" ] && echo "  Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+    [ -d "$HOME/.codex" ] && echo "  Codex 宿主（superpowers 框架端，非 codex AI 模型）：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
   else
     # Suggest missing per-host installations — only for hosts that are actually present
     local sp_missing=""
@@ -216,7 +216,7 @@ _check_skills_all() {
     if [ -n "$sp_missing" ]; then
       echo "  ⚠ superpowers 未安装于：$sp_missing"
       [ $sp_cc_found -eq 0 ] && [ -d "$HOME/.claude" ] && echo "    Claude Code：/plugin install superpowers"
-      [ $sp_codex_found -eq 0 ] && [ -d "$HOME/.codex" ] && echo "    Codex：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
+      [ $sp_codex_found -eq 0 ] && [ -d "$HOME/.codex" ] && echo "    Codex 宿主（superpowers 框架端，非 codex AI 模型）：按官方文档安装 https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md"
     fi
   fi
 

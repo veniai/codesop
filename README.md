@@ -111,6 +111,8 @@ cd ~/codesop && bash install.sh    # 自动安装 codesop + 全部依赖插件
 - `README.md` → 安装/运行/测试命令（如不存在）
 - `docs/adr/` → 架构决策记录
 
+> `CONTEXT.md`（领域术语统一语言）**可选，init 不生成**——仅复杂业务项目需要（领域术语多/易混），手动 `cp templates/project/CONTEXT.md` 建后填术语。
+
 </details>
 
 <details>

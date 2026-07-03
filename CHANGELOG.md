@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [4.4.4] - 2026-07-03
+
+### Changed — 新项目反馈首批（CONTEXT 定位 + superpowers Codex 输出）
+- **CONTEXT.md 文档澄清**（问题 1）：CLAUDE 架构 + Init Flow Phase 3 + README init 段注明 CONTEXT.md 是可选业务领域文档（DDD 统一语言），init 不生成（需领域专家填，空骨架无价值）；模板在 templates/project/ 供复杂业务项目手动建。codesop 自己不用（方法术语在 spec/SKILL，建会重复真相源）
+- **superpowers (Codex) 输出注明区分**（问题 2）：`_check_skills_all` 输出从"Codex"改为"Codex 宿主（superpowers 框架端，非 codex AI 模型）"——区分 superpowers 框架的 codex 宿主安装 vs codex@openai-codex AI 模型插件（9/9 已装），用户不再混
+
+### Added — 防再犯 E（A-F 齐全）
+- consistency-guards 加 E：patch 头部 changelog 的 codesop 版本（vX.Y）在 CHANGELOG 存在（排除 Based on/upstream/Retained/superpowers v 的 superpowers 版本引用）
+
+run_all 18/0。
+
 ## [4.4.3] - 2026-07-03
 
 ### Fixed — v4.4.2 删孤儿的连带遗漏 + 防再犯
