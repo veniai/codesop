@@ -25,12 +25,12 @@ assert_in_file() {
 echo "=== §8.7 A: /goal 协同四步（spec-gate 通过 → deliver-gate）==="
 
 assert_in_file "$SKILL" "### A. /goal 协同四步" "§8.7 协同四步 section 存在"
-assert_in_file "$SKILL" "| **① 启动**" "① 启动（spec-gate 通过→调 /goal）"
+assert_in_file "$SKILL" "| **① 交接**" "① 交接（spec-gate approved→/goal handoff，AI 生成命令交用户手动发）"
 assert_in_file "$SKILL" "| **② 每轮**" "② 每轮（dispatch 独立 subagent 出证据包）"
 assert_in_file "$SKILL" "| **③ 退出**" "③ 退出（读最后证据包→deliver-gate）"
 assert_in_file "$SKILL" "| **④ 失败码**" "④ 失败码（N 轮未收敛→停升级人）"
 
-echo "  PASS 协同四步（①启动 / ②每轮 / ③退出 / ④失败码）"
+echo "  PASS 协同四步（①交接 / ②每轮 / ③退出 / ④失败码）"
 
 echo ""
 echo "=== ②每轮：证据包产出 round-N.md + 独立 subagent ==="

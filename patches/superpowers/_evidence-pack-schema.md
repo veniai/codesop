@@ -178,7 +178,11 @@ bash brainstorming/scripts/start-server.sh --project-dir <proj> --open
 
 ## 8. HTML 片段示例（spec-gate 可视化：spec 实质为主 + evidence pack 为辅）
 
-spec-gate 人审看两层：**主 spec 实质呈现**（功能去留地图 / 改动跨层拓扑 / 数据流 / 去留三色卡片——subagent 读 spec 内容定制，回答"方案对不对"）+ **辅 evidence pack**（mermaid + (a)(b)(c) + 边界 + AND——完备性锚点，回答"够不够齐"）。占位符 `<…>` subagent 按 spec 内容 + §2/§5/§6 填。
+spec-gate 人审看**两层**（统一 gate-visual 模板，§8.7 B）：
+- **Layer 1 白话摘要**（3 秒入口，不提术语）：4 块——`要解决的问题` / `实际会改变什么` / `为什么这样改` / `明确不改变什么`。规则：≤5 行、不用文件名/章节号/术语、**不抄 spec 原文**（subagent 读 spec 后重写）
+- **Layer 2 具体判定**（认真审）：spec 实质呈现（功能去留地图 / 改动跨层拓扑 / 数据流）+ evidence pack（mermaid + (a)(b)(c) + 边界 + AND）
+
+占位符 `<…>` subagent 按 spec 内容 + §2/§5/§6 填。
 
 ```html
 <!-- spec-gate 可视化 fragment —— server 自动套 frame template -->
@@ -200,7 +204,17 @@ spec-gate 人审看两层：**主 spec 实质呈现**（功能去留地图 / 改
 
 <h2>spec-gate 可视化 — <spec 主题></h2>
 
-<!-- 主：spec 实质呈现（subagent 读 spec 定制，回答"方案对不对"）-->
+<!-- Layer 1：白话摘要（3 秒入口，不提术语；subagent 读 spec 后重写，非摘录）-->
+<h3>一句话看懂（白话）</h3>
+<div class="ep-plainlang" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0">
+  <p><strong>要解决的问题</strong>：&lt;一句话，不提 spec/术语&gt;</p>
+  <p><strong>实际会改变什么</strong>：&lt;大白话：加了/删了/改了什么&gt;</p>
+  <p><strong>为什么这样改</strong>：&lt;动机，一句话&gt;</p>
+  <p><strong>明确不改变什么</strong>：&lt;边界，防误判&gt;</p>
+</div>
+<p><em>（≤5 行；不用文件名/章节号/rubric 等术语；不抄 spec 原文）</em></p>
+
+<!-- Layer 2 主：spec 实质呈现（subagent 读 spec 定制，回答"方案对不对"）-->
 <h3>spec 实质：做了什么</h3>
 
 <h4>功能去留地图</h4>
@@ -300,6 +314,70 @@ flowchart LR
   <strong>总判定</strong>：满足 / 不满足（/goal 继续循环）
 </div>
 ```
+
+## 8b. HTML 片段示例（deliver-gate 可视化：复用两层结构，内容换交付证据）
+
+deliver-gate（§8.7 D，/goal 退出后）**high-risk 或抽样命中**时强制可视化；普通 low-risk 自动过不出页面（保住降级收益）。复用 §8 两层结构，但 Layer 2 是**交付证据**（不是 spec 实质）：
+
+```html
+<!-- deliver-gate 可视化 fragment —— 复用 §8 frame + 样式 -->
+
+<h2>deliver-gate 可视化 — <spec 主题></h2>
+
+<!-- Layer 1：白话摘要（不提术语）-->
+<h3>一句话看懂（白话）</h3>
+<div class="ep-plainlang" style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:.6rem .8rem;margin:.4rem 0">
+  <p><strong>这次改了什么</strong>：&lt;大白话&gt;</p>
+  <p><strong>用户/系统会看到什么变化</strong>：&lt;外部可观测变化&gt;</p>
+  <p><strong>最大风险是什么</strong>：&lt;一句话风险点&gt;</p>
+  <p><strong>为什么现在可以交付 / 为什么还需人定夺</strong>：&lt;结论 + 理由&gt;</p>
+</div>
+
+<!-- Layer 2：交付证据 -->
+<h3>风险卡</h3>
+<div class="ep-boundary">
+  <strong>spec 声明风险</strong>：&lt;low / high + 理由&gt;<br/>
+  <strong>实际触发升级原因</strong>：&lt;high-risk 命中条件 / 抽样命中&gt;<br/>
+  <strong>low→high 兜底</strong>：&lt;是否命中 / 为什么&gt;
+</div>
+
+<h3>Diff 摘要</h3>
+<div class="ep-codex">
+  <strong>changed files</strong>：&lt;N&gt;<br/>
+  <strong>public API/CLI/config/schema 变化</strong>：&lt;列出或无&gt;<br/>
+  <strong>删除/重命名</strong>：&lt;列出或无&gt;<br/>
+  <strong>迁移影响</strong>：&lt;有 / 无&gt;
+</div>
+
+<h3>验证证据</h3>
+<div class="ep-and">
+  测试 = &lt;命令 + 结果&gt;<br/>
+  lint = &lt;结果&gt;<br/>
+  build/typecheck = &lt;结果&gt;<br/>
+  diff 守护五项（R8）= &lt;结果&gt;
+</div>
+
+<h3>Spec 对照</h3>
+<p>证据包 (a) 满足/顾虑：&lt;列表&gt;</p>
+<p>(b) 未覆盖扫描：&lt;空 = 全覆盖&gt;</p>
+<p>advisory 汇总：&lt;列出或无&gt;</p>
+
+<h3>High-risk 专区（仅 high-risk 出）</h3>
+<div class="ep-codex">
+  <strong>codex 复核</strong>：&lt;状态 + 结论&gt;<br/>
+  <strong>adversarial review</strong>：&lt;状态 + 结论&gt;<br/>
+  <strong>blocking 清零</strong>：&lt;是 / 否&gt;
+</div>
+
+<h3>人审结论区</h3>
+<div class="ep-judge">
+  <strong>结论</strong>：☐ 通过 / ☐ 打回<br/>
+  <strong>打回原因</strong>：&lt;如打回&gt;<br/>
+  <strong>必须重跑阶段</strong>：&lt;如打回&gt;
+</div>
+```
+
+**ready / approved**：页面生成 = ready；人点通过 = approved（同 spec-gate，§8.7 B/D）。
 
 ---
 
