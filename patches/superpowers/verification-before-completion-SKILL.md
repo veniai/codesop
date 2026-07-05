@@ -281,7 +281,7 @@ deliver，但 (a)(b) 判定结论由独立 subagent 出（spec §5 #3，工作 A
 | **low** | 四项 AND 全真 → **自动过**（deliver-gate 不拦） | 可选（非强制） |
 | **high** | **强制人审**——四项 AND 全真也**不可自动过** | **强制**（见 R9 §C.1） |
 
-**deliver-gate 可视化**（high-risk 或抽样命中强制，codesop SKILL §8.7 D + schema §8b）：high-risk + 抽样命中时按 `_evidence-pack-schema.md §8b` 生成两层可视化页面（Layer 1 改动/风险白话 + Layer 2 交付证据），serve 给人；ready/approved 拆分——页面生成 = ready，人点通过 = approved。普通 low-risk 自动过不出页面（保住降级收益）；抽样命中 low 只建待清审查项（不阻塞当前 deliver）。
+**deliver-gate 可视化**（codesop SKILL §8.7 D + schema §8b）：**high-risk** 按两层模板生成可视化页面（Layer 1 改动/风险白话 + Layer 2 交付证据），serve 给人，走 ready/approved（页面 = ready，人点通过 = approved，task completed 只认 approved）。**抽样命中 low** 不走 ready/approved（low 照常自动过），只生成页面作 audit-log 待清审查项（不阻塞当前 deliver，§8.7 E）。普通 low-risk 自动过不出页面。
 
 ### C.1 codex high-risk 强制（v9 R9，与 T3 brainstorming 一致）
 
