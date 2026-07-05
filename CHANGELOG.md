@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.8.0] - 2026-07-05
+
+### Changed — gate 流程逻辑修正（/goal 交接包 + 两层可视化 + ready/approved）
+codex 双 AI 审（设计审查 + deliver-gate 复核）+ 逻辑梳理，5 件事不大改，核心机制（三 gate 分工 / /goal 范式 / 降级表）不动：
+- **/goal 交接包 + pre-/goal preparation segment 边界统一**（§1.1/§3/§8.7 A①）：承认 AI 不能自触发 /goal（built-in），改交接协议（生成 exact 命令 + 提示用户手动发）；统一边界概念消除"plan 驱动矛盾"
+- **spec-gate 可视化加 Layer 1 白话层**（schema §8 + §8.7 B）：4 块（要解决的问题/实际会改变什么/为什么这样改/明确不改变什么），≤5 行、不提术语、不抄 spec
+- **deliver-gate 补可视化**（schema §8b 新节 + §8.7 D + verification §C）：复用两层结构，high-risk 或抽样命中强制出页面
+- **ready/approved 拆分 + 阻塞语义**（§8.7 B/D/E）：URL=ready / 人点通过=approved（防 hard gate 被 task completed 绕过）；阻塞限 high-risk；抽样=待清审查项不阻塞当前 low
+- **router + verification 同步**（防漂移）
+
+run_all 19/0（含 Layer 1 四块 + deliver-gate §8b 防再犯断言）。
+
 ## [4.7.1] - 2026-07-03
 
 ### Fixed — 全方位审查 P2 收尾
