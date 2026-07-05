@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.8.1] - 2026-07-05
+
+### Fixed — code-review 补漏（3 CONFIRMED）
+code-review skill 4-finder 审 v4.7.1..v4.8.0 找出 3 个真实 bug：
+- **verification §C `+` vs SKILL `或`**：执行层文档正文还写"high-risk + 抽样命中"，与 SKILL §8.7 D"或"打架（+ 读成 AND 漏 high-risk-only 可视化）。改区分两场景
+- **§8.7 D deliver-gate 漏「completed 只认 approved」**：§8.7 B（spec-gate）防的"task completed 认 ready 绕过"漏洞在 deliver-gate 重现。补"high-risk task completed 只认 approved"
+- **抽样命中 low 时 ready/approved 空转**：§8.7 D 要求出页面（ready/approved）但 §8.7 E 不阻塞（approved 永不触发）。澄清：抽样命中 low 不走 ready/approved，页面作 audit-log 待清审查项
+
+SKILL §8.7 D + verification §C + schema §8b 末尾三处同步。run_all 19/0。
+
 ## [4.8.0] - 2026-07-05
 
 ### Changed — gate 流程逻辑修正（/goal 交接包 + 两层可视化 + ready/approved）
