@@ -55,7 +55,7 @@
 ### 链路组装（路由表是链路唯一真相源）
 **pre-/goal preparation segment**：链路组装到 **spec-gate + plan-gate + branch setup + /goal handoff 为止**（codesop 编排，auto-proceed 覆盖整段）；/goal handoff 时 AI 生成 exact /goal 命令交用户手动发（/goal 是 built-in，AI 不能自触发），用户发后 /goal 接管 dev/verify/finishing。
 **造目标段**（codesop 编排，☆=有插件时走）：设计后 → ★codex:rescue | 跨模块（锚点：≥2 路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（不可用跳过回退 CONTEXT.md/ADR；stale 降级提示）
-**跑目标段**（/goal handoff 后，嵌 `/goal` 完成条件）：/goal handoff 前 → main 上建分支 / using-git-worktrees | /goal dev 后 → ☆code-simplifier | /goal verify 后 → ☆claude-md-management | 跨模块同锚点 /goal dev 后 → understand-anything:understand-diff（辅助；不可用跳过；stale 降级）
+**跑目标段**（/goal handoff 后，嵌 `/goal` 完成条件）：/goal dev 后 → ☆code-simplifier | /goal verify 后 → ☆claude-md-management | 跨模块同锚点 /goal dev 后 → understand-anything:understand-diff（辅助；不可用跳过；stale 降级）
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。
 
