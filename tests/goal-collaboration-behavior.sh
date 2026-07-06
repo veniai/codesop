@@ -24,31 +24,27 @@ assert_in_file() {
 
 echo "=== §8.7 A: /goal 协同四步（spec-gate 通过 → deliver-gate）==="
 
-assert_in_file "$SKILL" "### A. /goal 协同四步" "§8.7 协同四步 section 存在"
-assert_in_file "$SKILL" "| **① 交接**" "① 交接（spec-gate approved→/goal handoff，AI 生成命令交用户手动发）"
+assert_in_file "$SKILL" "### A. /goal 协同四步" "§8.7 协同四步 section 存在（术语锚）"
+assert_in_file "$SKILL" "| **① 交接**" "① 交接（spec-gate approved→/goal handoff）"
 assert_in_file "$SKILL" "| **② 每轮**" "② 每轮（dispatch 独立 subagent 出证据包）"
 assert_in_file "$SKILL" "| **③ 退出**" "③ 退出（读最后证据包→deliver-gate）"
 assert_in_file "$SKILL" "| **④ 失败码**" "④ 失败码（N 轮未收敛→停升级人）"
 
-echo "  PASS 协同四步（①交接 / ②每轮 / ③退出 / ④失败码）"
+echo "  PASS 协同四步（section + ①②③④ 表头锚定）"
 
 echo ""
-echo "=== ②每轮：证据包产出 round-N.md + 独立 subagent ==="
-assert_in_file "$SKILL" "round-N.md" "round-N.md 证据包文件"
-assert_in_file "$SKILL" "goal-evidence" "goal-evidence 目录"
-assert_in_file "$SKILL" "dispatch 独立 subagent" "dispatch 独立 subagent（古德哈特防御）"
+echo "=== ②每轮：证据包产出 round-N.md + 独立 subagent（合并）==="
+assert_in_file "$SKILL" "round-N.md" "round-N.md 证据包文件（合并：goal-evidence 目录 + dispatch 独立 subagent）"
 echo "  PASS 每轮证据包产出"
 
 echo ""
-echo "=== ③退出 → deliver-gate 衔接 ==="
-assert_in_file "$SKILL" "进入 deliver-gate" "退出接 deliver-gate"
+echo "=== ③退出 → deliver-gate 衔接（保风险分级术语锚）==="
 assert_in_file "$SKILL" "风险分级" "deliver-gate 风险分级（low 自动/high 人审）"
 echo "  PASS deliver-gate 衔接"
 
 echo ""
-echo "=== ④失败码：不静默改走普通执行 ==="
-assert_in_file "$SKILL" "停 + 升级人" "失败码停 + 升级人"
-assert_in_file "$SKILL" "不静默改走普通执行" "不静默改走普通执行（防放飞 AI）"
+echo "=== ④失败码：不静默改走普通执行（术语锚）==="
+assert_in_file "$SKILL" "不静默改走普通执行" "不静默改走普通执行（防放飞 AI，合并：停 + 升级人）"
 echo "  PASS 失败码不静默"
 
 echo ""

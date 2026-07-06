@@ -23,6 +23,7 @@ suites=(
   adversarial-review-behavior.sh
   setup-patch-sync.sh
   dep-upgrade.sh
+  codesop-relief-behavior.sh
   codesop-e2e.sh
 )
 

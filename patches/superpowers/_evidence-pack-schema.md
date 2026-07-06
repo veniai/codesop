@@ -60,7 +60,7 @@
 
 codex 审查结果归位（spec §5 #4 跨模型强制 + §8 codex 不可用降级 / v9 R9）：
 
-- **① spec 必走 codex:rescue**；②③ 可选（risk:high）；adversarial 不自动（用户手动）
+- **① spec 必走 codex:rescue**（**simple 可跳 codex**：simple = 1-2 文件无 override 时跳过 codex 设计审；high-risk override = Public API/迁移/Security/构建部署 仍必走，见 SKILL §8.5 + writing-plans Complexity Assessment）；②③ 可选（risk:high）；adversarial 不自动（用户手动）
 - **R9 跨模型强制**：high-risk「满足」条目 codex 必复核，**不得标"跳过"**；codex 真不可用 → 该条目降级 advisory（人定夺），**不自动判满足**
 - **codex 不可用** → 本栏标「codex 不可用，降级 advisory」，(a)(b) 照出；**非 high-risk 不阻塞**（advisory 给人可见，不静默丢锚点）；high-risk 见上一条（不自动判满足）
 - codex 可用时本栏**顺带跨模型扫未覆盖**（补同模型盲点；结果并入 (b) 复核）
@@ -179,7 +179,7 @@ bash brainstorming/scripts/start-server.sh --project-dir <proj> --open
 ## 8. HTML 片段示例（spec-gate 可视化：spec 实质为主 + evidence pack 为辅）
 
 spec-gate 人审看**两层**（统一 gate-visual 模板，§8.7 B）：
-- **Layer 1 白话摘要**（3 秒入口，不提术语）：4 块——`要解决的问题` / `实际会改变什么` / `为什么这样改` / `明确不改变什么`。规则：≤5 行、不用文件名/章节号/术语、**不抄 spec 原文**（subagent 读 spec 后重写）
+- **Layer 1 白话摘要**（3 秒入口，优先白话可用术语）：4 块——`要解决的问题` / `实际会改变什么` / `为什么这样改` / `明确不改变什么`。规则：≤5 行、**优先白话**（可用术语但避免堆砌）、**不抄 spec 原文**（subagent 读 spec 后重写）
 - **Layer 2 具体判定**（认真审）：spec 实质呈现（功能去留地图 / 改动跨层拓扑 / 数据流）+ evidence pack（mermaid + (a)(b)(c) + 边界 + AND）
 
 占位符 `<…>` subagent 按 spec 内容 + §2/§5/§6 填。

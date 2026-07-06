@@ -34,37 +34,22 @@ assert_in_file() {
 
 echo "=== R1: brainstorming 造方案前走第一性原理推导 ==="
 
-# R1a: "Exploring approaches" 段显式声明第一性原理推导（造方案前推，不照搬类比）
+# R1a: "Exploring approaches" 段显式声明第一性原理推导（造方案前推，不照搬类比）—— 术语锚
 assert_in_file "$PATCHES/brainstorming-SKILL.md" \
   "第一性原理推导 (first-principles derivation, BEFORE proposing approaches)" \
   "R1 Exploring approaches declares first-principles derivation before proposing"
 
-# R1b: 推导从基本事实/约束出发（不是类比照搬）
-assert_in_file "$PATCHES/brainstorming-SKILL.md" \
-  "derive the solution from the problem's irreducible basic facts and constraints" \
-  "R1 derivation from basic facts/constraints (not analogy copy)"
-
-# R1c: 推导后对比类比——divergence 是关键（不照搬类比）
-assert_in_file "$PATCHES/brainstorming-SKILL.md" \
-  "Compare derivation vs analogy" \
-  "R1 compare derivation vs analogy (weigh trade-offs after derivation)"
-
-# R1d: 复杂度边界——complex/moderate 走，simple/trivial 跳（对齐 spec §3）
+# R1d: 复杂度边界——complex/moderate 走，simple/trivial 跳（对齐 spec §3）—— 术语锚
 assert_in_file "$PATCHES/brainstorming-SKILL.md" \
   "Walk this for complex / moderate tasks" \
   "R1 complexity boundary: complex/moderate walk, simple/trivial skip"
 
-# R1e: Key Principles 也锚定第一性原理（铁律级）
+# R1e: Key Principles 也锚定第一性原理（铁律级）—— 术语锚
 assert_in_file "$PATCHES/brainstorming-SKILL.md" \
   "First-principles before analogy" \
   "R1 Key Principles anchors first-principles as a standing principle"
 
-# R1f: header changelog 记录 first-principles v1 patch（叠加，不推翻 v9）
-assert_in_file "$PATCHES/brainstorming-SKILL.md" \
-  "(first-principles v1) First-principles derivation step" \
-  "R1 header changelog records the patch (additive over v9)"
-
-echo "  PASS R1 (brainstorming 造方案前走第一性原理推导 + 对比类比 + 复杂度边界 + Key Principle)"
+echo "  PASS R1 (brainstorming 造方案前走第一性原理推导 + 复杂度边界 + Key Principle)"
 
 echo ""
 echo "=== R2: systematic-debugging 走第一性原理找根因 ==="

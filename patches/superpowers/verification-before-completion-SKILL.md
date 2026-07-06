@@ -93,7 +93,7 @@ proceed to the evidence-pack, do NOT claim completion:
 
 | # | Sub-condition | Assertion (mechanical, zero AI judgment) | Violation = |
 |---|---|---|---|
-| **6.1** | 测试删行 = 0 | `git diff` on test files (`*.test.*` / `*_test.*` / `tests/` / `__tests__/`) — count of removed non-blank lines = 0 | immediate FAIL |
+| **6.1** | 测试删行 = 0（默认）| `git diff` on test files (`*.test.*` / `*_test.*` / `tests/` / `__tests__/`) — count of removed non-blank lines = 0；**spec 明确批准例外**（合法删旧测试/重构，固定写在 spec 该需求边界段）允许 | 默认 FAIL（spec 批准例外放行）|
 | **6.2** | skip/xfail 不激增 | count of `skip` / `xfail` / `.skip(`/`@skip` / `pytest.mark.skip` / `t.Skip` added in this diff ≥ count removed (net ≤ 0) | immediate FAIL |
 | **6.3** | assert 不删 | count of removed `assert ` / `expect(` / `require.` assertion lines = 0 | immediate FAIL |
 | **6.4** | 覆盖率阈值不降 | coverage threshold in config (`.coveragerc` / `jest.config` `coverageThreshold` / `go -coverprofile`) ≥ baseline | immediate FAIL |
@@ -301,7 +301,7 @@ Gate Function 五步 + Step 6 diff 守护 + 证据包组装（§A）全过后，
 
 **触发**：deliver-gate 风险分级 = **high**（§C）；或 **low 判定可疑兜底**——deliver 涉及**鉴权 / 外部输入 / 并发 / 资源 / 注入面**，即使 spec 声明 low（§C 自动过）也**升级 high** 走对抗式审查（防 spec 作者误判 low 放过边界 bug）。
 
-**攻击者视角扫的边界 bug 类（含但不限于）**：OOM 死循环 / 未来时间污染 / 缓存穿透 / 超大数据 / 性能炸弹（ReDoS）/ 资源泄漏（文件句柄·连接池·内存渐进）/ 并发竞态（race·死锁·TOCTOU）/ 权限越界（鉴权绕过·IDOR）/ 注入（SQL·命令·XSS·路径穿越）/ 日志泄敏 / 降级熔断失效。
+**先写一句话威胁模型**（含**资产 + 攻击向量**两要素，防敷衍——如"资产=用户会话，攻击向量=未校验的 redirect 参数"）再扫边界 bug 类（**举例含但不限于**）：OOM 死循环 / 未来时间污染 / 缓存穿透 / 超大数据 / 性能炸弹（ReDoS）/ 资源泄漏（文件句柄·连接池·内存渐进）/ 并发竞态（race·死锁·TOCTOU）/ 权限越界（鉴权绕过·IDOR）/ 注入（SQL·命令·XSS·路径穿越）/ 日志泄敏 / 降级熔断失效。
 
 **执行机制（复用，不另造攻击者 agent）**：
 - **动态工作流多 agent（AI 自动走）**：ultracode 开时 dispatch N 个 skeptic 攻击者 subagent（adversarial verify pattern），各站攻击者视角找一类边界 bug，投票汇总

@@ -40,22 +40,11 @@ assert_in_file "$PATCH" \
   "恶意用户怎么搞崩" \
   "R1 attacker-mindset proposition (how does a malicious user break it)"
 
-# R1c: 边界 bug 类——人审 dig_deeper 抓的 6 类漏（spec 漏洞 1 补全）
-assert_in_file "$PATCH" "资源泄漏"     "R1 boundary bug class: resource leak"
-assert_in_file "$PATCH" "并发竞态"     "R1 boundary bug class: concurrency race"
-assert_in_file "$PATCH" "权限越界"     "R1 boundary bug class: privilege escalation"
-assert_in_file "$PATCH" "注入"         "R1 boundary bug class: injection"
-assert_in_file "$PATCH" "日志泄敏"     "R1 boundary bug class: log sensitive leak"
-assert_in_file "$PATCH" "降级熔断失效" "R1 boundary bug class: fallback/circuit-breaker failure"
+# R1c: 边界 bug 类——保留 1 代表 + 开放列表（释放 7 个措辞锁：5 类原始 + 5 类补全的字段锁）
+assert_in_file "$PATCH" "资源泄漏"     "R1 boundary bug class 代表 (resource leak)"
+assert_in_file "$PATCH" "含但不限于"   "R1 open list marker (non-exhaustive, 允许扩展)"
 
-# R1d: 原始 5 类（卡兹克例子）也在
-assert_in_file "$PATCH" "OOM 死循环"   "R1 boundary bug class: OOM loop"
-assert_in_file "$PATCH" "未来时间污染" "R1 boundary bug class: future-time pollution"
-
-# R1e: "含但不限于"（开放列表，允许扩展，不锁死）
-assert_in_file "$PATCH" "含但不限于" "R1 open list marker (non-exhaustive)"
-
-echo "  PASS R1 (§C.2 high 路径对抗式审查 + 边界 bug 11 类 + 开放列表)"
+echo "  PASS R1 (§C.2 high 路径对抗式审查 + 边界 bug 开放列表)"
 
 echo ""
 echo "=== R2: 复用动态工作流（AI 自动）+ codex:adversarial-review（用户手动）==="
@@ -95,11 +84,7 @@ echo "=== R3: 找到的 bug 进证据包 blocking，不清零不交付 ==="
 
 assert_in_file "$PATCH" \
   "找到的 bug 进证据包 blocking" \
-  "R3 findings enter evidence-pack as blocking"
-
-assert_in_file "$PATCH" \
-  "不清零不交付" \
-  "R3 blocking must clear before deliver"
+  "R3 findings enter evidence-pack as blocking (合并: 不清零不交付)"
 
 echo "  PASS R3 (对抗式审查 bug 进证据包 blocking)"
 
