@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.9.0] - 2026-07-05
+
+### Changed — codesop 减负（simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点）
+基于 Workflow 6-finder 调研 + codex 双 AI 审 + brainstorming spec（spec-gate approved）。核心范式不动，按综合 ROI 排序减负——回归初心「指引/锦上添花，不限制大模型」。
+- **simple 出口**：simple（1-2 文件无 override）跳 codex 设计审（brainstorming patch + router + schema §4 ①）
+- **测试双锚**：术语锚 golden-lock（≥8）+ 措辞锁语义化（5 套减 ≥30%，96→59）+ dogfood 文本契约
+- **去重降噪**：§9 Iron Law 表降级 + §9 1% chance 改可判定 + 不静默合并 + Skill 生态条件输出 + 全局文档段保留原则删细表
+- **spec-gate 禁止降级**（codesop 自身漏洞修复）：必 serve URL + 自动 dispatch + B 四道 Layer 1 放宽 + serve 失败失败码
+- **8 半锚点全包**：blockedBy 允许并行 + Git 清理去硬编码 + doc-gate step 3 删 + 30 行定性 + 反膨胀合并 + §C.2 威胁模型 + SessionStart hook opt-out + 测试删行 spec 批准例外
+
+run_all 20/0（新增 codesop-relief-behavior.sh）。code-review + codex 双审（1 low + 1 high + 3 medium + 2 low 全 fix）。
+
 ## [4.8.1] - 2026-07-05
 
 ### Fixed — code-review 补漏（3 CONFIRMED）

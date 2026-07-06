@@ -19,11 +19,11 @@
 - **当前阶段**: stable
 - **当前目标**: 稳定维护，按需迭代新能力
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v4.8.1
+- **当前里程碑**: v4.9.0
 - **完成度**: 100%
 - **下一步**: 按需迭代
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.8.1 code-review 补漏（deliver-gate completed 只认 approved + 抽样 low 不走 ready/approved + verification +/或）
+- **最后更新原因**: v4.9.0 codesop 减负（simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点）
 
 ## 2. 当前进度
 
@@ -37,6 +37,7 @@
 - 无
 
 ### 2.4 Done Recently
+- [x] v4.9.0: codesop 减负（feat/v4.9，PR #49）— simple 出口（跳 codex）+ 测试双锚（术语锚 golden-lock + 措辞锁语义化）+ 去重降噪（§9/1% chance/不静默/Skill 生态）+ spec-gate 禁止降级（codesop 自身漏洞修复）+ 8 半锚点全包；Workflow 6-finder + codex 双审 + code-review；run_all 20/0
 - [x] v4.8.1: code-review 补漏（feat/v4.8.1，PR #48）— verification §C +/或执行层矛盾 + §8.7 D deliver-gate completed 只认 approved + 抽样 low 不走 ready/approved；3 CONFIRMED 全修；run_all 19/0
 - [x] v4.8.0: gate 流程逻辑修正（feat/v4.8，PR #47）— /goal 交接包 + pre-/goal preparation segment 边界统一 + spec-gate Layer 1 白话层 + deliver-gate §8b 可视化 + ready/approved 拆分 + 阻塞语义澄清；router+verification 同步；codex 双 AI 审（设计 + deliver-gate 复核）；run_all 19/0
 - [x] v4.7.1: 全方位审查 P2 收尾（feat/v4.7.1）— HOME 守卫（detection/init-interview，hooks/IDE 环境）+ commands docs/adr scaffold + R2 rubric 实质断言（防字段在/实质退化）；codex 完整审查 #7/#9 不动；run_all 19/0
@@ -70,6 +71,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-05 | codesop 减负（v4.9.0）| 回归初心：Workflow 6-finder + codex 双审找 5 类限制/仪式 | simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点；code-review + codex 双审全 fix；run_all 20/0 |
 | 2026-07-05 | code-review 补漏（v4.8.1）| code-review skill 4-finder 审找 3 CONFIRMED（verification +/或执行层矛盾 / deliver-gate 漏 completed 只认 approved / 抽样 low ready-approved 空转）| SKILL §8.7 D + verification §C + schema §8b 三处同步；run_all 19/0 |
 | 2026-07-05 | gate 流程逻辑修正（v4.8.0）| codex 双 AI 审找 5 件事 + 9 漏改 + 3 盲点（/goal 必须手动 / plan 驱动矛盾 / ready-approved 混 / 边界词乱）| /goal 交接包 + 边界统一 + spec-gate Layer 1 白话 + deliver-gate §8b 可视化 + ready/approved 拆分 + 阻塞语义；router+verification 同步；run_all 19/0 |
 | 2026-07-03 | P2 收尾（v4.7.1）| v4.7.0 P0+P1 已修，P2 follow-up（codex 完整审查 #7/#9 建议不动）| HOME 守卫（detection/init-interview）+ commands docs/adr scaffold + R2 rubric 实质断言；run_all 19/0 |
@@ -112,7 +114,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.8.1.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.0.
 
 ## 5. 产品核心规范
 
