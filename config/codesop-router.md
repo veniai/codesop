@@ -1,4 +1,4 @@
-## codesop 路由卡 (v4)
+## codesop 路由卡 (v4)（可忽略——熟悉项目可跳过；opt-out: `touch ~/.claude/.codesop-router-disabled`）
 
 新任务必须先输出任务对齐块（理解 + 阶段 + Skill）。
 完整 pipeline 定义见 /codesop。
@@ -14,7 +14,7 @@
 | | | plugin | understand-anything:understand-onboard | 新会话接手陌生项目 / 新人 onboarding：生成架构学习路径 |
 | **1. 需求分析与设计** | | | | |
 | | ★ | sp | superpowers:brainstorming | 任何新功能/改动前：理解需求→grill 式术语对齐→澄清问题→出设计方案→写 spec→spec 自审→用户审阅；架构审查/重构/模块边界 |
-| | ★ | plugin | codex:rescue | spec 完成后的独立设计审查（双 AI 设计审查，必走） |
+| | ★ | plugin | codex:rescue | spec 完成后的独立设计审查（双 AI 设计审查，**simple 可跳 codex**：simple 任务可跳，high-risk override 仍必走） |
 | | ★ | plugin | frontend-design:frontend-design | 做前端 UI 时：强制设计思维阶段，拒绝通用 AI 审美，独特的排版/配色/动效 |
 | **2. 生成执行文档** | | | | |
 | | ★ | sp | superpowers:writing-plans | spec 已批准，拆成可执行的分步任务 |
@@ -54,7 +54,7 @@
 
 ### 链路组装（路由表是链路唯一真相源）
 **pre-/goal preparation segment**：链路组装到 **spec-gate + plan-gate + branch setup + /goal handoff 为止**（codesop 编排，auto-proceed 覆盖整段）；/goal handoff 时 AI 生成 exact /goal 命令交用户手动发（/goal 是 built-in，AI 不能自触发），用户发后 /goal 接管 dev/verify/finishing。
-**造目标段**（codesop 编排，☆=有插件时走）：设计后 → ★codex:rescue | 跨模块（锚点：≥2 路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（不可用跳过回退 CONTEXT.md/ADR；stale 降级提示）
+**造目标段**（codesop 编排，☆=有插件时走）：设计后 → ★codex:rescue（**simple 可跳 codex**：1-2 文件无 override 跳过；high-risk override 仍必走） | 跨模块（锚点：≥2 路由模块 / 跨 client-server / 改公共接口）→ brainstorming 前条件插入 understand-anything:understand-chat（不可用跳过回退 CONTEXT.md/ADR；stale 降级提示）
 **跑目标段**（/goal handoff 后，嵌 `/goal` 完成条件）：/goal dev 后 → ☆code-simplifier | /goal verify 后 → ☆claude-md-management | 跨模块同锚点 /goal dev 后 → understand-anything:understand-diff（辅助；不可用跳过；stale 降级）
 
 链路完整性：组装链路后检查相邻 skill 之间是否存在逻辑断层（如 code-review 后未走 receiving-code-review、反馈后未修复验证），有则自动补充过渡步骤，不盲目前进。

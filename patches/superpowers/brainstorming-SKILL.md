@@ -23,7 +23,7 @@
        high-risk「满足」entry degrades to advisory (codesop spec-gate 人审 adjudicates) — it is NOT auto-judged
        满足. Non-high-risk entries: codex unavailable → degrade to advisory (column (c) marked
        "codex 不可用，降级 advisory", human-visible, non-blocking) — never a silent skip, because
-       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue). Fixes v7 codex-skip 漏洞
+       the spec stage MUST walk codex (schema §4: ① spec 必走 codex:rescue) **unless simple**（**simple 可跳 codex**：simple = 1-2 文件无 override；high-risk override 仍必走，per writing-plans Complexity Assessment）. Fixes v7 codex-skip 漏洞
        where codex-unavailable silently bypassed the cross-model anchor.
     8. (first-principles v1) First-principles derivation step added to "Exploring approaches":
        before proposing 2-3 approaches, AI MUST first derive the solution from basic facts /
@@ -104,7 +104,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is 交付 codesop spec-gate.** brainstorming 完成后交 codesop spec-gate（SKILL §8.7 B：人审 rubric + 可视化）；spec-gate 审过后由 codesop 决定调 `/goal` 或（complex）走 writing-plans——brainstorming 不直接进 writing-plans。
+**The terminal state is 交付 codesop spec-gate.** brainstorming 完成后交 codesop spec-gate（SKILL §8.7 B：人审 rubric + 可视化）——**codesop 自动 dispatch spec-gate**（不问用户要不要可视化，禁止降级为文字摘要）；spec-gate 审过后由 codesop 决定调 `/goal` 或（complex）走 writing-plans——brainstorming 不直接进 writing-plans。
 
 ## The Process
 

@@ -60,7 +60,7 @@
 
 codex 审查结果归位（spec §5 #4 跨模型强制 + §8 codex 不可用降级 / v9 R9）：
 
-- **① spec 必走 codex:rescue**；②③ 可选（risk:high）；adversarial 不自动（用户手动）
+- **① spec 必走 codex:rescue**（**simple 可跳 codex**：simple = 1-2 文件无 override 时跳过 codex 设计审；high-risk override = public API/迁移/Security/构建部署 仍必走，见 SKILL §8.5 + writing-plans Complexity Assessment）；②③ 可选（risk:high）；adversarial 不自动（用户手动）
 - **R9 跨模型强制**：high-risk「满足」条目 codex 必复核，**不得标"跳过"**；codex 真不可用 → 该条目降级 advisory（人定夺），**不自动判满足**
 - **codex 不可用** → 本栏标「codex 不可用，降级 advisory」，(a)(b) 照出；**非 high-risk 不阻塞**（advisory 给人可见，不静默丢锚点）；high-risk 见上一条（不自动判满足）
 - codex 可用时本栏**顺带跨模型扫未覆盖**（补同模型盲点；结果并入 (b) 复核）

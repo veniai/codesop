@@ -333,7 +333,7 @@ configure_hooks() {
   fi
 
   # Use absolute path to avoid ~ expansion failure in sh/dash when HOME is unset
-  local router_hook_cmd="cat $HOME/.claude/codesop-router.md"
+  local router_hook_cmd="[ ! -f $HOME/.claude/.codesop-router-disabled ] && cat $HOME/.claude/codesop-router.md"
 
   # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME vs absolute)
   local existing
