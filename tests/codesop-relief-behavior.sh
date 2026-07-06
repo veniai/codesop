@@ -66,4 +66,12 @@ grep -Fq "codesop-router-disabled" "$ROOT_DIR/setup" || fail "5.7 setup opt-out 
 echo "  PASS SessionStart hook opt-out"
 
 echo ""
+echo "=== cross-file 一致性（codex 双审补：router/schema override + blocking/advisory）==="
+assert_in_file "$ROUTER" "1-2 文件无 override" "router simple override 口径"
+assert_in_file "$SCHEMA" "Public API"          "schema override 清单（Public API 代表）"
+assert_in_file "$VERIF"  "blocking"             "verification blocking 锚"
+assert_in_file "$VERIF"  "advisory"             "verification advisory 锚"
+echo "  PASS cross-file 一致性（router/schema simple override + verification blocking/advisory）"
+
+echo ""
 echo "All v4.9 relief behavior tests passed."
