@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [4.9.2] - 2026-07-11
+
+### Changed — v5 spec r2（采纳 12 条外部审查）+ compat hash 门禁
+外部审查 v5 spec r1 后采纳全部 12 条改进：
+- **compat hash 门禁**（补盲区）：patch_skills apply 前比 superpowers `gitCommitSha` vs 基线 stamp，变了报警暂停不覆盖——补 `dep_patch_compat` 只比 major.minor 的盲区（防 6.1.1→6.1.2 整文件覆盖吞上游修复）；patch-health-check 加第二道 sha 检查。双门：跨 minor（major.minor）+ minor 内（gitCommitSha）
+- **v5 spec r2**：Claude-first 能力分级 / floor best-effort 语义（非安全边界，不可逆靠宿主原生审批，adapter 不弱化）/ 轻量 profile 行为评测（表驱动 + dogfood）/ 补 ambiguity / 审计路径 `$XDG_STATE_HOME` / 修正前版 PEP 描述（≠要求 deny hook）/ R1·R5 改 high / R6 拆分（patch 审计移 baseline）/ 删 Phase 2 finishing 弃留
+- **PRD 同步**：版本号；§5 用户画像三端同级 → Claude-first 能力分级
+- 含 v5 spec draft（profile-decouple r2 + 前版 adaptive-governance 作历史）
+
+README 经核实无三端同级宣传（审查误判），不改。run_all 20/0。
+
 ## [4.9.1] - 2026-07-11
 
 ### Fixed — superpowers 6.1.1 适配 + patch 失效可见化（防再犯）

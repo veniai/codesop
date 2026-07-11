@@ -32,4 +32,20 @@ if [ "$inst_mm" != "$baseline" ]; then
     "  修复：跑 \`bash setup --host claude\` 适配，或手动适配 patches/superpowers/ + bump 基线" \
     "  ------------------------------------------------------------" ""
 fi
+
+# Gate 2 (v5 §7/R7): upstream commit fingerprint — catches minor-internal changes that
+# the major.minor gate misses (6.1.1→6.1.2 passes compat but may change patched skills).
+sha_stamp="${XDG_STATE_HOME:-$HOME/.local/state}/codesop/patch-upstream-sha"
+if [ -f "$sha_stamp" ]; then
+  baseline_sha=$(tr -d '[:space:]' < "$sha_stamp" 2>/dev/null)
+  cur_sha=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].gitCommitSha // empty' "$plugins_json" 2>/dev/null)
+  if [ -n "$baseline_sha" ] && [ -n "$cur_sha" ] && [ "$baseline_sha" != "$cur_sha" ]; then
+    printf '%s\n' "" \
+      "  ------------------------------------------------------------" \
+      "  ⚠⚠  上游 superpowers commit 变化（$baseline_sha → $cur_sha） ⚠⚠" \
+      "  patched skill 可能已改，patch 覆盖可能吞上游修复（major.minor 兼容但内容变了）" \
+      "  修复：跑 \`bash setup --host claude\`（hash 门禁会暂停覆盖，re-derive 后更新基线）" \
+      "  ------------------------------------------------------------" ""
+  fi
+fi
 exit 0

@@ -257,6 +257,33 @@ patch_skills() {
     fi
   fi
 
+  # --- Hash gate (v5 §7/R7): upstream commit fingerprint, catches minor-internal changes ---
+  # dep_patch_compat only checks major.minor — a 6.1.1→6.1.2 bump passes as compatible and
+  # whole-file overwrite would swallow upstream fixes silently. This gate reads the upstream
+  # gitCommitSha (installed_plugins.json) and compares to the baseline stamp from last adapt.
+  # Any change → halt, don't overwrite (human re-derives, then re-runs setup).
+  local _plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+  local _upstream_sha=""
+  if [ -f "$_plugins_json" ] && command -v jq >/dev/null 2>&1; then
+    _upstream_sha=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].gitCommitSha // empty' "$_plugins_json" 2>/dev/null)
+  fi
+  local _sha_stamp="${XDG_STATE_HOME:-$HOME/.local/state}/codesop/patch-upstream-sha"
+  if [ -n "$_upstream_sha" ] && [ -f "$_sha_stamp" ]; then
+    local _baseline_sha
+    _baseline_sha=$(tr -d '[:space:]' < "$_sha_stamp" 2>/dev/null)
+    if [ -n "$_baseline_sha" ] && [ "$_baseline_sha" != "$_upstream_sha" ]; then
+      printf '%s\n' "" \
+        "  ------------------------------------------------------------" \
+        "  ⚠⚠  上游 superpowers commit 变化（$_baseline_sha → $_upstream_sha） ⚠⚠" \
+        "  major.minor 兼容但 upstream commit 变了——patched skill 文件可能已改，" \
+        "  整文件覆盖会吞掉上游修复。暂停 patch 覆盖。" \
+        "  修复：re-derive patches/superpowers/ 对比新上游（spec §7 hash 门禁），" \
+        "  适配后重跑 setup 会更新基线。强制覆盖（风险自担）：rm $_sha_stamp" \
+        "  ------------------------------------------------------------" ""
+      return 0
+    fi
+  fi
+
   local patches_dir="$SOURCE_DIR/patches/superpowers"
   local patched=0
 
@@ -321,6 +348,15 @@ patch_skills() {
 
   if [ "$patched" -gt 0 ] || [ "$schema_copied" -gt 0 ]; then
     echo "  ✓ Skill patches applied ($patched SKILL.md + $schema_copied schema sibling)"
+  fi
+
+  # Update upstream-sha baseline after successful apply (or idempotent no-op).
+  # Records the upstream gitCommitSha we adapted against; next setup compares to this.
+  # Skipped when hash gate halts (return 0 above) — baseline stays at old sha so the
+  # mismatch keeps surfacing until human adapt.
+  if [ -n "$_upstream_sha" ]; then
+    mkdir -p "$(dirname "$_sha_stamp")"
+    printf '%s\n' "$_upstream_sha" > "$_sha_stamp" 2>/dev/null || true
   fi
 }
 

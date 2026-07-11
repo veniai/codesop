@@ -1,5 +1,5 @@
 # Product: codesop
-# Last Updated: 2026-06-29
+# Last Updated: 2026-07-11
 # Status: active
 
 ---
@@ -16,27 +16,28 @@
 
 ## 1. 当前快照
 
-- **当前阶段**: stable
-- **当前目标**: 稳定维护，按需迭代新能力
-- **长期目标**: 让 AI 编码助手在任意项目中有统一的 workflow 纪律和 skill 路由
-- **当前里程碑**: v4.9.0
-- **完成度**: 100%
-- **下一步**: 按需迭代
+- **当前阶段**: v5 spec review r3（v4.9.2 stable 继续维护）
+- **当前目标**: 评审 v5 spec（profile-decouple r3），确认 Claude-first + profile 分档 + 事实完整性方向
+- **长期目标**: 让 AI 编码助手在任意项目中有统一的核心 workflow 纪律和 skill 路由（编排按宿主能力分级）
+- **当前里程碑**: v4.9.2
+- **完成度**: v4.9.2 stable（superpowers 6.1.1 适配 + patch fingerprint 门禁）；v5 spec r3 待 spec-gate
+- **下一步**: spec-gate `2026-07-11-v5-profile-decouple.md`（r3 收口：fingerprint 措辞 / Phase 0 状态 / 文档压缩）
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.9.0 codesop 减负（simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点）
+- **最后更新原因**: v4.9.2 = r2 审查采纳 + gitCommitSha fingerprint 门禁；r3 收口 spec/实现口径 + Phase 0 状态 + 文档密度
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- 无
+- [ ] v5 自适应治理架构 spec-gate：确认治理内核、三档 profile、宿主适配、第三方 Skill 解耦和 Phase 0 优先级
 
 ### 2.2 Next Up
-- 无（v4.1.0 第一性原理 + v4.2.0 对抗式审查均落地；按需迭代）
+- spec-gate 通过后先做 Phase 0：runtime 版本/hash 完整性、宿主感知 routing coverage、文档漂移修正
 
 ### 2.3 Blocked
 - 无
 
 ### 2.4 Done Recently
+- [x] 2026-07-11: 完成强模型/AGI 演进下的 codesop 战略审计，新增 v5 自适应治理架构草案（Policy Kernel + Project Context + Adaptive Orchestrator + Host Adapter + Skill Pack + Evaluation）
 - [x] v4.9.0: codesop 减负（feat/v4.9，PR #49）— simple 出口（跳 codex）+ 测试双锚（术语锚 golden-lock + 措辞锁语义化）+ 去重降噪（§9/1% chance/不静默/Skill 生态）+ spec-gate 禁止降级（codesop 自身漏洞修复）+ 8 半锚点全包；Workflow 6-finder + codex 双审 + code-review；run_all 20/0
 - [x] v4.8.1: code-review 补漏（feat/v4.8.1，PR #48）— verification §C +/或执行层矛盾 + §8.7 D deliver-gate completed 只认 approved + 抽样 low 不走 ready/approved；3 CONFIRMED 全修；run_all 19/0
 - [x] v4.8.0: gate 流程逻辑修正（feat/v4.8，PR #47）— /goal 交接包 + pre-/goal preparation segment 边界统一 + spec-gate Layer 1 白话层 + deliver-gate §8b 可视化 + ready/approved 拆分 + 阻塞语义澄清；router+verification 同步；codex 双 AI 审（设计 + deliver-gate 复核）；run_all 19/0
@@ -71,6 +72,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-11 | 启动 v5 自适应治理架构设计（待 spec-gate） | 强模型降低过程教学价值，但放大权限、意图、证据和跨宿主一致性问题；当前还存在 repo 4.9 / Claude 4.8.1 / Codex-OpenCode 3.15 runtime 分裂 | 候选方向为最小治理内核 + 三档 profile + 宿主适配 + 按需 Skill + 结果评测；批准前不改变 v4.9 默认行为 |
 | 2026-07-05 | codesop 减负（v4.9.0）| 回归初心：Workflow 6-finder + codex 双审找 5 类限制/仪式 | simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点；code-review + codex 双审全 fix；run_all 20/0 |
 | 2026-07-05 | code-review 补漏（v4.8.1）| code-review skill 4-finder 审找 3 CONFIRMED（verification +/或执行层矛盾 / deliver-gate 漏 completed 只认 approved / 抽样 low ready-approved 空转）| SKILL §8.7 D + verification §C + schema §8b 三处同步；run_all 19/0 |
 | 2026-07-05 | gate 流程逻辑修正（v4.8.0）| codex 双 AI 审找 5 件事 + 9 漏改 + 3 盲点（/goal 必须手动 / plan 驱动矛盾 / ready-approved 混 / 边界词乱）| /goal 交接包 + 边界统一 + spec-gate Layer 1 白话 + deliver-gate §8b 可视化 + ready/approved 拆分 + 阻塞语义；router+verification 同步；run_all 19/0 |
@@ -114,15 +116,19 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.0.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.2.
 
 ## 5. 产品核心规范
 
 ### 5.1 核心目标
-让 AI 编码助手在任意项目中拥有统一的 workflow 纪律：知道用什么 skill、按什么顺序执行、什么时候该停下来验证。
+让 AI 编码助手在任意项目中拥有**统一的核心 workflow 纪律**：知道用什么 skill、按什么顺序执行、什么时候该停下来验证。编排能力（hook、/goal、patch）按宿主能力分级提供（见 §5.2），不承诺跨宿主行为完全对等，只承诺核心纪律语义一致。
 
-### 5.2 用户画像
-- **目标用户**: 使用 Claude Code / Codex / OpenCode 的开发者
+### 5.2 用户画像与能力分级
+- **目标用户**: 以 **Claude Code** 为主的开发者；Codex / OpenCode 用户提供核心纪律
+- **能力分级**（Claude-first）:
+  - **Claude Code（完整）**: router 编排 + SessionStart hook + /goal handoff + superpowers patch + 审计
+  - **Codex（核心纪律）**: L0 kernel + 项目文档（AGENTS/PRD/README）+ codesop Skill；编排按 Codex 原生
+  - **OpenCode/OpenClaw（核心纪律）**: 同 Codex；安装目标分别验证
 - **核心痛点**:
   - AI 助手跳过测试、review、文档更新等关键步骤
   - 不同 AI 工具间没有统一的 workflow 指导
@@ -231,6 +237,9 @@ setup                       # 宿主安装、同步与卸载
 ## 6. 当前风险与假设
 
 ### 6.1 Risks
+- **跨宿主 runtime 漂移**: 仓库、Claude、Codex/OpenCode 可运行不同代际的 SKILL，现有检查仍可能报告覆盖完整
+- **强模型受过程约束**: 固定任务对齐块、simple spec-gate、强制 HTML 和过度 Skill 触发可能增加成本并压缩模型自主判断
+- **缺少结果评测**: 当前测试主要保护安装和文本合同，尚不能证明 full workflow 相对宿主原生 baseline 的质量收益
 - **文档纪律执行靠 AI 自觉**: router card 注入规则但没有结构性检查点
 - **bash 复杂度上限**: shell 体量继续增长时可能需迁移 Python
 - **PRD 文档滞后风险**: 代码和 PR 先行时 PRD 容易落后
