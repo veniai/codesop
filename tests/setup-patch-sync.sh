@@ -31,11 +31,11 @@ trap 'rm -rf "$WORKROOT"' EXIT
 
 HOME_FAKE="$WORKROOT/home"
 MARKET="claude-plugins-official"
-SPVER="6.0.3"   # 与 config/dependencies.sh superpowers min_version 同口径
+SPVER="6.1.1"   # 与 config/dependencies.sh superpowers min_version 同口径
 PLUGIN_ROOT="$HOME_FAKE/.claude/plugins/cache/$MARKET/superpowers/$SPVER"
 SKILLS_ROOT="$PLUGIN_ROOT/skills"
 
-# dependencies.sh patch_compat 走 major.minor 匹配；用与 manifest 一致的 6.0.x
+# dependencies.sh patch_compat 走 major.minor 匹配；用与 manifest 一致的 6.1.x
 mkdir -p "$SKILLS_ROOT/writing-plans" \
          "$SKILLS_ROOT/finishing-a-development-branch" \
          "$SKILLS_ROOT/brainstorming" \

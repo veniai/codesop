@@ -1,6 +1,11 @@
 <!--
   codesop patch: writing-plans
-  Based on: superpowers v6.0.3
+  Based on: superpowers v6.1.1
+  6.1.1 适配说明：官方共享骨架段（Overview / Scope Check / File Structure / Task Right-Sizing
+    / Bite-Sized Task Granularity / Plan Document Header / Global Constraints）与 codesop 基于
+    6.0.3 版本逐字一致（md5 校验）。codesop 9 项改动（含 No Placeholders / Remember 段为
+    implementation-brief 体系加的配套澄清、Task Structure 的 brief/Lightweight 分流）不依赖
+    6.0.3 特有结构，在 6.1.1 上原样生效。本次适配仅 bump 基线版本号，无结构改动。
   Changes vs upstream:
     1. Removed Execution Handoff menu (Pipeline Continuation replaces — autonomous re-entry)
     2. Added Requirement Extraction (R1..RN) before review

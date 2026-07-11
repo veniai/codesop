@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [4.9.1] - 2026-07-11
+
+### Fixed — superpowers 6.1.1 适配 + patch 失效可见化（防再犯）
+superpowers 7-04 静默升到 6.1.1（基线仍 6.0.3），4 个核心 patch 被 `dep_patch_compat` 跳过 9 天未觉。根因：`claude plugin` CLI 不支持 pin 版本，codesop 的 install/update 命令从没钉版本 → 永远跟 marketplace 最新；`min_version` 只供 compat 判断，不控制安装版本。
+- **适配 6.1.1**：5 patch 全必要（finishing 是减法补丁非过时——146行 < 官方 241行，但删菜单/forge中立/PR去重/ref清理官方都没做）。finishing 重写（吸收官方 6.1.1 的 worktree 保留 + provenance 三态清理 2 项进步）；brainstorming/writing-plans/verification 纯版本号 bump（codesop 改动不依赖 6.0.3 结构，共享骨架段与官方 md5 逐字一致）；schema 免适配。基线 6.0.3 → 6.1.1
+- **失效可见化**（防再静默 9 天）：① setup `_patch_stale_warn`——patch_skills compat 跳过时多行醒目警告（版本 + 受影响行为 + 修复路径），不阻断 install；② SessionStart `~/.claude/codesop-patch-check.sh` hook——读 stamp 基线 vs `installed_plugins.json` 实际版本，stale 注入会话横幅，健康**静默零输出**；③ `_write_patch_baseline_stamp` 每次 sync 写基线 major.minor
+
+run_all 20/0（setup-patch-sync.sh SPVER + dep-upgrade.sh 期望同步 6.1.1）。
+
 ## [4.9.0] - 2026-07-05
 
 ### Changed — codesop 减负（simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点）

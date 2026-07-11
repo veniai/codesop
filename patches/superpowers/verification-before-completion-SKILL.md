@@ -1,6 +1,11 @@
 <!--
   codesop patch: verification-before-completion
-  Based on: superpowers v6.0.3
+  Based on: superpowers v6.1.1
+  6.1.1 适配说明：官方核心部分（Gate Function 5步 / Common Failures / Red Flags /
+    Rationalization Prevention / Key Patterns / Why This Matters / When To Apply）
+    与 codesop 基于 6.0.3 的版本逐字一致（md5 校验）——6.0.3→6.1.1 官方未动这些共享段。
+    codesop 增量（Step 6 diff 守护 + §A/§B/§C/§D）全是 append，不依赖 6.0.3 特有结构，
+    在 6.1.1 上原样生效。本次适配仅 bump 基线版本号，无结构改动。
   Changes vs upstream:
     1. Gate Function (5 steps) UNCHANGED — IDENTIFY/RUN/READ/VERIFY/CLAIM stays exactly as
        upstream. We do NOT touch the verification core.

@@ -1,6 +1,12 @@
 <!--
   codesop patch: brainstorming
-  Based on: superpowers v6.0.3
+  Based on: superpowers v6.1.1
+  6.1.1 适配说明：官方骨架段（Anti-Pattern / Presenting the design / Design for isolation
+    and clarity / Working in existing codebases / Visual Companion / Key Principles 6 条原条）
+    与 codesop 基于 6.0.3 的版本逐字一致（md5 校验）。codesop 8 项改动落点（Checklist
+    4/6-9 项、Process Flow 图、Exploring approaches、Spec Self-Review/User Review Gate、
+    Implementation、Key Principles +first-principles 条）不依赖 6.0.3 特有结构，在 6.1.1
+    上原样生效。本次适配仅 bump 基线版本号，无结构改动。
   Changes vs upstream:
     1. Added Grill Mode (code-first answers, decision tree tracking, domain vocabulary alignment)
     2. Added ADR trigger — suggests writing ADR when design involves architectural decisions

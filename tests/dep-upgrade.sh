@@ -11,7 +11,7 @@ source "$(dirname "$0")/test_helpers.sh"
 manifest_output="$(cat "$ROOT_DIR/config/dependencies.sh")"
 assert_contains "$manifest_output" "DEP_MANIFEST"
 assert_contains "$manifest_output" "superpowers@claude-plugins-official"
-assert_contains "$manifest_output" "core|yes|6.0.3"
+assert_contains "$manifest_output" "core|yes|6.1.1"
 assert_contains "$manifest_output" "code-review@claude-plugins-official"
 assert_contains "$manifest_output" "codex@openai-codex"
 
@@ -48,7 +48,7 @@ assert_contains "$setup_output" "dependencies.sh"
 assert_contains "$setup_output" "install_managed_deps"
 assert_contains "$setup_output" "inst_mm"
 assert_contains "$setup_output" "patch_mm"
-assert_contains "$setup_output" "skipping patches"
+assert_contains "$setup_output" "_patch_stale_warn"
 
 # --- commands.sh integration ---
 

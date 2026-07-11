@@ -12,7 +12,7 @@
 
 DEP_MANIFEST=(
   # Core — backbone, patches applied
-  "plugin|superpowers@claude-plugins-official|core|yes|6.0.3"
+  "plugin|superpowers@claude-plugins-official|core|yes|6.1.1"
 
   # Required — curated plugins
   "plugin|code-review@claude-plugins-official|required|no|"

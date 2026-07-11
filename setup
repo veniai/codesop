@@ -202,6 +202,21 @@ find_superpowers_plugin_path() {
   return 1
 }
 
+# Loud warning when superpowers is outside the patch-compat range (stale patch).
+# Replaces the old single-line silent skip (return 0 + one easy-to-miss line) —
+# a stale patch silently disables codesop's core behavior and must never go
+# unnoticed (see the 6.0.3→6.1.1 incident where patches were skipped for 9 days).
+_patch_stale_warn() {
+  local inst="$1" patch_mm="$2"
+  printf '%s\n' "" \
+    "  ------------------------------------------------------------" \
+    "  ⚠⚠  codesop 核心 patch 未生效  ⚠⚠" \
+    "  superpowers $inst ≠ 补丁基线 $patch_mm.x" \
+    "  spec 三件套 / grill / deliver-gate / simple 出口 / 对抗审查 等行为将不可用" \
+    "  修复：适配 patches/superpowers/ 到 $inst + bump config/dependencies.sh 基线" \
+    "  ------------------------------------------------------------" ""
+}
+
 patch_skills() {
   local plugin_dir
   plugin_dir=$(find_superpowers_plugin_path || true)
@@ -229,7 +244,7 @@ patch_skills() {
   if type dep_patch_compat >/dev/null 2>&1; then
     if ! dep_patch_compat "$installed_version" "$dep_min_ver"; then
       local patch_mm="${dep_min_ver%%.*}.$(echo "$dep_min_ver" | cut -d. -f2)"
-      echo "  ⚠ superpowers $installed_version (patches target $patch_mm.x) — skipping patches"
+      _patch_stale_warn "$installed_version" "$patch_mm"
       return 0
     fi
   elif [ -n "$dep_min_ver" ] && [ -n "$installed_version" ] && [ "$installed_version" != "unknown" ]; then
@@ -237,7 +252,7 @@ patch_skills() {
     inst_mm="${installed_version%%.*}.$(echo "$installed_version" | cut -d. -f2)"
     patch_mm="${dep_min_ver%%.*}.$(echo "$dep_min_ver" | cut -d. -f2)"
     if [ "$inst_mm" != "$patch_mm" ]; then
-      echo "  ⚠ superpowers $installed_version (patches target $patch_mm.x) — skipping patches"
+      _patch_stale_warn "$installed_version" "$patch_mm"
       return 0
     fi
   fi
@@ -306,6 +321,47 @@ patch_skills() {
 
   if [ "$patched" -gt 0 ] || [ "$schema_copied" -gt 0 ]; then
     echo "  ✓ Skill patches applied ($patched SKILL.md + $schema_copied schema sibling)"
+  fi
+}
+
+# Write the patch baseline (major.minor) to a stamp consumed by the SessionStart
+# patch-health-check. Called every setup sync so the stamp always reflects the
+# current dependencies.sh baseline.
+_write_patch_baseline_stamp() {
+  [ -f "$SOURCE_DIR/config/dependencies.sh" ] || return 0
+  # shellcheck disable=SC1090
+  source "$SOURCE_DIR/config/dependencies.sh"
+  local entry base_mm=""
+  for entry in "${DEP_MANIFEST[@]}"; do
+    local t id tier patched min_ver
+    IFS='|' read -r t id tier patched min_ver <<< "$entry"
+    if [ "$id" = "superpowers@claude-plugins-official" ]; then
+      base_mm="${min_ver%%.*}.$(echo "$min_ver" | cut -d. -f2)"
+      break
+    fi
+  done
+  [ -n "$base_mm" ] && printf '%s\n' "$base_mm" > "$HOME/.claude/.codesop-patch-baseline" 2>/dev/null || true
+}
+
+# Configure an independent SessionStart hook for the patch-health-check.
+# Deliberately separate from configure_hooks' router hook so we don't entangle
+# its migration regex — appends a codesop-patch-check hook if absent.
+configure_patch_check_hook() {
+  local settings="$HOME/.claude/settings.json"
+  [ -f "$settings" ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+  local check_hook_cmd="bash $HOME/.claude/codesop-patch-check.sh"
+  if grep -q "codesop-patch-check.sh" "$settings" 2>/dev/null; then
+    echo "  ✓ SessionStart patch-health-check hook already configured"
+    return 0
+  fi
+  if jq --arg cmd "$check_hook_cmd" 'if .hooks == null then . + {"hooks":{"SessionStart":[]}} else . end | if .hooks.SessionStart == null then .hooks.SessionStart = [] else . end | .hooks.SessionStart += [{"matcher":"","hooks":[{"type":"command","command":$cmd}]}]' \
+    "$settings" > "$settings.tmp"; then
+    mv "$settings.tmp" "$settings"
+    echo "  ✓ SessionStart patch-health-check hook configured"
+  else
+    rm -f "$settings.tmp"
+    echo "  ⚠ Failed to configure patch-health-check hook"
   fi
 }
 
@@ -454,6 +510,9 @@ install_claude() {
   install_router_card
   configure_hooks
   patch_skills
+  copy_file "$SOURCE_DIR/lib/patch-health-check.sh" "$HOME/.claude/codesop-patch-check.sh"
+  _write_patch_baseline_stamp
+  configure_patch_check_hook
 }
 
 install_opencode() {
