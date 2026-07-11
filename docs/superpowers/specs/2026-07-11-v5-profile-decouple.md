@@ -104,10 +104,10 @@ profile    = minimal | standard | governed
 |------|------|------|
 | patch 跨 minor 失效提示 | ✅ v4.9.1 | `_patch_stale_warn`（setup 醒目警告）+ SessionStart `patch-health-check` hook（major.minor 对比） |
 | patch fingerprint 门禁 | ✅ v4.9.2 | gitCommitSha 双门（apply 前暂停 + 会话级告警），防 minor 内吞上游修复 |
-| runtime version 报告 | 待实施 | 复用 `_dep_installed_version`（读 installed_plugins.json） |
-| manifest hash | 待实施 | sha256 哈希 codesop 关键文件（kernel/router/patches/dependencies.sh）→ stamp 对比 |
-| capability state 模型 | 待实施 | 仿 `check_understand_usability`（多态）+ `check_git_health`（三态）：healthy/stale/absent/unknown |
-| family 汇总 | 待实施 | 取最差（任一 stale/unknown → family 上浮） |
+| runtime version 报告 | ✅ 已实施 | `runtime_version_superpowers`（detection.sh，读 installed_plugins.json version+gitCommitSha）|
+| manifest hash | ✅ 已实施 | `codesop_manifest_hash`（detection.sh）+ setup 写 stamp；sha256 SKILL.md+router |
+| capability state 模型 | ✅ 已实施 | `capability_state`（detection.sh，healthy/stale/absent/unknown，双 gate：gitCommitSha + manifest hash）|
+| family 汇总 | ✅ 已实施 | `family_aggregate`（detection.sh，claude/codex/opencode 已安装取最差）|
 
 **退出条件**：所有已安装宿主目标 runtime/version/hash 一致；family 内任一 stale/unknown 上浮；stale 测试必红；fingerprint 门禁测试（模拟 commit 变 → 暂停）必过；缺 capability 为 unknown 时不报「覆盖完整」。
 

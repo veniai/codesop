@@ -549,6 +549,17 @@ install_claude() {
   copy_file "$SOURCE_DIR/lib/patch-health-check.sh" "$HOME/.claude/codesop-patch-check.sh"
   _write_patch_baseline_stamp
   configure_patch_check_hook
+  # Write manifest hash stamp (v5 Phase 0 capability state). Self-contained hash
+  # (setup is self-contained per line 190; mirrors lib/detection.sh codesop_manifest_hash).
+  local _state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/codesop"
+  mkdir -p "$_state_dir"
+  local _skill_md="$HOME/.claude/skills/codesop/SKILL.md"
+  local _router_md="$HOME/.claude/codesop-router.md"
+  if [ -f "$_skill_md" ] && command -v sha256sum >/dev/null 2>&1; then
+    local _mf="$_skill_md"
+    [ -f "$_router_md" ] && _mf="$_skill_md $_router_md"
+    sha256sum $_mf 2>/dev/null | sha256sum | cut -c1-16 > "$_state_dir/manifest-hash" 2>/dev/null || true
+  fi
 }
 
 install_opencode() {

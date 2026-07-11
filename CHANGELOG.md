@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [4.9.3] - 2026-07-11
+
+### Added — v5 Phase 0 事实完整性待实施 4 项（capability state）
+/goal 驱动实现 spec §8 Phase 0 待实施 4 项（lib/detection.sh 4 函数 + setup stamp + 测试），Phase 0 至此全 done：
+- `runtime_version_superpowers`：读 installed_plugins.json version + gitCommitSha（absent/unknown/正常）
+- `codesop_manifest_hash`：sha256 codesop 安装文件（SKILL.md + router）
+- `capability_state`：healthy/stale/absent/unknown 四态，双 gate（gitCommitSha fingerprint + manifest hash）
+- `family_aggregate`：claude/codex/opencode 已安装目标取最差（stale/unknown 上浮）
+- setup 写 manifest-hash stamp（`$XDG_STATE_HOME/codesop/`，自包含镜像 detection.sh）
+- `tests/capability-state.sh`：4 函数 × healthy/stale/absent/unknown + family 取最差（TDD，注册 run_all）
+
+run_all 21/0（新增 capability-state）。独立 subagent 验证 blocking 清零。Phase 0 全 done：4.9.1 跨minor提示 + 4.9.2 fingerprint 门禁 + 4.9.3 capability state 4 函数。
+
 ## [4.9.2] - 2026-07-11
 
 ### Changed — v5 spec r2（采纳 12 条外部审查）+ compat hash 门禁

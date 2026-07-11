@@ -16,14 +16,14 @@
 
 ## 1. 当前快照
 
-- **当前阶段**: v5 spec review r3（v4.9.2 stable 继续维护）
-- **当前目标**: 评审 v5 spec（profile-decouple r3），确认 Claude-first + profile 分档 + 事实完整性方向
+- **当前阶段**: v5 Phase 0 完成（v4.9.3 stable；Phase 1 待启）
+- **当前目标**: v5 Phase 0 事实完整性落地完成，Phase 1（Claude 解耦）待启
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的核心 workflow 纪律和 skill 路由（编排按宿主能力分级）
-- **当前里程碑**: v4.9.2
-- **完成度**: v4.9.2 stable（superpowers 6.1.1 适配 + patch fingerprint 门禁）；v5 spec r3 待 spec-gate
-- **下一步**: spec-gate `2026-07-11-v5-profile-decouple.md`（r3 收口：fingerprint 措辞 / Phase 0 状态 / 文档压缩）
+- **当前里程碑**: v4.9.3
+- **完成度**: v4.9.3 stable（Phase 0 全 done：6.1.1 适配 + fingerprint 门禁 + capability state 4 函数）；v5 spec r3 已 spec-gate approved
+- **下一步**: v5 Phase 1（Claude 解耦：拆 core/ + claude-adapter/ + grep 守卫）
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.9.2 = r2 审查采纳 + gitCommitSha fingerprint 门禁；r3 收口 spec/实现口径 + Phase 0 状态 + 文档密度
+- **最后更新原因**: v4.9.3 Phase 0 capability state 4 函数（runtime version / manifest hash / capability state / family 汇总）+ 测试
 
 ## 2. 当前进度
 
@@ -116,7 +116,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.2.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.3.
 
 ## 5. 产品核心规范
 

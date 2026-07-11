@@ -307,3 +307,102 @@ check_understand_usability() {
     if [ "$cfg_on" = "true" ] && [ "$fp_ok" = "yes" ]; then echo "UA_STATE=fresh_on"; else echo "UA_STATE=fresh_degraded"; fi
   fi
 }
+
+# ============================================================================
+# v5 Phase 0 事实完整性（spec §8 待实施 4 项）
+# 4 函数：runtime_version_superpowers / codesop_manifest_hash /
+# capability_state（healthy/stale/absent/unknown）/ family_aggregate（取最差）
+# 复用 find_superpowers_plugin_path（定位）+ 仿 check_understand_usability（多态）
+# ============================================================================
+
+# superpowers runtime version + upstream gitCommitSha（Claude family）
+# Output: RUNTIME_VERSION=<ver|absent|unknown>  RUNTIME_SHA=<sha|absent|unknown>
+runtime_version_superpowers() {
+  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
+  if [ -z "$(find_superpowers_plugin_path 2>/dev/null || true)" ]; then
+    printf '%s\n' "RUNTIME_VERSION=absent" "RUNTIME_SHA=absent"
+    return
+  fi
+  if [ ! -f "$plugins_json" ] || ! command -v jq >/dev/null 2>&1; then
+    printf '%s\n' "RUNTIME_VERSION=unknown" "RUNTIME_SHA=unknown"
+    return
+  fi
+  local ver sha
+  ver=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].version // empty' "$plugins_json" 2>/dev/null)
+  sha=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].gitCommitSha // empty' "$plugins_json" 2>/dev/null)
+  [ -n "$ver" ] && echo "RUNTIME_VERSION=$ver" || echo "RUNTIME_VERSION=unknown"
+  [ -n "$sha" ] && echo "RUNTIME_SHA=$sha" || echo "RUNTIME_SHA=unknown"
+}
+
+# codesop manifest hash（sha256 安装的关键文件：SKILL.md + router）
+# Output: 16-char hash | absent | unknown
+codesop_manifest_hash() {
+  local skill="$HOME/.claude/skills/codesop/SKILL.md"
+  local router="$HOME/.claude/codesop-router.md"
+  command -v sha256sum >/dev/null 2>&1 || { echo "unknown"; return; }
+  [ -f "$skill" ] || { echo "absent"; return; }
+  local files="$skill"
+  [ -f "$router" ] && files="$skill $router"
+  sha256sum $files 2>/dev/null | sha256sum | cut -c1-16
+}
+
+# capability state（healthy/stale/absent/unknown）— 综合 runtime + fingerprint + manifest
+# healthy: superpowers 装了 + gitCommitSha 一致 + manifest hash 一致
+# stale:   gitCommitSha 或 manifest hash 与基线 stamp 不符
+# absent:  superpowers 未装
+# unknown: 无法探测（无 installed_plugins.json / 无 jq / 无 sha）
+# Output: CAPABILITY_STATE=<state>
+capability_state() {
+  local rv ver sha
+  rv=$(runtime_version_superpowers)
+  ver=$(printf '%s\n' "$rv" | sed -n 's/^RUNTIME_VERSION=//p')
+  sha=$(printf '%s\n' "$rv" | sed -n 's/^RUNTIME_SHA=//p')
+
+  [ "$ver" = "absent" ] && { echo "CAPABILITY_STATE=absent"; return; }
+  [ "$ver" = "unknown" ] && { echo "CAPABILITY_STATE=unknown"; return; }
+
+  local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/codesop"
+
+  # Gate 1: fingerprint（gitCommitSha）vs stamp
+  local sha_stamp="$state_dir/patch-upstream-sha"
+  if [ -f "$sha_stamp" ] && [ "$sha" != "unknown" ]; then
+    local baseline_sha
+    baseline_sha=$(tr -d '[:space:]' < "$sha_stamp" 2>/dev/null)
+    if [ -n "$baseline_sha" ] && [ "$baseline_sha" != "$sha" ]; then
+      echo "CAPABILITY_STATE=stale"; return
+    fi
+  fi
+
+  # Gate 2: manifest hash vs stamp（codesop 安装文件完整性）
+  local manifest_stamp="$state_dir/manifest-hash"
+  if [ -f "$manifest_stamp" ]; then
+    local cur_hash baseline_hash
+    cur_hash=$(codesop_manifest_hash)
+    baseline_hash=$(tr -d '[:space:]' < "$manifest_stamp" 2>/dev/null)
+    if [ "$cur_hash" != "absent" ] && [ "$cur_hash" != "unknown" ] && \
+       [ -n "$baseline_hash" ] && [ "$baseline_hash" != "$cur_hash" ]; then
+      echo "CAPABILITY_STATE=stale"; return
+    fi
+  fi
+
+  echo "CAPABILITY_STATE=healthy"
+}
+
+# family aggregate（claude/codex/opencode，已安装目标取最差）
+# claude: capability_state（healthy/stale/absent/unknown）
+# codex/opencode: AGENTS.md 存在 → present（无 version 漂移概念，不参与 stale）
+# Output: FAMILY_CLAUDE=<state> FAMILY_CODEX=<present|absent> FAMILY_OPENCODE=<present|absent> FAMILY=<worst>
+# family 取最差：claude stale/unknown 上浮（任一已安装 stale/unknown → family stale/unknown）
+family_aggregate() {
+  local claude_state codex_state opencode_state
+  claude_state=$(capability_state | sed -n 's/^CAPABILITY_STATE=//p')
+  [ -f "$HOME/.codex/AGENTS.md" ] && codex_state=present || codex_state=absent
+  [ -f "$HOME/.config/opencode/AGENTS.md" ] && opencode_state=present || opencode_state=absent
+
+  printf '%s\n' "FAMILY_CLAUDE=$claude_state" "FAMILY_CODEX=$codex_state" "FAMILY_OPENCODE=$opencode_state"
+
+  case "$claude_state" in
+    stale|unknown) echo "FAMILY=$claude_state" ;;
+    *) echo "FAMILY=healthy" ;;
+  esac
+}
