@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>codesop v5 spec-gate 可视化</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --ink: #1c1917;
+    --ink-soft: #57534e;
+    --ink-faint: #a8a29e;
+    --line: #e7e5e4;
+    --line-strong: #d6d3d1;
+    --accent: #0f766e;
+    --accent-soft: #ccfbf1;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --keep: #15803d;
+    --keep-soft: #dcfce7;
+    --cut: #b91c1c;
+    --cut-soft: #fee2e2;
+    --new: #1d4ed8;
+    --new-soft: #dbeafe;
+    --done: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+  header.page-head {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+  }
+  header.page-head h1 {
+    font-size: 28px;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+  }
+  header.page-head .meta {
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  header.page-head .meta span { margin-right: 16px; }
+
+  /* Layer 1 — 白话层 */
+  .layer-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 24px;
+  }
+  .layer-divider .badge {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .layer-divider h2 {
+    font-size: 22px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .layer-divider .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line-strong);
+  }
+  .layer-tag {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: -8px 0 24px;
+  }
+
+  .blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .block {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 22px 24px;
+  }
+  .block.problem { border-left-color: var(--cut); }
+  .block.change  { border-left-color: var(--accent); }
+  .block.why     { border-left-color: var(--new); }
+  .block.keep    { border-left-color: var(--keep); }
+  .block h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .block h3 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .block.problem h3 .num { background: var(--cut); }
+  .block.change  h3 .num { background: var(--accent); }
+  .block.why     h3 .num { background: var(--new); }
+  .block.keep    h3 .num { background: var(--keep); }
+  .block p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .block .em {
+    font-weight: 600;
+  }
+
+  /* Layer 2 — spec 实质 */
+  .l2-intro {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: -12px 0 24px;
+  }
+  h3.sub {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    background: #f5f5f4;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.center, th.center { text-align: center; }
+
+  .pill {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+  .pill.keep    { color: var(--keep); background: var(--keep-soft); }
+  .pill.cut     { color: var(--cut);  background: var(--cut-soft); }
+  .pill.new     { color: var(--new);  background: var(--new-soft); }
+  .pill.change  { color: var(--warn); background: var(--warn-soft); }
+  .pill.done    { color: var(--done); background: #f3f4f6; }
+
+  /* topology grid */
+  .topo {
+    display: grid;
+    grid-template-columns: 140px repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .topo .cell {
+    background: var(--surface);
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .topo .head {
+    background: #f5f5f4;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .topo .row-head {
+    background: #f5f5f4;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .topo .cell .what {
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .topo .cell .status {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .topo .cell.done   { border-left: 3px solid var(--keep); }
+  .topo .cell.pending { border-left: 3px solid var(--warn); }
+
+  /* rubric */
+  .rubric {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .rubric-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+  .rubric-item .rn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .rubric-item .body .q {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .rubric-item .body .a {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .verdict {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .verdict.pass   { color: var(--keep); background: var(--keep-soft); }
+  .verdict.watch  { color: var(--warn); background: var(--warn-soft); }
+  .verdict.fail   { color: var(--cut);  background: var(--cut-soft); }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 32px 18px 60px; }
+    .blocks { grid-template-columns: 1fr; }
+    .topo { grid-template-columns: 1fr; }
+    .topo .head { display: none; }
+    .rubric-item { grid-template-columns: 32px 1fr; }
+    .rubric-item .verdict { grid-column: 2; justify-self: start; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-head">
+  <h1>codesop v5 spec-gate</h1>
+  <div class="meta">
+    <span>spec: 2026-07-11-v5-profile-decouple.md (r3)</span>
+    <span>状态: Draft → 待 spec-gate</span>
+    <span>独立 subagent 交叉渲染</span>
+  </div>
+</header>
+
+<!-- ============ LAYER 1 ============ -->
+
+<div class="layer-divider">
+  <span class="badge">Layer 1</span>
+  <h2>白话摘要 · codesop 最后起到什么效果</h2>
+  <span class="rule"></span>
+</div>
+<p class="layer-tag">3 秒入口 — 不抄 spec 原文，独立重写。每块 ≤5 行。</p>
+
+<div class="blocks">
+
+  <div class="block problem">
+    <h3><span class="num">1</span>要解决的问题</h3>
+    <p>
+      codesop 是给 AI 编码助手套上 SOP 纪律的操作系统（装 10 个 skill、四条铁律、路由表、pipeline 可视化）。
+      但它带着弱模型时代的包袱：<span class="em">所有任务一律走全套仪式</span>（spec/对齐块/HTML 全上）、
+      Claude 专属机制（/goal、SessionStart、patch）混进了核心逻辑、
+      <span class="em">patch 静默失效了 9 天没人知道</span>（6.1.1 升级后 4 个核心补丁被跳过）、
+      还在<span class="em">假装 Codex / OpenCode 和 Claude 能力对等</span>。
+      仪式一刀切浪费强模型，假对等掩盖真实差距。
+    </p>
+  </div>
+
+  <div class="block change">
+    <h3><span class="num">2</span>v5 实际改变什么</h3>
+    <p>
+      v5 后 codesop 变成<span class="em">按风险比例做事</span>的工具，三层效果：
+      ①<span class="em">流程分档</span>——低风险小改动走 minimal（直接改+验证），鉴权/迁移/部署才走 governed（spec+人审+证据+回滚），中间档 standard；
+      ②<span class="em">核心解耦 Claude</span>——拆出 core/（宿主中立）和 claude-adapter/，七类核心纪律跨宿主一致，Claude 编排能力归 Claude；
+      ③<span class="em">事实完整性</span>——runtime 版本/manifest hash/capability 状态每会话自检，报「覆盖完整」前必须真的完整（patch 失效不再静默 9 天）。
+    </p>
+  </div>
+
+  <div class="block why">
+    <h3><span class="num">3</span>为什么这样改</h3>
+    <p>
+      核心立场一句话：<span class="em">帮模型做对，而不是防模型做错</span>。
+      强模型时代，硬防只会挡掉正确判断——该信任模型的判断力 + 宿主原生的审批/sandbox，
+      codesop 只负责给出清晰的 floor（流程强度要求）和不变量。
+      不再自造执行点 / deny hook 冒充安全边界（那是宿主的活）。
+      实务上<span class="em">单人维护</span>：选覆盖最优的 patch 模式 + 轻量测试（表驱动+dogfood），砍掉完整评测平台这种「第二项目」。
+    </p>
+  </div>
+
+  <div class="block keep">
+    <h3><span class="num">4</span>不改变什么</h3>
+    <p>
+      四条铁律原样保留：先设计再编码 / 先失败再生产 / 无根因不修 bug / 无证据不完工。
+      <span class="em">七类不变量</span>（治理内核）不动、不掺 skill 名 / /goal / 固定章节。
+      <span class="em">证据后声明</span>不变——没跑测试看到结果就不能说「已完成」。
+      <span class="em">5 个 superpowers patch 是命脉</span>（v4.9.1 逐个 md5 验过全必要），模式保持，只加 fingerprint 门禁防吞上游修复。
+      governed 人审<span class="em">不取消</span>——破坏性操作必须真停下请求批准。
+    </p>
+  </div>
+
+</div>
+
+<!-- ============ LAYER 2 ============ -->
+
+<div class="layer-divider">
+  <span class="badge" style="background:#e0e7ff; color:#3730a3;">Layer 2</span>
+  <h2>spec 实质 · 功能去留 / 改动拓扑 / rubric</h2>
+  <span class="rule"></span>
+</div>
+<p class="l2-intro">spec 质量呈现 + 五项 rubric 判定。逐项给满足/顾虑 + 一句理由。</p>
+
+<h3 class="sub">① 功能去留地图</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="width:28%">项目</th>
+      <th style="width:30%">v4.9 现状</th>
+      <th style="width:14%" class="center">处置</th>
+      <th>v5 目标</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>核心纪律（七类不变量 + 四铁律 + 证据后声明）</td>
+      <td>已立，SKILL/kernel 承载</td>
+      <td class="center"><span class="pill keep">留</span></td>
+      <td>原样保留，golden test + 尺寸上限守卫，不掺 skill 名/固定章节</td>
+    </tr>
+    <tr>
+      <td>router + pipeline</td>
+      <td>输出固定链路，一条默认完整 pipeline</td>
+      <td class="center"><span class="pill change">改</span></td>
+      <td>先算 profile floor（minimal/standard/governed），再按 floor 组装链路</td>
+    </tr>
+    <tr>
+      <td>Claude 耦合（/goal, SessionStart, installed_plugins.json, ~/.claude, patch）</td>
+      <td>横切散在 lib/+setup+config/+SKILL 5 文件</td>
+      <td class="center"><span class="pill change">改→解耦</span></td>
+      <td>拆 core/（宿主中立）+ claude-adapter/，核心 grep 守卫不含 Claude 路径</td>
+    </tr>
+    <tr>
+      <td>patch 门禁</td>
+      <td>仅 major.minor compat（dep_patch_compat），minor 内盲区</td>
+      <td class="center"><span class="pill new">新加</span></td>
+      <td>fingerprint 门禁（gitCommitSha 双门）：apply 前比基线，变了暂停不覆盖</td>
+    </tr>
+    <tr>
+      <td>行为测试</td>
+      <td>术语锚 + 措辞锁 + dogfood 文本契约（v4.9.0 双锚）</td>
+      <td class="center"><span class="pill new">新加</span></td>
+      <td>轻量 profile 行为评测：表驱动 12-20 路由场景 + 6 dogfood（每档 2）</td>
+    </tr>
+    <tr>
+      <td>完整评测平台</td>
+      <td>前版（adaptive-governance）规划过四组对照/shadow</td>
+      <td class="center"><span class="pill cut">砍</span></td>
+      <td>是第二项目，单人维护不建；留 R8 轻量测试兜底</td>
+    </tr>
+    <tr>
+      <td>自造执行点（PDP / PEP / Audit / deny hook）</td>
+      <td>前版规划自造执行点体系</td>
+      <td class="center"><span class="pill cut">砍</span></td>
+      <td>不可逆操作靠宿主原生审批，adapter 只增强不弱化，codesop 不自造</td>
+    </tr>
+    <tr>
+      <td>三端假装对等</td>
+      <td>宣传 Codex/OpenCode 与 Claude 同级</td>
+      <td class="center"><span class="pill cut">砍→分级</span></td>
+      <td>Claude-first 能力分级：Claude 完整 / Codex+OpenCode 核心纪律语义一致</td>
+    </tr>
+    <tr>
+      <td>SessionStart 注入</td>
+      <td>每次注入完整 router</td>
+      <td class="center"><span class="pill change">改（Phase 2）</span></td>
+      <td>瘦身：默认只注入 kernel，router 按需读取（minimal 任务省 context）</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="sub">② 改动拓扑 · 三层能力 × 三阶段</h3>
+<div class="topo">
+  <div class="cell head"></div>
+  <div class="cell head">Phase 0 · v4.9.x（进行中）</div>
+  <div class="cell head">Phase 1 · v5 alpha</div>
+  <div class="cell head">Phase 2 · v5 beta</div>
+
+  <div class="cell row-head">Profile 分档</div>
+  <div class="cell pending">
+    <span class="what">—</span>
+    <span class="status">Phase 0 聚焦事实完整性，profile 在 Phase 1/2</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">router 改 floor 优先</span>
+    <span class="status">待实施：先算 floor 再组装链路；floor_reason 可审计</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">minimal 走通</span>
+    <span class="status">待实施：取消 spec/对齐块/HTML；SessionStart 瘦身</span>
+  </div>
+
+  <div class="cell row-head">Claude 解耦</div>
+  <div class="cell pending">
+    <span class="what">—</span>
+    <span class="status">解耦在 Phase 1</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">拆 core/ + claude-adapter/</span>
+    <span class="status">待实施：grep 守卫 + adapter 能力分级 + 审计 jsonl</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">v4-compat 保留</span>
+    <span class="status">待实施：engine_mode 兼容旧 workflow</span>
+  </div>
+
+  <div class="cell row-head">事实完整性</div>
+  <div class="cell done">
+    <span class="what">patch 门禁 ✅</span>
+    <span class="status">v4.9.1 跨 minor 提示 + v4.9.2 gitCommitSha 双门 已落地</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">family 汇总</span>
+    <span class="status">待实施：runtime version + manifest hash + capability state，取最差上浮</span>
+  </div>
+  <div class="cell pending">
+    <span class="what">行为测试闭环</span>
+    <span class="status">待实施：12-20 场景 + 6 dogfood 可重复，退出可判定</span>
+  </div>
+</div>
+<p style="font-size:12px;color:var(--ink-faint);margin-top:8px;">
+  绿条 = 已实施（v4.9.1/4.9.2）；黄条 = 待实施。Phase 0 退出条件：所有宿主目标 runtime/version/hash 一致 + stale 测试必红 + fingerprint 门禁测试必过。
+</p>
+
+<h3 class="sub">③ Rubric 五项判定（§8.5）</h3>
+<div class="rubric">
+
+  <div class="rubric-item">
+    <div class="rn">1</div>
+    <div class="body">
+      <div class="q">完成条件齐吗？（R1-R8 三件：完成条件 + 边界 + 风险分级）</div>
+      <div class="a">
+        每个 R 都有三件。例 R2 Profile 判定：完成条件=表驱动 12-20 场景全过；边界=ambiguity=high 不进 minimal；风险=high。
+        Phase 0/1/2 各有独立退出条件（可判定）。
+        <strong>理由</strong>：八条 R 逐条拆得开，阶段退出条件写成「测试必红/必过」而非「基本完成」。
+      </div>
+    </div>
+    <span class="verdict pass">满足</span>
+  </div>
+
+  <div class="rubric-item">
+    <div class="rn">2</div>
+    <div class="body">
+      <div class="q">不空泛吗？（完成条件可机械验证，非主观）</div>
+      <div class="a">
+        R1=golden test + 尺寸上限；R2=12-20 场景全过 + 高风险误入 minimal=0；R3=minimal 不产 spec/HTML（dogfood 看）；R4=core/ grep 不含禁词；
+        R5=governed 真停下请求批准（dogfood）；R7=跨 minor + minor 内 commit 变测试必过；R8=退出可判定。
+        <strong>理由</strong>：判定锚点是 grep/dogfood/测试，不是「感觉对了」。
+      </div>
+    </div>
+    <span class="verdict pass">满足</span>
+  </div>
+
+  <div class="rubric-item">
+    <div class="rn">3</div>
+    <div class="body">
+      <div class="q">伪机器验证吗？（grep 守卫/测试/dogfood 是真机械锚点）</div>
+      <div class="a">
+        grep 守卫（R4 core/ 不含 /goal/installed_plugins.json/~/.claude/SessionStart）是真 grep；
+        fingerprint 门禁测试（R7 模拟 commit 变→暂停）是真测试；
+        dogfood（R3/R5/R8）靠人执行但文本契约可断言（v4.9.0 已立 dogfood 文本契约模式）。
+        <strong>顾虑</strong>：dogfood 仍含人执行环节，非纯机械——但已用文本契约把「人审」锚定到可断言文本，是当前合理上限。
+      </div>
+    </div>
+    <span class="verdict watch">满足（dogfood 半机械）</span>
+  </div>
+
+  <div class="rubric-item">
+    <div class="rn">4</div>
+    <div class="body">
+      <div class="q">边界遗漏吗？（anti-Goodhart 边界段）</div>
+      <div class="a">
+        spec §3 设计原则 + §10 非目标明确反 Goodhart：不靠 Prompt 堆叠当护城河 / floor 是 best-effort 非安全边界 / adapter 不弱化宿主原生审批 /
+        不取消 governed 人审 / 不自造 deny hook 冒充安全边界。
+        <strong>理由</strong>：明确划了「codesop 管什么、不管什么」，防 profile/floor 被当成安全门禁误用。
+      </div>
+    </div>
+    <span class="verdict pass">满足</span>
+  </div>
+
+  <div class="rubric-item">
+    <div class="rn">5</div>
+    <div class="body">
+      <div class="q">风险错分吗？（R1-R8 风险分级合理）</div>
+      <div class="a">
+        r3 把 R1（改全局契约）和 R5（改人审语义 + 涉宿主审批）从 r2 的 medium 修正为 high——合理；
+        R7 patch 门禁=high（吞上游修复是真失效）合理；R6 事实完整性=medium、R8 评测=medium 合理（行为观察，非契约变更）。
+        <strong>理由</strong>：改全局契约/人审语义的 R 标 high，纯观察/汇总的 R 标 medium，分级有据。
+      </div>
+    </div>
+    <span class="verdict pass">满足</span>
+  </div>
+
+</div>
+
+<footer>
+  独立 subagent 渲染 · 基于 spec r3 + PRD §1/§2/§5 + README + CHANGELOG [4.9.1][4.9.2] ·
+  供人审 spec-gate。Layer 1 四块为独立重写（非抄 spec），Layer 2 表格锚定 spec §4/§6/§7/§8/§9/§10。
+</footer>
+
+</div>
+</body>
+</html>

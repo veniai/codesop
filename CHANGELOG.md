@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [5.0.0-alpha] - 2026-07-13
+
+### Added — v5 Phase 1（Claude 解耦 + profile floor + grep 守卫 + 审计）
+/goal 驱动实现 spec §8 Phase 1 B 范围 5 项：
+- **Claude 耦合集中 adapter**：新建 `lib/adapter/claude.sh`（find_superpowers_plugin_path + runtime_version_superpowers + codesop_manifest_hash + has_mcp_server + _dep_installed_version）+ `lib/adapter/patch-health-check.sh`（挪入）；detection/updates 删挪走函数；codesop entrypoint + setup source adapter
+- **grep 守卫**：`tests/grep-guard.sh`——core（detection+commands）代码不含 Claude 路径词（`/goal`/`installed_plugins.json`/`~/.claude`/`SessionStart`/`find_superpowers_plugin_path`）；Claude 专属归 `lib/adapter/`
+- **router profile floor**：`codesop-router.md` v5——profile 三档（minimal/standard/governed）判定 + floor 不可降 + minimal 不强制对齐块/spec-gate/HTML
+- **审计**：router 指示任务完成写 `$XDG_STATE_HOME/codesop/audit.jsonl`（intent/risk/profile/floor_reason/evidence/approver/ts）
+- **砍 v4-compat**（profile 增量不需兼容期）
+
+run_all 22/0（新增 grep-guard）。独立 subagent 验证 blocking 清零。core 干净 + router 按 profile 分档。
+
 ## [4.9.3] - 2026-07-11
 
 ### Added — v5 Phase 0 事实完整性待实施 4 项（capability state）

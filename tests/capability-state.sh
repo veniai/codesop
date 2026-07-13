@@ -19,6 +19,8 @@ STATE_DIR="$HOME/.local/state/codesop"
 mkdir -p "$STATE_DIR" "$HOME/.claude/skills/codesop"
 
 # shellcheck disable=SC1091
+source "$ROOT_DIR/lib/adapter/claude.sh"
+# shellcheck disable=SC1091
 source "$ROOT_DIR/lib/detection.sh"
 
 write_plugins_json() {

@@ -3,6 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT_DIR/lib/adapter/claude.sh"
 source "$ROOT_DIR/lib/updates.sh"
 source "$(dirname "$0")/test_helpers.sh"
 

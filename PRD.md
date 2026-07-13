@@ -16,14 +16,14 @@
 
 ## 1. 当前快照
 
-- **当前阶段**: v5 Phase 0 完成（v4.9.3 stable；Phase 1 待启）
-- **当前目标**: v5 Phase 0 事实完整性落地完成，Phase 1（Claude 解耦）待启
+- **当前阶段**: v5 Phase 1 完成（v5.0.0-alpha；Phase 2 待启）
+- **当前目标**: v5 Phase 1 Claude 解耦 + profile floor 落地完成，Phase 2（minimal 走通 + SessionStart 瘦身）待启
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的核心 workflow 纪律和 skill 路由（编排按宿主能力分级）
-- **当前里程碑**: v4.9.3
-- **完成度**: v4.9.3 stable（Phase 0 全 done：6.1.1 适配 + fingerprint 门禁 + capability state 4 函数）；v5 spec r3 已 spec-gate approved
-- **下一步**: v5 Phase 1（Claude 解耦：拆 core/ + claude-adapter/ + grep 守卫）
+- **当前里程碑**: v5.0.0-alpha
+- **完成度**: v5.0.0-alpha（Phase 0 + Phase 1 done：事实完整性 + Claude 解耦 + profile floor + 审计）；Phase 2 待启
+- **下一步**: v5 Phase 2（minimal 走通 + SessionStart 瘦身 + 行为测试）
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v4.9.3 Phase 0 capability state 4 函数（runtime version / manifest hash / capability state / family 汇总）+ 测试
+- **最后更新原因**: v5.0.0-alpha Phase 1（Claude 解耦 lib/adapter/ + grep 守卫 + router profile floor + 审计）
 
 ## 2. 当前进度
 
@@ -116,7 +116,7 @@
 
 ## 4. 版本历史
 
-See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v4.9.3.
+See [GitHub Releases](https://github.com/veniai/codesop/releases) for full version history. Current version: v5.0.0-alpha.
 
 ## 5. 产品核心规范
 

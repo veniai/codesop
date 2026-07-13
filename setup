@@ -187,20 +187,8 @@ install_router_card() {
   echo "  ✓ Router card: $dst"
 }
 
-# Canonical: lib/detection.sh — setup 保留独立副本（自包含脚本）
-find_superpowers_plugin_path() {
-  local marketplace_dir version_dir
-  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
-    [ -d "$marketplace_dir" ] || continue
-    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
-    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ]; then
-      [ -f "$version_dir/.orphaned_at" ] && continue
-      printf '%s\n' "$version_dir"
-      return 0
-    fi
-  done
-  return 1
-}
+# find_superpowers_plugin_path / has_mcp_server / _dep_installed_version 由
+# lib/adapter/claude.sh 提供（install_claude / restore_superpowers source 它）。
 
 # Loud warning when superpowers is outside the patch-compat range (stale patch).
 # Replaces the old single-line silent skip (return 0 + one easy-to-miss line) —
@@ -531,6 +519,7 @@ install_claude() {
   if [ -f "$SOURCE_DIR/lib/updates.sh" ]; then
     ROOT_DIR="$SOURCE_DIR"
     VERSION_FILE="$SOURCE_DIR/VERSION"
+    source "$SOURCE_DIR/lib/adapter/claude.sh"
     source "$SOURCE_DIR/lib/updates.sh"
     printf '%s\n' "检查依赖安装..."
     install_managed_deps || printf '%s\n' "  ⚠ 部分依赖安装失败，请稍后手动安装"
@@ -546,7 +535,7 @@ install_claude() {
   install_router_card
   configure_hooks
   patch_skills
-  copy_file "$SOURCE_DIR/lib/patch-health-check.sh" "$HOME/.claude/codesop-patch-check.sh"
+  copy_file "$SOURCE_DIR/lib/adapter/patch-health-check.sh" "$HOME/.claude/codesop-patch-check.sh"
   _write_patch_baseline_stamp
   configure_patch_check_hook
   # Write manifest hash stamp (v5 Phase 0 capability state). Self-contained hash
@@ -590,6 +579,7 @@ restore_superpowers_patches() {
 
   # Source updates.sh for _run_with_timeout (not available when run via setup --uninstall)
   if ! type _run_with_timeout >/dev/null 2>&1 && [ -f "$SOURCE_DIR/lib/updates.sh" ]; then
+    source "$SOURCE_DIR/lib/adapter/claude.sh"
     source "$SOURCE_DIR/lib/updates.sh"
   fi
 

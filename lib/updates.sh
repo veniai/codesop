@@ -805,14 +805,6 @@ _dep_parse() {
 
 # Read installed version of a managed dependency from installed_plugins.json.
 # Returns version string (semver or git hash) or empty string if unavailable.
-_dep_installed_version() {
-  local id="$1"
-  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
-  if [ -f "$plugins_json" ] && command -v jq >/dev/null 2>&1; then
-    jq -r --arg id "$id" '.plugins[$id][0].version // ""' "$plugins_json" 2>/dev/null || true
-  fi
-}
-
 # Run a command with optional timeout (falls back gracefully on macOS without GNU coreutils).
 _run_with_timeout() {
   local seconds="$1"; shift

@@ -24,6 +24,7 @@ suites=(
   setup-patch-sync.sh
   dep-upgrade.sh
   capability-state.sh
+  grep-guard.sh
   codesop-relief-behavior.sh
   codesop-e2e.sh
 )

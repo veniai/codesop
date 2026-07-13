@@ -145,40 +145,6 @@ detect_project_shape_and_framework() {
   _DET_PROJECT_FRAMEWORK="$project_framework"
 }
 
-# Check if a specific MCP server is configured in Claude Code settings
-# Arguments:
-#   $1 - MCP server name
-# Returns: 0 if configured, 1 if not
-has_mcp_server() {
-  local server_name="$1"
-  local settings_file="$HOME/.claude/settings.json"
-  [ -f "$settings_file" ] || return 1
-  # Check exact name and common hyphen/underscore variation
-  local name_alt="${server_name//-/_}"
-  jq -e --arg name "$server_name" --arg alt "$name_alt" \
-    '.mcpServers | if . then (has($name) or has($alt)) else false end' \
-    "$settings_file" 2>/dev/null | grep -q true
-}
-
-# Find superpowers installed via Claude Code plugin marketplace.
-# The actual path is ~/.claude/plugins/cache/<marketplace>/superpowers/<version>/
-# Returns the path to the latest version directory, or nothing if not found.
-find_superpowers_plugin_path() {
-  local marketplace_dir version_dir
-  for marketplace_dir in "$HOME/.claude/plugins/cache/"*"/superpowers"; do
-    [ -d "$marketplace_dir" ] || continue
-    # Find the latest version directory (sorted by version, pick last)
-    version_dir=$(find "$marketplace_dir" -maxdepth 1 -type d 2>/dev/null | sort -V | tail -1)
-    if [ -n "$version_dir" ] && [ "$version_dir" != "$marketplace_dir" ]; then
-      # Skip orphaned installations
-      [ -f "$version_dir/.orphaned_at" ] && continue
-      printf '%s\n' "$version_dir"
-      return 0
-    fi
-  done
-  return 1
-}
-
 # Check git branch health for the codesop workbench.
 # Detects orphaned local branches (merged into main) and leftover feature branches.
 # Outputs machine-readable KEY=VALUE lines; exits cleanly on skip conditions.
@@ -309,42 +275,10 @@ check_understand_usability() {
 }
 
 # ============================================================================
-# v5 Phase 0 事实完整性（spec §8 待实施 4 项）
-# 4 函数：runtime_version_superpowers / codesop_manifest_hash /
-# capability_state（healthy/stale/absent/unknown）/ family_aggregate（取最差）
-# 复用 find_superpowers_plugin_path（定位）+ 仿 check_understand_usability（多态）
+# v5 Phase 0 capability state（core 抽象层；读 ~/.claude 的函数在 lib/adapter/claude.sh）
+# capability_state / family_aggregate 综合 adapter 的 runtime_version_superpowers /
+# codesop_manifest_hash，判 healthy/stale/absent/unknown；family 取最差。
 # ============================================================================
-
-# superpowers runtime version + upstream gitCommitSha（Claude family）
-# Output: RUNTIME_VERSION=<ver|absent|unknown>  RUNTIME_SHA=<sha|absent|unknown>
-runtime_version_superpowers() {
-  local plugins_json="$HOME/.claude/plugins/installed_plugins.json"
-  if [ -z "$(find_superpowers_plugin_path 2>/dev/null || true)" ]; then
-    printf '%s\n' "RUNTIME_VERSION=absent" "RUNTIME_SHA=absent"
-    return
-  fi
-  if [ ! -f "$plugins_json" ] || ! command -v jq >/dev/null 2>&1; then
-    printf '%s\n' "RUNTIME_VERSION=unknown" "RUNTIME_SHA=unknown"
-    return
-  fi
-  local ver sha
-  ver=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].version // empty' "$plugins_json" 2>/dev/null)
-  sha=$(jq -r '.plugins["superpowers@claude-plugins-official"][0].gitCommitSha // empty' "$plugins_json" 2>/dev/null)
-  [ -n "$ver" ] && echo "RUNTIME_VERSION=$ver" || echo "RUNTIME_VERSION=unknown"
-  [ -n "$sha" ] && echo "RUNTIME_SHA=$sha" || echo "RUNTIME_SHA=unknown"
-}
-
-# codesop manifest hash（sha256 安装的关键文件：SKILL.md + router）
-# Output: 16-char hash | absent | unknown
-codesop_manifest_hash() {
-  local skill="$HOME/.claude/skills/codesop/SKILL.md"
-  local router="$HOME/.claude/codesop-router.md"
-  command -v sha256sum >/dev/null 2>&1 || { echo "unknown"; return; }
-  [ -f "$skill" ] || { echo "absent"; return; }
-  local files="$skill"
-  [ -f "$router" ] && files="$skill $router"
-  sha256sum $files 2>/dev/null | sha256sum | cut -c1-16
-}
 
 # capability state（healthy/stale/absent/unknown）— 综合 runtime + fingerprint + manifest
 # healthy: superpowers 装了 + gitCommitSha 一致 + manifest hash 一致

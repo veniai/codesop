@@ -42,7 +42,7 @@ echo ""
 echo "=== C: VERSION == skill.json == PRD §1 里程碑 == §4 Current（防版本脱节）==="
 VER=$(tr -d '[:space:]' < "$ROOT_DIR/VERSION")
 [ -n "$VER" ] || fail "C: VERSION 空"
-SKILL_VER=$(grep -oE '"version": *"[^"]+"' "$ROOT_DIR/skill.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+SKILL_VER=$(grep -oE '"version": *"[^"]+"' "$ROOT_DIR/skill.json" | sed 's/.*"version"[: ]*"//;s/"[^"]*$//')
 [ "$SKILL_VER" = "$VER" ] || fail "C: skill.json($SKILL_VER) != VERSION($VER)"
 grep -q "当前里程碑.*v$VER" "$PRD" || fail "C: PRD §1 里程碑 != VERSION(v$VER)"
 grep -q "Current version: v$VER" "$PRD" || fail "C: PRD §4 Current != VERSION(v$VER)"

@@ -60,7 +60,7 @@ run_output="$(HOME="$HOME_FAKE" bash "$SETUP" --host claude 2>&1)" || {
 # ---------------------------------------------------------------------------
 # 断言 1: find_superpowers_plugin_path 能解析到 fake 插件
 # ---------------------------------------------------------------------------
-resolved="$(HOME="$HOME_FAKE" bash -c "source '$ROOT_DIR/lib/detection.sh' && find_superpowers_plugin_path || true")"
+resolved="$(HOME="$HOME_FAKE" bash -c "source '$ROOT_DIR/lib/adapter/claude.sh' && find_superpowers_plugin_path || true")"
 [ -n "$resolved" ] || fail "find_superpowers_plugin_path returned empty in fake HOME"
 [ "$resolved" = "$PLUGIN_ROOT" ] || fail "resolved plugin path mismatch: got '$resolved', expected '$PLUGIN_ROOT'"
 

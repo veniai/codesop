@@ -15,6 +15,7 @@ done
 ROOT_DIR="$(cd "$(dirname "$SOURCE_PATH")" && pwd)"
 VERSION_FILE="$ROOT_DIR/VERSION"
 
+source "$ROOT_DIR/lib/adapter/claude.sh"
 source "$ROOT_DIR/lib/detection.sh"
 source "$ROOT_DIR/lib/updates.sh"
 source "$ROOT_DIR/lib/commands.sh"
