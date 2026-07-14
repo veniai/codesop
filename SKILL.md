@@ -66,7 +66,11 @@ Use `PRD.md` for long-term orientation and direct git/file commands for mechanic
 
 ## 3. Default Behavior
 
-When this skill triggers:
+**Profile 分支（v5 Phase 2 R2）**：本 skill 触发后先判 profile（见 kernel 七类不变量 + floor）。
+- **minimal**（低风险/低歧义/局部/可回滚/无 override）：**跳过**任务对齐块（理解+阶段+Skill）、固定四段输出（§4）、spec-gate、HTML serve——直接执行 + diff/测试验证 + 简短结论（**必含新鲜验证证据，不得以 minimal 为由跳过验证**）。不走下面的完整 §3 step 1-10.5。
+- **standard / governed**：走下面的完整 §3 流程（standard 轻量、governed 正式 spec + 人审）。
+
+When this skill triggers (standard/governed):
 
 1. Read `AGENTS.md`
 2. Read `PRD.md`
@@ -176,7 +180,9 @@ Default to orientation and routing first. Do not jump into implementation unless
 
 ## 4. Default Output
 
-Output MUST contain exactly these 4 sections in this order, nothing else:
+**minimal profile**：不强制四段输出——直接给变更 + 新鲜验证证据 + 简短结论。
+
+**standard/governed**：Output MUST contain exactly these 4 sections in this order, nothing else:
 
 1. `## 工作台摘要` — one field per line (no nested bullets)
 2. `## Skill 生态` — routing coverage only

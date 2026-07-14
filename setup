@@ -174,17 +174,32 @@ write_skill_runtime() {
 }
 
 install_router_card() {
-  local src="$SOURCE_DIR/config/codesop-router.md"
-  local dst="$HOME/.claude/codesop-router.md"
+  local src_full="$SOURCE_DIR/config/codesop-router.md"
+  local src_kernel="$SOURCE_DIR/config/codesop-router-kernel.md"
+  local dst_full="$HOME/.claude/codesop-router.md"
+  local dst_kernel="$HOME/.claude/codesop-router-kernel.md"
 
-  if [ ! -f "$src" ]; then
-    echo "  ⚠ config/codesop-router.md not found — skipping router card install"
-    return 0
+  mkdir -p "$(dirname "$dst_full")"
+
+  if [ -f "$src_full" ]; then
+    cp "$src_full" "$dst_full"
+    echo "  ✓ Full router: $dst_full"
+    # full router sha256 基线 stamp（v5 Phase 2 R4 完整性校验，sessionstart-trim.sh 用）
+    if command -v sha256sum >/dev/null 2>&1; then
+      local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/codesop"
+      mkdir -p "$state_dir"
+      sha256sum "$src_full" | awk '{print $1}' > "$state_dir/full-router-sha256"
+    fi
+  else
+    echo "  ⚠ config/codesop-router.md not found — skipping full router install"
   fi
 
-  mkdir -p "$(dirname "$dst")"
-  cp "$src" "$dst"
-  echo "  ✓ Router card: $dst"
+  if [ -f "$src_kernel" ]; then
+    cp "$src_kernel" "$dst_kernel"
+    echo "  ✓ Kernel (SessionStart 注入): $dst_kernel"
+  else
+    echo "  ⚠ config/codesop-router-kernel.md not found — skipping kernel install"
+  fi
 }
 
 # find_superpowers_plugin_path / has_mcp_server / _dep_installed_version 由
@@ -401,7 +416,7 @@ configure_hooks() {
   if ! command -v jq >/dev/null 2>&1; then
     echo "  ⚠ jq not found — hook auto-config skipped"
     echo "    Manual step: add to $settings:"
-    echo "    \"hooks\":{\"SessionStart\":[{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"cat $HOME/.claude/codesop-router.md\"}]}]}"
+    echo "    \"hooks\":{\"SessionStart\":[{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"cat $HOME/.claude/codesop-router-kernel.md\"}]}]}"
     return 0
   fi
 
@@ -413,11 +428,11 @@ configure_hooks() {
   fi
 
   # Use absolute path to avoid ~ expansion failure in sh/dash when HOME is unset
-  local router_hook_cmd="[ ! -f $HOME/.claude/.codesop-router-disabled ] && cat $HOME/.claude/codesop-router.md"
+  local router_hook_cmd="[ ! -f $HOME/.claude/.codesop-router-disabled ] && cat $HOME/.claude/codesop-router-kernel.md"
 
   # Idempotency: check if hook already exists (match substring to handle ~ vs $HOME vs absolute)
   local existing
-  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" != "0" ]; then
     # Migration: replace old ~ or $HOME variants with absolute path
     local migrated
@@ -426,7 +441,7 @@ configure_hooks() {
         .hooks.SessionStart |= map(
           if (.hooks | type) == "array" then
             .hooks |= map(
-              if ((.command? // "") | tostring | test("^cat [\"']?~/.claude/codesop-router.md[\"']?$|^cat [\"']?\\$HOME/.claude/codesop-router.md[\"']?$|^cat /[^ ]*/codesop-router.md$")) then
+              if ((.command? // "") | tostring | test("codesop-router\\.md")) then
                 .command = $cmd
               else . end
             )
@@ -486,7 +501,7 @@ remove_codesop_hook() {
   jq '.' "$settings" >/dev/null 2>&1 || { echo "  ⚠ $settings invalid JSON — hook removal skipped"; return 0; }
 
   local existing
-  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router.md"))] | length' "$settings" 2>/dev/null || echo "0")
+  existing=$(jq '[.hooks.SessionStart // [] | .[] | select(.hooks // [] | .[]? | (.command? // "") | tostring | test("codesop-router"))] | length' "$settings" 2>/dev/null || echo "0")
   if [ "$existing" = "0" ]; then
     return 0
   fi
@@ -495,7 +510,7 @@ remove_codesop_hook() {
     if .hooks.SessionStart then
       .hooks.SessionStart |= map(
         if (.hooks | type) == "array" then
-          .hooks |= map(select(((.command? // "") | tostring | contains("codesop-router.md")) | not))
+          .hooks |= map(select(((.command? // "") | tostring | contains("codesop-router")) | not))
         else . end
       )
       | .hooks.SessionStart |= map(select((.hooks | type != "array") or ((.hooks | length) > 0)))
@@ -654,6 +669,7 @@ uninstall_claude() {
   fi
 
   _safe_rm_copy "$HOME/.claude/codesop-router.md" "$SOURCE_DIR/config/codesop-router.md" "~/.claude/codesop-router.md"
+  _safe_rm_copy "$HOME/.claude/codesop-router-kernel.md" "$SOURCE_DIR/config/codesop-router-kernel.md" "~/.claude/codesop-router-kernel.md"
   remove_codesop_hook
   restore_superpowers_patches
 }

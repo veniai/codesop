@@ -25,6 +25,10 @@ suites=(
   dep-upgrade.sh
   capability-state.sh
   grep-guard.sh
+  profile-routing.sh
+  audit-structure.sh
+  minimal-behavior.sh
+  sessionstart-trim.sh
   codesop-relief-behavior.sh
   codesop-e2e.sh
 )

@@ -16,27 +16,28 @@
 
 ## 1. 当前快照
 
-- **当前阶段**: v5 Phase 1 完成（v5.0.0-alpha；Phase 2 待启）
-- **当前目标**: v5 Phase 1 Claude 解耦 + profile floor 落地完成，Phase 2（minimal 走通 + SessionStart 瘦身）待启
+- **当前阶段**: v5 Phase 2 完成（R1-R4 + codex deliver-gate 修复），待提 PR 合并
+- **当前目标**: v5 Phase 2 收尾（提 PR → 合并 main）
 - **长期目标**: 让 AI 编码助手在任意项目中有统一的核心 workflow 纪律和 skill 路由（编排按宿主能力分级）
-- **当前里程碑**: v5.0.0-alpha
-- **完成度**: v5.0.0-alpha（Phase 0 + Phase 1 done：事实完整性 + Claude 解耦 + profile floor + 审计）；Phase 2 待启
-- **下一步**: v5 Phase 2（minimal 走通 + SessionStart 瘦身 + 行为测试）
+- **当前里程碑**: v5.0.0-alpha（Phase 0+1+2）
+- **完成度**: Phase 0+1+2 done（事实完整性 + Claude 解耦 + profile floor + 判定可测化 + minimal 走通 + SessionStart 瘦身）；run_all 26/0；待提 PR
+- **下一步**: Phase 2 PR 合并 main
 - **负责人/执行主体**: Mixed
-- **最后更新原因**: v5.0.0-alpha Phase 1（Claude 解耦 lib/adapter/ + grep 守卫 + router profile floor + 审计）
+- **最后更新原因**: v5 Phase 2 R1-R4 完成 + codex deliver-gate 修复（2026-07-14 实现，2026-07-15 收尾）
 
 ## 2. 当前进度
 
 ### 2.1 In Progress
-- [ ] v5 自适应治理架构 spec-gate：确认治理内核、三档 profile、宿主适配、第三方 Skill 解耦和 Phase 0 优先级
+- [ ] v5 Phase 2 收尾：feat/v5-phase2 提 PR → 合并 main（R1-R4 + 审查修复已完成，run_all 26/0）
 
 ### 2.2 Next Up
-- spec-gate 通过后先做 Phase 0：runtime 版本/hash 完整性、宿主感知 routing coverage、文档漂移修正
+- Phase 2 PR 合并后，视反馈决定 v5.0.0 正式发布或进一步 profile 治理完善（R3 §8 人工 dogfood 6 场景清单待执行，不阻塞合并）
 
 ### 2.3 Blocked
 - 无
 
 ### 2.4 Done Recently
+- [x] 2026-07-14: v5 Phase 2 完成（feat/v5-phase2，待提 PR）— R1 judge_profile(6参) H0-H3 硬规则 + floor_reason 字段顺序唯一性（profile-routing 29项）；R3 write_audit 严格写入接口（9参校验+13字段契约+profile_rank，audit-structure）；R2 SKILL §3/§4 minimal profile 分支（跳对齐块/固定四段/spec-gate/HTML，保留新鲜验证证据，minimal-behavior 文本结构守卫）；R4 codesop-router-kernel.md ≤30行（七类不变量+floor+判定入口）+ setup 注入 kernel + full router sha256 基线（sessionstart-trim）；codex deliver-gate 修 4 issue（迁移正则覆盖旧 hook/write_audit 运行时接入 router card/uninstall 移除 kernel/参数默认值+畸形CSV拒绝）+ setup jq-unavailable fallback；可测范围诚实收缩到判定函数/文本结构/审计数据（行为验证退人工 dogfood）；run_all 26/0（4新+v4 22不回归）
 - [x] 2026-07-11: 完成强模型/AGI 演进下的 codesop 战略审计，新增 v5 自适应治理架构草案（Policy Kernel + Project Context + Adaptive Orchestrator + Host Adapter + Skill Pack + Evaluation）
 - [x] v4.9.0: codesop 减负（feat/v4.9，PR #49）— simple 出口（跳 codex）+ 测试双锚（术语锚 golden-lock + 措辞锁语义化）+ 去重降噪（§9/1% chance/不静默/Skill 生态）+ spec-gate 禁止降级（codesop 自身漏洞修复）+ 8 半锚点全包；Workflow 6-finder + codex 双审 + code-review；run_all 20/0
 - [x] v4.8.1: code-review 补漏（feat/v4.8.1，PR #48）— verification §C +/或执行层矛盾 + §8.7 D deliver-gate completed 只认 approved + 抽样 low 不走 ready/approved；3 CONFIRMED 全修；run_all 19/0
@@ -72,6 +73,7 @@
 
 | Date | Decision | Why | Impact |
 |------|----------|-----|--------|
+| 2026-07-14 | v5 Phase 2 完成（判定可测化 + minimal 走通 + SessionStart 瘦身） | Phase 1 profile floor 落地后需让判定可单测；codex 证伪"prompt 行为测试=自证"，可测范围收缩到程序化部分（判定函数/文本结构/审计数据），行为验证退人工 dogfood | R1 judge_profile H0-H3 确定映射 + R3 write_audit 严格接口 + R2 SKILL minimal 分支 + R4 kernel ≤30行独立文件 + full router sha256 基线；codex deliver-gate 修 4 issue；run_all 26/0 |
 | 2026-07-11 | 启动 v5 自适应治理架构设计（待 spec-gate） | 强模型降低过程教学价值，但放大权限、意图、证据和跨宿主一致性问题；当前还存在 repo 4.9 / Claude 4.8.1 / Codex-OpenCode 3.15 runtime 分裂 | 候选方向为最小治理内核 + 三档 profile + 宿主适配 + 按需 Skill + 结果评测；批准前不改变 v4.9 默认行为 |
 | 2026-07-05 | codesop 减负（v4.9.0）| 回归初心：Workflow 6-finder + codex 双审找 5 类限制/仪式 | simple 出口 + 测试双锚 + 去重降噪 + spec-gate 禁止降级 + 8 半锚点；code-review + codex 双审全 fix；run_all 20/0 |
 | 2026-07-05 | code-review 补漏（v4.8.1）| code-review skill 4-finder 审找 3 CONFIRMED（verification +/或执行层矛盾 / deliver-gate 漏 completed 只认 approved / 抽样 low ready-approved 空转）| SKILL §8.7 D + verification §C + schema §8b 三处同步；run_all 19/0 |
