@@ -441,7 +441,7 @@ configure_hooks() {
         .hooks.SessionStart |= map(
           if (.hooks | type) == "array" then
             .hooks |= map(
-              if ((.command? // "") | tostring | test("^cat [\"']?~/.claude/codesop-router\\.md[\"']?$|^cat [\"']?\\$HOME/.claude/codesop-router\\.md[\"']?$|^cat /[^ ]*/codesop-router\\.md$")) then
+              if ((.command? // "") | tostring | test("codesop-router\\.md")) then
                 .command = $cmd
               else . end
             )
@@ -669,6 +669,7 @@ uninstall_claude() {
   fi
 
   _safe_rm_copy "$HOME/.claude/codesop-router.md" "$SOURCE_DIR/config/codesop-router.md" "~/.claude/codesop-router.md"
+  _safe_rm_copy "$HOME/.claude/codesop-router-kernel.md" "$SOURCE_DIR/config/codesop-router-kernel.md" "~/.claude/codesop-router-kernel.md"
   remove_codesop_hook
   restore_superpowers_patches
 }

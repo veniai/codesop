@@ -50,4 +50,15 @@ assert_contains "$setup" 'cat $HOME/.claude/codesop-router-kernel.md'
 assert_contains "$setup" 'codesop-router.md'           # full router 仍安装
 assert_contains "$setup" "full-router-sha256"          # sha256 基线 stamp
 
-echo "  PASS sessionstart-trim（kernel ≤30 行 [$kl] + 七类语义 + floor 入口 + full router 完整 + setup 注入 kernel）"
+# --- codex 复核 P1：升级迁移（旧 guarded full hook → kernel）---
+# 重现 setup configure_hooks 的迁移 jq：旧 `[ ! -f ... ] && cat .../codesop-router.md`（guarded）
+# 含 "codesop-router.md" → 匹配迁移正则 → 替换为 kernel command。
+old_hook_cmd='[ ! -f /home/u/.claude/.codesop-router-disabled ] && cat /home/u/.claude/codesop-router.md'
+mig_settings='{"hooks":{"SessionStart":[{"matcher":"","hooks":[{"type":"command","command":"'"$old_hook_cmd"'"}]}]}}'
+new_hook_cmd='[ ! -f /home/u/.claude/.codesop-router-disabled ] && cat /home/u/.claude/codesop-router-kernel.md'
+mig_out=$(echo "$mig_settings" | jq --arg cmd "$new_hook_cmd" 'if .hooks.SessionStart then .hooks.SessionStart |= map(if (.hooks|type)=="array" then .hooks |= map(if ((.command? // "")|tostring|test("codesop-router\\.md")) then .command=$cmd else . end) else . end) else . end')
+assert_contains "$mig_out" "codesop-router-kernel.md"
+# 旧 full cat（非 kernel）应已被替换掉
+if echo "$mig_out" | grep -q 'cat [^ ]*/codesop-router\.md'; then fail "旧 guarded full hook 未迁移到 kernel"; fi
+
+echo "  PASS sessionstart-trim（kernel ≤30 行 [$kl] + 七类语义 + floor 入口 + full router 完整 + setup 注入 kernel + 升级迁移）"

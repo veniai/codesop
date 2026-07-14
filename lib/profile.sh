@@ -26,9 +26,12 @@ _profile_valid_override_members() {
   # $1 = comma-separated override; 全部成员须合法；空串合法（∅）
   local o="$1"
   [ -z "$o" ] && return 0
+  # 拒绝畸形 CSV：首尾逗号 / 连续逗号（auth, / ,auth / auth,,b）
+  [[ "$o" == ,* || "$o" == *, || "$o" == *,,* ]] && return 1
   local m
   local IFS=','
   for m in $o; do
+    [ -z "$m" ] && return 1   # 空成员（auth, / ,auth / auth,,b）拒绝
     _profile_contains "$_PROFILE_OVERRIDES" "$m" || return 1
   done
   return 0
@@ -47,7 +50,7 @@ profile_rank() {
 # stdout: "PROFILE=<p> FLOOR_REASON=<r>"
 # H0 合法性前置短路 → H1 override/risk/blast → H2 ambiguity/cross-module → H3 minimal 四要件 → default standard
 judge_profile() {
-  local intent="$1" risk="$2" ambiguity="$3" blast="$4" override="$5" reversible="$6"
+  local intent="${1:-}" risk="${2:-}" ambiguity="${3:-}" blast="${4:-}" override="${5:-}" reversible="${6:-}"
 
   # H0：合法性校验（前置短路，按 intent→risk→ambiguity→blast→override→reversible 固定顺序取首非法）
   _profile_contains "$_PROFILE_INTENTS" "$intent"       || { echo "PROFILE=governed FLOOR_REASON=input_incomplete:intent"; return 0; }
@@ -96,8 +99,8 @@ judge_profile() {
 # 严格校验全 9 参 → 合法才调 judge_profile 算 floor/floor_reason → 追加一行 audit.jsonl
 # 非法：拒写 + 非零退出 + stderr 报字段名。返回 0=写入成功。
 write_audit() {
-  local intent="$1" risk="$2" ambiguity="$3" blast="$4" override="$5" reversible="$6"
-  local declared_profile="$7" evidence="$8" approver="${9:-}"
+  local intent="${1:-}" risk="${2:-}" ambiguity="${3:-}" blast="${4:-}" override="${5:-}" reversible="${6:-}"
+  local declared_profile="${7:-}" evidence="${8:-}" approver="${9:-}"
 
   _profile_contains "$_PROFILE_INTENTS"  "$intent"          || { echo "write_audit: invalid field: intent" >&2; return 1; }
   _profile_contains "$_PROFILE_RISKS"    "$risk"            || { echo "write_audit: invalid field: risk" >&2; return 1; }

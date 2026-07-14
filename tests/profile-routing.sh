@@ -62,6 +62,16 @@ check "PROFILE=governed FLOOR_REASON=input_incomplete:intent" badintent high low
 [ "$(profile_rank governed)" = "2" ] || fail "profile_rank governed"
 PASS=$((PASS+3))
 
+# --- codex 复核 P2：override 畸形集合拒绝（auth, / ,auth / auth,,b 空成员）---
+check "PROFILE=governed FLOOR_REASON=input_incomplete:override" change low low local "auth," true
+check "PROFILE=governed FLOOR_REASON=input_incomplete:override" change low low local ",auth" true
+check "PROFILE=governed FLOOR_REASON=input_incomplete:override" change low low local "auth,,migration" true
+
+# --- codex 复核 P2：少参 set -u 安全（judge_profile 缺 $6 → H0 input_incomplete:reversible，不崩溃）---
+_got=$(judge_profile change low low local "" 2>/dev/null || true)
+assert_contains "$_got" "input_incomplete:reversible"
+PASS=$((PASS+1))
+
 # --- 一致性：router card 含三档名 + floor 不可降声明（结构存在校验，非规则细节一致）---
 ROUTER="$ROOT_DIR/config/codesop-router.md"
 rc=$(cat "$ROUTER")
