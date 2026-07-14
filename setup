@@ -416,7 +416,7 @@ configure_hooks() {
   if ! command -v jq >/dev/null 2>&1; then
     echo "  ⚠ jq not found — hook auto-config skipped"
     echo "    Manual step: add to $settings:"
-    echo "    \"hooks\":{\"SessionStart\":[{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"cat $HOME/.claude/codesop-router.md\"}]}]}"
+    echo "    \"hooks\":{\"SessionStart\":[{\"matcher\":\"\",\"hooks\":[{\"type\":\"command\",\"command\":\"cat $HOME/.claude/codesop-router-kernel.md\"}]}]}"
     return 0
   fi
 
